@@ -4,6 +4,7 @@ import { formatTimeWithSeconds } from '@/lib/datetime';
 import { EVENT_LABEL_KEY } from '@/lib/eventLabels';
 import type { TaskEvent } from '@/types/housekeeping.types';
 import { eventStyle } from './eventStyles';
+import { localized } from '@/lib/localized';
 
 interface EventsTableProps {
   events: TaskEvent[];
@@ -47,7 +48,7 @@ export const EventsTable = ({ events, staffNames }: EventsTableProps) => {
                   <td className="py-3 px-4 font-mono tabular-nums text-slate-600 dark:text-slate-400">
                     {event.durationSeconds !== undefined ? t('audit.duration', { minutes: Math.round(event.durationSeconds / 60), seconds: event.durationSeconds }) : '—'}
                   </td>
-                  <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-md">{event.detail ? t(event.detail.key, event.detail.params) : '—'}</td>
+                  <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-md">{event.detail ? localized(t, event.detail) : '—'}</td>
                 </tr>
               );
             })

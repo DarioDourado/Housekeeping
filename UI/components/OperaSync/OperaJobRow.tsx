@@ -3,6 +3,7 @@ import { ArrowDownLeft, ArrowUpRight, RefreshCw } from 'lucide-react';
 import { ALL_ROOMS } from '@/config/constants';
 import { formatTimeWithSeconds } from '@/lib/datetime';
 import { SyncState, type OperaSyncJob } from '@/types/housekeeping.types';
+import { localized } from '@/lib/localized';
 
 const STATE_STYLE: Record<SyncState, string> = {
   [SyncState.CONFIRMED]: 'text-emerald-600 dark:text-emerald-400',
@@ -40,8 +41,8 @@ export const OperaJobRow = ({ job, roomNumber, canRetry, onRetry }: OperaJobRowP
               {job.previousStatus ?? '—'} → <strong className="text-blue-600 dark:text-blue-400">{job.targetStatus}</strong>
             </span>
           </div>
-          <span className="text-[11px] text-slate-500">{t(job.source.key, job.source.params)}</span>
-          {job.lastError && <span className="block text-[11px] text-orange-600 dark:text-orange-400">{t(job.lastError.key, job.lastError.params)}</span>}
+          <span className="text-[11px] text-slate-500">{localized(t, job.source)}</span>
+          {job.lastError && <span className="block text-[11px] text-orange-600 dark:text-orange-400">{localized(t, job.lastError)}</span>}
         </div>
       </div>
 

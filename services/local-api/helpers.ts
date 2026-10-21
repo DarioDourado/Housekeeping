@@ -82,13 +82,13 @@ interface EventInput {
   type: TaskEvent['type'];
   roomId: string;
   roomNumber: string;
-  taskId?: string;
-  detail?: LocalizedText;
-  durationSeconds?: number;
-  executorIds?: string[];
-  onBehalfOfTeam?: boolean;
-  supervisorId?: string;
-  metadata?: Record<string, unknown>;
+  taskId?: string | undefined;
+  detail?: LocalizedText | undefined;
+  durationSeconds?: number | undefined;
+  executorIds?: string[] | undefined;
+  onBehalfOfTeam?: boolean | undefined;
+  supervisorId?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export const withEvent = (state: HousekeepingState, ctx: CommandContext, input: EventInput): HousekeepingState => {
@@ -99,9 +99,9 @@ export const withEvent = (state: HousekeepingState, ctx: CommandContext, input: 
     registeredByName: ctx.actor.name,
     registeredByRole: ctx.actor.role,
     deviceId: ctx.actor.deviceId,
-    executorIds: [],
-    onBehalfOfTeam: false,
-    ...input
+    ...input,
+    executorIds: input.executorIds ?? [],
+    onBehalfOfTeam: input.onBehalfOfTeam ?? false
   };
   return { ...state, events: [event, ...state.events] };
 };
@@ -112,7 +112,7 @@ export const resolveExecution = (
   state: HousekeepingState,
   task: Pick<ServiceTask, 'sheetId'>,
   actor: Actor,
-  explicitExecutorIds?: string[]
+  explicitExecutorIds?: string[] | undefined
 ): { executorIds: string[]; onBehalfOfTeam: boolean } => {
   if (explicitExecutorIds && explicitExecutorIds.length > 0) {
     return { executorIds: explicitExecutorIds, onBehalfOfTeam: !explicitExecutorIds.includes(actor.id) };
@@ -127,7 +127,7 @@ export const resolveExecution = (
 interface OperaWrite {
   room: Room;
   target: RoomStatus;
-  occurredAt?: string;
+  occurredAt?: string | undefined;
   source: LocalizedText;
 }
 

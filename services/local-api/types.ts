@@ -34,7 +34,7 @@ export interface Actor {
   id: string;
   name: string;
   role: string;
-  deviceId?: string;
+  deviceId?: string | undefined;
 }
 
 export interface CommandContext {
@@ -46,7 +46,16 @@ export interface CommandContext {
 export interface CommandResult {
   state: HousekeepingState;
   // - mensagem de confirmação para a UI (chave i18n + parâmetros)
-  toast?: LocalizedText;
+  toast?: LocalizedText | undefined;
 }
 
 export type Command<Args = void> = (state: HousekeepingState, args: Args, ctx: CommandContext) => CommandResult;
+
+// - Argumentos comuns dos comandos de execução
+export interface TaskArgs {
+  taskId: string;
+}
+
+export interface ExecutionArgs extends TaskArgs {
+  executorIds?: string[] | undefined;
+}

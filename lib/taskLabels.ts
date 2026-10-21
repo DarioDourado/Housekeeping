@@ -1,7 +1,9 @@
 import { Movement, TaskKind, type ServiceTask } from '@/types/housekeeping.types';
 
 // - chave i18n (room.serviceShort.*) do tipo de trabalho de uma tarefa
-export const serviceLabelKey = (task: Pick<ServiceTask, 'kind' | 'movement'>): string => {
+export type ServiceLabelKey = 'refresh' | 'turndown' | 'departureArrival' | 'departureOnly' | 'stayover';
+
+export const serviceLabelKey = (task: Pick<ServiceTask, 'kind' | 'movement'>): ServiceLabelKey => {
   if (task.kind === TaskKind.REFRESH) return 'refresh';
   if (task.kind === TaskKind.TURNDOWN) return 'turndown';
   if (task.movement === Movement.DEPARTURE_ARRIVAL) return 'departureArrival';

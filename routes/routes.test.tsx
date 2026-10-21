@@ -30,7 +30,7 @@ const renderAt = (path: string, sessionUserId?: string) => {
   return { router, user: userEvent.setup() };
 };
 
-const text = (key: string, params?: Record<string, string | number>) => i18n.t(key, params);
+const text = (key: string) => i18n.t(key);
 
 beforeEach(async () => {
   await i18n.changeLanguage('pt');

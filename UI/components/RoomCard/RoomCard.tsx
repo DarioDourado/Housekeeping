@@ -3,7 +3,7 @@ import { AlertTriangle, Baby, BellOff, GripVertical, Home, Luggage, LogOut, Rota
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useTaskDrag } from '@/hooks/housekeeping/useTaskDrag';
 import { formatTime } from '@/lib/datetime';
-import { serviceLabelKey } from '@/lib/taskLabels';
+import { serviceLabelKey, type ServiceLabelKey } from '@/lib/taskLabels';
 import type { TaskView } from '@/lib/taskViews';
 import { useOverlayStore } from '@/store/overlayStore';
 import { CommercialBlock, InspectionStatus, NotPerformedReason, RoomTypology, TaskKind, TaskStatus } from '@/types/housekeeping.types';
@@ -16,7 +16,7 @@ interface RoomCardProps {
   compact?: boolean;
 }
 
-const SERVICE_STYLE: Record<string, { icon: typeof Home; color: string }> = {
+const SERVICE_STYLE: Record<ServiceLabelKey, { icon: typeof Home; color: string }> = {
   departureArrival: { icon: Luggage, color: 'text-rose-600 dark:text-rose-400 font-semibold' },
   stayover: { icon: Home, color: 'text-blue-600 dark:text-blue-400' },
   departureOnly: { icon: LogOut, color: 'text-stone-500 dark:text-stone-400' },
@@ -42,7 +42,7 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
   const { isDragging, dropPosition, draggableProps } = useTaskDrag(task.id, task.sheetId, index, canDistribute);
 
   const serviceKey = serviceLabelKey(task);
-  const service = SERVICE_STYLE[serviceKey] ?? SERVICE_STYLE.stayover;
+  const service = SERVICE_STYLE[serviceKey];
   const ServiceIcon = service.icon;
   const typologyKey = TYPOLOGY_KEY[room.typology];
   const inProgress = task.status === TaskStatus.IN_PROGRESS;

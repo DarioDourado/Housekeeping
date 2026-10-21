@@ -24,18 +24,18 @@ describe('buildTaskViews', () => {
 
   it('resolve os executores a partir do pessoal e ignora ids desconhecidos', () => {
     expect(dayViews.find(v => v.task.id === 'task-203-cleaning')?.executors.map(u => u.name)).toEqual(['Patrícia Gomes']);
-    const ghost = buildTaskViews({ ...state, tasks: [{ ...state.tasks[0], executorIds: ['ninguem'] }] });
-    expect(ghost[0].executors).toEqual([]);
+    const ghost = buildTaskViews({ ...state, tasks: [{ ...state.tasks[0]!, executorIds: ['ninguem'] }] });
+    expect(ghost[0]!.executors).toEqual([]);
   });
 
   it('distingue quem registou o início de quem executou', () => {
-    const view = buildTaskViews({ ...state, tasks: [{ ...state.tasks[0], startedById: 'user-filipa', executorIds: [] }] })[0];
+    const view = buildTaskViews({ ...state, tasks: [{ ...state.tasks[0]!, startedById: 'user-filipa', executorIds: [] }] })[0]!;
     expect(view.startedBy?.name).toBe('Filipa Mendes');
     expect(view.executors).toEqual([]);
   });
 
   it('descarta tarefas cujo quarto ou sheet já não existem', () => {
-    const orphan = { ...state.tasks[0], roomId: 'nao-existe' };
+    const orphan = { ...state.tasks[0]!, roomId: 'nao-existe' };
     expect(buildTaskViews({ ...state, tasks: [orphan] })).toEqual([]);
   });
 });

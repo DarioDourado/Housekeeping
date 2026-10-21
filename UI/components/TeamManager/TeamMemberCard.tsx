@@ -11,7 +11,7 @@ interface TeamMemberCardProps {
   member: User;
   team: BlockTeam;
   palette: TeamColorPalette;
-  sheetNumber?: number;
+  sheetNumber?: number | undefined;
   blockTeams: BlockTeam[];
   onSwitchUser: (userId: string) => void;
 }

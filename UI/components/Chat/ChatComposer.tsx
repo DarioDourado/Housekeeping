@@ -4,8 +4,8 @@ import { Image as ImageIcon, Send } from 'lucide-react';
 
 export interface ChatDraft {
   text: string;
-  roomNumber?: string;
-  attachmentUrl?: string;
+  roomNumber?: string | undefined;
+  attachmentUrl?: string | undefined;
 }
 
 // - foto simulada (ex.: TV avariada, berço colocado); o upload real fica para a Fase 2 (anexos)

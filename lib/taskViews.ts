@@ -17,10 +17,10 @@ import {
 export interface TaskView {
   task: ServiceTask;
   room: Room;
-  stay?: RoomStay;
+  stay?: RoomStay | undefined;
   sheet: TaskSheet;
   executors: User[];
-  startedBy?: User;               // quem registou o início (pode não ser quem executou)
+  startedBy?: User | undefined;               // quem registou o início (pode não ser quem executou)
   refreshCount: number;
 }
 

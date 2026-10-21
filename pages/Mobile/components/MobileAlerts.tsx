@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, CheckCircle2 } from 'lucide-react';
 import { useAcknowledgeAlert, useAlerts } from '@/hooks/housekeeping';
 import { formatTime } from '@/lib/datetime';
+import { localized } from '@/lib/localized';
 
 export const MobileAlerts = () => {
   const { t } = useTranslation();
@@ -28,7 +29,7 @@ export const MobileAlerts = () => {
               {alert.type === 'REPROVAL' ? t('mobile.alertReproval') : t('mobile.alertTrace')}
             </span>
           </div>
-          <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">{t(alert.message.key, alert.message.params)}</p>
+          <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">{localized(t, alert.message)}</p>
           <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
             <span className="text-[11px] text-slate-400">
               {alert.acknowledged ? t('mobile.acknowledgedAt', { time: formatTime(alert.acknowledgedAt ?? '') }) : t('mobile.awaiting')}

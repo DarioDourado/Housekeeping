@@ -16,7 +16,7 @@ const SHIFT_KEYS: Record<string, string> = {
 interface DirectoryRowProps {
   user: User;
   blockTeams: BlockTeam[];
-  sheetNumber?: number;
+  sheetNumber?: number | undefined;
   canManage: boolean;
   onToggleDuty: (user: User) => void;
   onChangeDefaultBlock: (user: User, block: string) => void;

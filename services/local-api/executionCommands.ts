@@ -1,35 +1,23 @@
 import {
   InspectionStatus,
-  Movement,
   NotPerformedReason,
   PlanKind,
-  PriorityOrigin,
   RoomStatus,
   TaskKind,
   TaskStatus,
   type LocalizedText
 } from '@/types/housekeeping.types';
-import type { Command } from './types';
+import type { Command, ExecutionArgs, TaskArgs } from './types';
 import {
   activePlan,
   findRoom,
-  findSheet,
   findTask,
   resetTask,
   resolveExecution,
-  tasksOfSheet,
   updateTaskIn,
   withEvent,
   writeOperaStatus
 } from './helpers';
-
-interface TaskArgs {
-  taskId: string;
-}
-
-interface ExecutionArgs extends TaskArgs {
-  executorIds?: string[];
-}
 
 // - Cada tarefa tem o seu estado de execução (PENDING→IN_PROGRESS→COMPLETED/NOT_PERFORMED); o estado do quarto no Opera
 //   é outra coisa e só muda quando a regra o diz (limpeza concluída, inspeção, reabertura).
@@ -65,7 +53,7 @@ export const startTask: Command<ExecutionArgs> = (state, { taskId, executorIds }
 };
 
 // - Concluir uma limpeza: Dirty → Clean no Opera. Refresh e turndown não escrevem no Opera (§9, §10.6).
-export const finishTask: Command<ExecutionArgs & { occurredAt?: string }> = (state, { taskId, executorIds, occurredAt }, ctx) => {
+export const finishTask: Command<ExecutionArgs & { occurredAt?: string | undefined }> = (state, { taskId, executorIds, occurredAt }, ctx) => {
   const task = findTask(state, taskId);
   const room = task && findRoom(state, task.roomId);
   if (!task || !room || (task.status !== TaskStatus.PENDING && task.status !== TaskStatus.IN_PROGRESS)) return { state };
@@ -136,91 +124,6 @@ export const recordNotPerformed: Command<TaskArgs & { reason: NotPerformedReason
   };
 };
 
-export const inspectTask: Command<TaskArgs & { occurredAt?: string }> = (state, { taskId, occurredAt }, ctx) => {
-  const task = findTask(state, taskId);
-  const room = task && findRoom(state, task.roomId);
-  if (!task || !room || task.kind !== TaskKind.CLEANING || task.status !== TaskStatus.COMPLETED || task.inspectionStatus !== InspectionStatus.PENDING) {
-    return { state };
-  }
-
-  const approved = updateTaskIn(state, taskId, t => ({ ...t, inspectionStatus: InspectionStatus.APPROVED, inspectionNote: undefined }));
-  const logged = withEvent(approved, ctx, {
-    type: 'INSPECTION_APPROVED',
-    roomId: room.id,
-    roomNumber: room.number,
-    taskId,
-    supervisorId: ctx.actor.id,
-    detail: { key: 'events.inspectionApproved', params: { name: ctx.actor.name } }
-  });
-
-  return {
-    state: writeOperaStatus(logged, ctx, { room, target: RoomStatus.INSPECTED, occurredAt, source: { key: 'opera.source.inspectionApproved' } })
-  };
-};
-
-// - O pedido de correção NÃO é um estado do Opera: o quarto continua Clean, a tarefa continua concluída e a empregada recebe
-//   um alerta com a nota (§8.2). Só deixa de ser Inspected-elegível até a correção estar feita.
-export const requestCorrection: Command<TaskArgs & { note: string }> = (state, { taskId, note }, ctx) => {
-  const task = findTask(state, taskId);
-  const room = task && findRoom(state, task.roomId);
-  if (!task || !room || task.status !== TaskStatus.COMPLETED || task.inspectionStatus !== InspectionStatus.PENDING) return { state };
-
-  const flagged = updateTaskIn(state, taskId, t => ({ ...t, inspectionStatus: InspectionStatus.CORRECTION_REQUESTED, inspectionNote: note }));
-  const logged = withEvent(flagged, ctx, {
-    type: 'INSPECTION_REPROVED',
-    roomId: room.id,
-    roomNumber: room.number,
-    taskId,
-    supervisorId: ctx.actor.id,
-    detail: { key: 'events.inspectionReproved', params: { name: ctx.actor.name, note } }
-  });
-
-  const responsible = (task.executorIds[0] ? state.staff.find(user => user.id === task.executorIds[0]) : undefined)
-    ?? state.staff.find(user => user.id === findSheet(state, task.sheetId)?.assignments[0]?.staffId);
-
-  return {
-    state: {
-      ...logged,
-      alerts: [
-        {
-          id: ctx.newId('alt'),
-          timestamp: ctx.now.toISOString(),
-          roomId: room.id,
-          roomNumber: room.number,
-          taskId,
-          targetWorkerName: responsible?.name,
-          targetArea: room.block,
-          type: 'REPROVAL',
-          message: { key: 'alerts.reproval', params: { number: room.number, name: ctx.actor.name, note } },
-          acknowledged: false
-        },
-        ...logged.alerts
-      ]
-    }
-  };
-};
-
-// - correção feita: volta a ficar à espera de inspeção (§5 do contrato)
-export const completeCorrection: Command<ExecutionArgs> = (state, { taskId, executorIds }, ctx) => {
-  const task = findTask(state, taskId);
-  const room = task && findRoom(state, task.roomId);
-  if (!task || !room || task.inspectionStatus !== InspectionStatus.CORRECTION_REQUESTED) return { state };
-
-  const execution = resolveExecution(state, task, ctx.actor, executorIds);
-  const fixed = updateTaskIn(state, taskId, t => ({ ...t, inspectionStatus: InspectionStatus.PENDING, inspectionNote: undefined }));
-
-  return {
-    state: withEvent(fixed, ctx, {
-      type: 'CORRECTION_DONE',
-      roomId: room.id,
-      roomNumber: room.number,
-      taskId,
-      ...execution,
-      detail: { key: 'events.correctionDone', params: { name: ctx.actor.name } }
-    })
-  };
-};
-
 // - Reabrir uma tarefa de turndown ou de refresh já concluída (volta a "por iniciar"). Nunca toca no Opera.
 //   Reabrir a LIMPEZA do dia é outra coisa: é reopenRoom, que escreve Dirty no Opera.
 export const reopenTask: Command<TaskArgs> = (state, { taskId }, ctx) => {
@@ -240,7 +143,7 @@ export const reopenTask: Command<TaskArgs> = (state, { taskId }, ctx) => {
 };
 
 // - A governanta devolve o quarto a Dirty (§8.3): escreve Dirty no Opera e a limpeza do dia volta ao início
-export const reopenRoom: Command<{ roomId: string; reason?: string; occurredAt?: string }> = (state, { roomId, reason, occurredAt }, ctx) => {
+export const reopenRoom: Command<{ roomId: string; reason?: string | undefined; occurredAt?: string | undefined }> = (state, { roomId, reason, occurredAt }, ctx) => {
   const room = findRoom(state, roomId);
   if (!room) return { state };
 
@@ -263,81 +166,4 @@ export const reopenRoom: Command<{ roomId: string; reason?: string; occurredAt?:
   });
 
   return { state: writeOperaStatus(logged, ctx, { room, target: RoomStatus.DIRTY, occurredAt, source: { key: 'opera.source.reopened' } }) };
-};
-
-// - Refresh não é uma limpeza: tem a sua própria tarefa e o seu histórico, e não altera o estado do quarto (§9.4).
-//   Sem tarefa de refresh no plano, regista-se uma intervenção não prevista (§6.5).
-export const recordRefresh: Command<{ roomId: string; executorIds?: string[] }> = (state, { roomId, executorIds }, ctx) => {
-  const room = findRoom(state, roomId);
-  const plan = activePlan(state, PlanKind.DAY);
-  if (!room || !plan) return { state };
-
-  const existing = state.tasks.find(t => t.planId === plan.id && t.roomId === roomId && t.kind === TaskKind.REFRESH);
-  const cleaning = state.tasks.find(t => t.planId === plan.id && t.roomId === roomId && t.kind === TaskKind.CLEANING);
-  const sheetId = (existing ?? cleaning)?.sheetId
-    ?? state.sheets.find(sheet => sheet.planId === plan.id && sheet.isReserve)?.id
-    ?? state.sheets.find(sheet => sheet.planId === plan.id)?.id;
-  if (!sheetId) return { state };
-
-  const execution = resolveExecution(state, { sheetId }, ctx.actor, executorIds);
-  const movement = state.stays.find(stay => stay.roomId === roomId && stay.date === plan.operationalDate)?.movement ?? Movement.VACANT;
-  const done = {
-    status: TaskStatus.COMPLETED,
-    finishedAt: ctx.now.toISOString(),
-    startedById: ctx.actor.id,
-    ...execution
-  };
-
-  let next = existing
-    ? updateTaskIn(state, existing.id, t => ({ ...t, ...done }))
-    : {
-        ...state,
-        tasks: [
-          ...state.tasks,
-          {
-            id: ctx.newId('task'),
-            planId: plan.id,
-            sheetId,
-            roomId,
-            kind: TaskKind.REFRESH,
-            movement,
-            isPriority: false,
-            orderIndex: tasksOfSheet(state, sheetId).length,
-            inspectionStatus: InspectionStatus.NOT_REQUIRED,
-            ...done
-          }
-        ]
-      };
-
-  next = withEvent(next, ctx, {
-    type: 'REFRESH_RECORDED',
-    roomId,
-    roomNumber: room.number,
-    taskId: existing?.id,
-    ...execution,
-    detail: { key: 'events.refreshRecorded', params: { name: ctx.actor.name } }
-  });
-  return { state: next };
-};
-
-export const togglePriority: Command<TaskArgs & { reason?: string }> = (state, { taskId, reason }, ctx) => {
-  const task = findTask(state, taskId);
-  const room = task && findRoom(state, task.roomId);
-  if (!task || !room) return { state };
-
-  const enabled = !task.isPriority;
-  const toggled = updateTaskIn(state, taskId, t => ({
-    ...t,
-    isPriority: enabled,
-    priorityOrigin: enabled ? (ctx.actor.role === 'reception' ? PriorityOrigin.RECEPTION : PriorityOrigin.HOUSEKEEPING) : undefined,
-    priorityReason: enabled ? reason : undefined
-  }));
-
-  const detail: LocalizedText = !enabled
-    ? { key: 'events.priorityOff' }
-    : reason
-      ? { key: 'events.priorityOn', params: { name: ctx.actor.name, reason } }
-      : { key: 'events.priorityOnNoNote', params: { name: ctx.actor.name } };
-
-  return { state: withEvent(toggled, ctx, { type: 'PRIORITY_TOGGLED', roomId: room.id, roomNumber: room.number, taskId, detail }) };
 };

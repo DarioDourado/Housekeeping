@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChatMessage } from '@/types/chat.types';
 
-export const ChatMessageList = ({ messages, currentUserId }: { messages: ChatMessage[]; currentUserId?: string }) => {
+export const ChatMessageList = ({ messages, currentUserId }: { messages: ChatMessage[]; currentUserId?: string | undefined }) => {
   const { t } = useTranslation();
   const endRef = useRef<HTMLDivElement>(null);
 

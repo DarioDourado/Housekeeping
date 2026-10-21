@@ -29,7 +29,7 @@ export const CollaboratorDirectoryTab = () => {
   const deleteUser = useDeleteStaff();
   const canManage = usePermission('staff.assign');
   const [filters, setFilters] = useState(NO_FILTERS);
-  const [editor, setEditor] = useState<{ user?: User } | null>(null);
+  const [editor, setEditor] = useState<{ user?: User | undefined } | null>(null);
 
   const filtered = useMemo(() => {
     const query = filters.search.trim().toLowerCase();

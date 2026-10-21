@@ -14,7 +14,9 @@ export interface TeamColorPalette {
   bar: string;
 }
 
-export const AVAILABLE_TEAM_COLORS: Record<string, TeamColorPalette> = {
+export type TeamColorId = 'blue' | 'indigo' | 'violet' | 'emerald' | 'amber' | 'rose' | 'teal' | 'orange' | 'slate';
+
+export const AVAILABLE_TEAM_COLORS: Record<TeamColorId, TeamColorPalette> = {
   blue: {
     id: 'blue',
     name: 'Azul Real',
@@ -152,20 +154,15 @@ export const AVAILABLE_TEAM_COLORS: Record<string, TeamColorPalette> = {
   }
 };
 
-/**
- * Retorna a paleta de cores para uma determinada cor ou bloco
- */
+const isTeamColorId = (key: string): key is TeamColorId => key in AVAILABLE_TEAM_COLORS;
+
+// - Paleta pela cor escolhida; sem cor válida, deduz-se do nome do bloco
 export const getTeamColorPalette = (colorOrBlock?: string): TeamColorPalette => {
   if (!colorOrBlock) return AVAILABLE_TEAM_COLORS.slate;
-  
-  const key = colorOrBlock.toLowerCase();
-  
-  // Direto pelo id de cor
-  if (AVAILABLE_TEAM_COLORS[key]) {
-    return AVAILABLE_TEAM_COLORS[key];
-  }
 
-  // Pelo nome do bloco se a cor não bater
+  const key = colorOrBlock.toLowerCase();
+  if (isTeamColorId(key)) return AVAILABLE_TEAM_COLORS[key];
+
   if (key.includes('bloco a')) return AVAILABLE_TEAM_COLORS.blue;
   if (key.includes('bloco b')) return AVAILABLE_TEAM_COLORS.indigo;
   if (key.includes('bloco c')) return AVAILABLE_TEAM_COLORS.violet;

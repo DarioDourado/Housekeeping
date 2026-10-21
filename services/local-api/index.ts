@@ -1,16 +1,7 @@
 import { acknowledgeAlert, sendTraceAlert } from './alertCommands';
-import {
-  completeCorrection,
-  finishTask,
-  inspectTask,
-  recordNotPerformed,
-  recordRefresh,
-  reopenRoom,
-  reopenTask,
-  requestCorrection,
-  startTask,
-  togglePriority
-} from './executionCommands';
+import { finishTask, recordNotPerformed, reopenRoom, reopenTask, startTask } from './executionCommands';
+import { completeCorrection, inspectTask, requestCorrection } from './inspectionCommands';
+import { recordRefresh, togglePriority } from './interventionCommands';
 import { receiveOperaStatus, retryOperaJob, syncWithOpera, triggerNightAudit } from './operaCommands';
 import { assignStaffToSheet, mergeSheets, moveTask, openPlan } from './planningCommands';
 import {

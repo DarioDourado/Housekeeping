@@ -25,7 +25,7 @@ interface FormState {
 }
 
 interface StaffFormModalProps {
-  user?: User;
+  user?: User | undefined;
   blockTeams: BlockTeam[];
   onSave: (user: Omit<User, 'id'> & { id?: string }) => Promise<void>;
   onClose: () => void;

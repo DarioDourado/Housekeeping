@@ -6,7 +6,7 @@ import { RoomStatus } from '@/types/housekeeping.types';
 
 interface SummaryStripProps {
   views: TaskView[];
-  onReset?: () => void;
+  onReset?: (() => void) | undefined;
 }
 
 // - Totais do dia: composição do trabalho por tipo e estado dos quartos no Opera

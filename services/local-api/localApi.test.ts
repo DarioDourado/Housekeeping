@@ -156,7 +156,7 @@ describe('execução diurna', () => {
 
     const fixed = next(flagged, 'completeCorrection', { taskId: 'task-203-cleaning' }, ctx(MARIA));
     expect(task(fixed, 'task-203-cleaning').inspectionStatus).toBe(InspectionStatus.PENDING);
-    expect(fixed.events[0].type).toBe('CORRECTION_DONE');
+    expect(fixed.events[0]!.type).toBe('CORRECTION_DONE');
     expect(task(run(fixed, 'inspectTask', { taskId: 'task-203-cleaning' }).state, 'task-203-cleaning').inspectionStatus).toBe(InspectionStatus.APPROVED);
   });
 
@@ -383,7 +383,7 @@ describe('Opera: estado do quarto vs execução', () => {
     expect(room(pulled, 'room-302').operaStatus).toBe(RoomStatus.DIRTY);
     expect(task(pulled, 'task-302-cleaning')).toEqual(task(before, 'task-302-cleaning'));
     expect(pulled.syncJobs[0]).toMatchObject({ direction: 'OPERA_TO_APP', previousStatus: RoomStatus.INSPECTED, targetStatus: RoomStatus.DIRTY });
-    expect(pulled.events[0].type).toBe('OPERA_SYNC_PULL');
+    expect(pulled.events[0]!.type).toBe('OPERA_SYNC_PULL');
   });
 
   it('uma notificação do Opera mais antiga do que o estado atual é ignorada', () => {
@@ -399,13 +399,13 @@ describe('Opera: estado do quarto vs execução', () => {
     expect(room(stale, 'room-101').operaStatus).toBe(RoomStatus.INSPECTED);
     expect(task(stale, CLEAN_101).status).toBe(TaskStatus.COMPLETED);
     expect(stale.syncJobs[0]).toMatchObject({ state: SyncState.CONFLICT, targetStatus: RoomStatus.CLEAN, lastError: { key: 'opera.errors.newerStatus' } });
-    expect(stale.events[0].type).toBe('OPERA_CONFLICT_DETECTED');
+    expect(stale.events[0]!.type).toBe('OPERA_CONFLICT_DETECTED');
   });
 
   it('um conflito só se resolve se uma pessoa mandar reenviar (aplica o estado e conta a tentativa)', () => {
     const afterOperaChange = next(seed(), 'receiveOperaStatus', { roomId: 'room-101', status: RoomStatus.INSPECTED, observedAt: todayAt('09:00') });
     const stale = next(afterOperaChange, 'finishTask', { taskId: CLEAN_101, occurredAt: todayAt('08:30') });
-    const conflictJob = stale.syncJobs[0];
+    const conflictJob = stale.syncJobs[0]!;
 
     const retried = run(stale, 'retryOperaJob', { jobId: conflictJob.id }, ctx(SUPERVISOR, minutesAfter(10))).state;
     expect(room(retried, 'room-101').operaStatus).toBe(RoomStatus.CLEAN);
@@ -442,7 +442,7 @@ describe('Opera: estado do quarto vs execução', () => {
     const synced = run(before, 'syncWithOpera', undefined).state;
     expect(synced.rooms).toBe(before.rooms);
     expect(synced.syncJobs).toHaveLength(before.syncJobs.length + 1);
-    expect(synced.syncJobs[0].roomId).toBeNull();
+    expect(synced.syncJobs[0]!.roomId).toBeNull();
   });
 });
 

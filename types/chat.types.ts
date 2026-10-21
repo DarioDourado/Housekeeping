@@ -12,10 +12,10 @@ export interface ChatMessage {
   senderId: string;
   senderName: string;
   senderRole: string;
-  roomNumber?: string;
+  roomNumber?: string | undefined;
   text: string;
   timestamp: string;
-  attachment?: ChatAttachment;
+  attachment?: ChatAttachment | undefined;
   isPriority?: boolean;
 }
 

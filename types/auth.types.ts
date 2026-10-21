@@ -16,20 +16,22 @@ export const loginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  assignedArea?: string; // Bloco atualmente atribuído: "Bloco A", "Bloco B", etc.
-  defaultBlock?: string;  // Bloco fixo por default ("Bloco A", "Bloco B", "Bloco C", "Bloco D", "Oasis Parc", "Master Villas", "Apoio & Rotativas")
-  isOnDuty?: boolean;     // De serviço hoje (true) ou folga/ausente (false)
-  shift?: string;         // "Manhã" | "Tarde 13h30" | "Turndown" | "Geral"
-  notes?: string;
-  avatar?: string;
-  isExtra?: boolean;
-  phoneDeviceId?: string;
-}
+export const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  role: z.enum(UserRole),
+  assignedArea: z.string().optional(),   // bloco atualmente atribuído: "Bloco A", "Bloco B", etc.
+  defaultBlock: z.string().optional(),   // bloco fixo por defeito (ver BLOCK em config/constants)
+  isOnDuty: z.boolean().optional(),      // de serviço hoje (true) ou folga/ausente (false)
+  shift: z.string().optional(),          // "Manhã" | "Tarde 13h30" | "Turndown" | "Geral"
+  notes: z.string().optional(),
+  avatar: z.string().optional(),
+  isExtra: z.boolean().optional(),
+  phoneDeviceId: z.string().optional()
+});
+
+export type User = z.infer<typeof userSchema>;
 
 export interface AuthTokens {
   accessToken: string;

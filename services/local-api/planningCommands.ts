@@ -17,7 +17,7 @@ import { findRoom, findSheet, findTask, reindexSheet, tasksOfSheet, withEvent } 
 
 // - Mover uma tarefa só muda a sua task sheet: nunca a apaga nem a conclui, e fica em qualquer estado (§6.4/§6.5).
 //   Não se mistura trabalho entre o plano diurno e o noturno: são distribuições independentes (§10.4).
-export const moveTask: Command<{ taskId: string; targetSheetId: string; targetIndex?: number }> = (
+export const moveTask: Command<{ taskId: string; targetSheetId: string; targetIndex?: number | undefined }> = (
   state,
   { taskId, targetSheetId, targetIndex },
   ctx
@@ -91,7 +91,7 @@ export const assignStaffToSheet: Command<{ sheetId: string; assignments: SheetAs
 
 // - Abrir o serviço de um dia: copia as secções (configuração base) para task sheets e cria as tarefas a partir das
 //   estadias, SEM alterar a configuração base (CT-01). Se esse dia já está aberto, não faz nada.
-export const openPlan: Command<{ kind: PlanKind; date?: string }> = (state, { kind, date }, ctx) => {
+export const openPlan: Command<{ kind: PlanKind; date?: string | undefined }> = (state, { kind, date }, ctx) => {
   const day = date ?? operationalDate(ctx.now);
   if (state.plans.some(plan => plan.operationalDate === day && plan.kind === kind)) return { state };
 

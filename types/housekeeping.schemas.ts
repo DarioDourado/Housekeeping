@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserRole, type User } from '@/types/auth.types';
+import { userSchema } from '@/types/auth.types';
 import {
   CommercialBlock,
   InspectionStatus,
@@ -13,30 +13,23 @@ import {
   SheetRole,
   SyncState,
   TaskKind,
-  TaskStatus,
-  type BlockTeam,
-  type LocalizedText,
-  type OperaSyncJob,
-  type Room,
-  type RoomAlert,
-  type RoomStay,
-  type Section,
-  type ServicePlan,
-  type ServiceTask,
-  type TaskEvent,
-  type TaskSheet
-} from '@/types/housekeeping.types';
+  TaskStatus
+} from '@/types/housekeeping.enums';
 
-// - Validam o que vem do transporter (hoje localStorage, amanhã a API FastAPI); espelham o contrato em 34-backend-fastapi
+// - Fonte única de verdade (14-types): o schema valida o que vem do transporter (hoje localStorage, amanhã a API FastAPI)
+//   e o tipo da entidade é inferido dele. Espelha o contrato em 34-backend-fastapi.
 
-const localizedTextSchema: z.ZodType<LocalizedText> = z.object({
+export { userSchema };
+
+// - Texto gerado pelo sistema: guarda-se a chave i18n + parâmetros, nunca a frase (a UI traduz ao mostrar)
+export const localizedTextSchema = z.object({
   key: z.string(),
   params: z.record(z.string(), z.union([z.string(), z.number()])).optional()
 });
 
 const roomStatusSchema = z.enum(RoomStatus);
 
-export const roomSchema: z.ZodType<Room> = z.object({
+export const roomSchema = z.object({
   id: z.string(),
   number: z.string(),
   block: z.string(),
@@ -48,7 +41,7 @@ export const roomSchema: z.ZodType<Room> = z.object({
   occupied: z.boolean()
 });
 
-export const roomStaySchema: z.ZodType<RoomStay> = z.object({
+export const roomStaySchema = z.object({
   roomId: z.string(),
   date: z.string(),
   movement: z.enum(Movement),
@@ -67,7 +60,7 @@ export const roomStaySchema: z.ZodType<RoomStay> = z.object({
   preferences: z.string().optional()
 });
 
-export const sectionSchema: z.ZodType<Section> = z.object({
+export const sectionSchema = z.object({
   id: z.string(),
   name: z.string(),
   block: z.string(),
@@ -75,14 +68,16 @@ export const sectionSchema: z.ZodType<Section> = z.object({
   defaultStaffIds: z.array(z.string())
 });
 
-export const servicePlanSchema: z.ZodType<ServicePlan> = z.object({
+export const servicePlanSchema = z.object({
   id: z.string(),
   operationalDate: z.string(),
   kind: z.enum(PlanKind),
   status: z.enum(PlanStatus)
 });
 
-export const taskSheetSchema: z.ZodType<TaskSheet> = z.object({
+export const sheetAssignmentSchema = z.object({ staffId: z.string(), role: z.enum(SheetRole) });
+
+export const taskSheetSchema = z.object({
   id: z.string(),
   planId: z.string(),
   number: z.number(),
@@ -90,11 +85,11 @@ export const taskSheetSchema: z.ZodType<TaskSheet> = z.object({
   block: z.string(),
   sectionId: z.string().optional(),
   isReserve: z.boolean(),
-  assignments: z.array(z.object({ staffId: z.string(), role: z.enum(SheetRole) })),
+  assignments: z.array(sheetAssignmentSchema),
   notes: z.string().optional()
 });
 
-export const serviceTaskSchema: z.ZodType<ServiceTask> = z.object({
+export const serviceTaskSchema = z.object({
   id: z.string(),
   planId: z.string(),
   sheetId: z.string(),
@@ -117,15 +112,31 @@ export const serviceTaskSchema: z.ZodType<ServiceTask> = z.object({
   onBehalfOfTeam: z.boolean()
 });
 
-export const taskEventSchema: z.ZodType<TaskEvent> = z.object({
+export const TASK_EVENT_TYPES = [
+  'ROOM_STARTED',
+  'ROOM_FINISHED',
+  'INSPECTION_APPROVED',
+  'INSPECTION_REPROVED',
+  'CORRECTION_DONE',
+  'REFRESH_RECORDED',
+  'DND_RECORDED',
+  'SERVICE_REFUSED',
+  'PRIORITY_TOGGLED',
+  'MOVED_TASK_SHEET',
+  'ROOM_REOPENED',
+  'TURNDOWN_UPDATED',
+  'STAFF_MOVED',
+  'PLAN_OPENED',
+  'OPERA_SYNC_PUSH',
+  'OPERA_SYNC_PULL',
+  'OPERA_CONFLICT_DETECTED',
+  'NIGHT_AUDIT_TRIGGERED'
+] as const;
+
+export const taskEventSchema = z.object({
   id: z.string(),
   occurredAt: z.string(),
-  type: z.enum([
-    'ROOM_STARTED', 'ROOM_FINISHED', 'INSPECTION_APPROVED', 'INSPECTION_REPROVED', 'CORRECTION_DONE',
-    'REFRESH_RECORDED', 'DND_RECORDED', 'SERVICE_REFUSED', 'PRIORITY_TOGGLED', 'MOVED_TASK_SHEET',
-    'ROOM_REOPENED', 'TURNDOWN_UPDATED', 'STAFF_MOVED', 'PLAN_OPENED', 'OPERA_SYNC_PUSH', 'OPERA_SYNC_PULL',
-    'OPERA_CONFLICT_DETECTED', 'NIGHT_AUDIT_TRIGGERED'
-  ]),
+  type: z.enum(TASK_EVENT_TYPES),
   roomId: z.string(),
   roomNumber: z.string(),
   taskId: z.string().optional(),
@@ -141,7 +152,7 @@ export const taskEventSchema: z.ZodType<TaskEvent> = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
-export const operaSyncJobSchema: z.ZodType<OperaSyncJob> = z.object({
+export const operaSyncJobSchema = z.object({
   id: z.string(),
   roomId: z.string().nullable(),
   direction: z.enum(['APP_TO_OPERA', 'OPERA_TO_APP']),
@@ -156,7 +167,7 @@ export const operaSyncJobSchema: z.ZodType<OperaSyncJob> = z.object({
   source: localizedTextSchema
 });
 
-export const roomAlertSchema: z.ZodType<RoomAlert> = z.object({
+export const roomAlertSchema = z.object({
   id: z.string(),
   timestamp: z.string(),
   roomId: z.string(),
@@ -170,7 +181,7 @@ export const roomAlertSchema: z.ZodType<RoomAlert> = z.object({
   acknowledgedAt: z.string().optional()
 });
 
-export const blockTeamSchema: z.ZodType<BlockTeam> = z.object({
+export const blockTeamSchema = z.object({
   id: z.string(),
   block: z.string(),
   name: z.string(),
@@ -180,17 +191,18 @@ export const blockTeamSchema: z.ZodType<BlockTeam> = z.object({
   color: z.string()
 });
 
-export const userSchema: z.ZodType<User> = z.object({
-  id: z.string(),
-  name: z.string(),
-  email: z.string(),
-  role: z.enum(UserRole),
-  assignedArea: z.string().optional(),
-  defaultBlock: z.string().optional(),
-  isOnDuty: z.boolean().optional(),
-  shift: z.string().optional(),
-  notes: z.string().optional(),
-  avatar: z.string().optional(),
-  isExtra: z.boolean().optional(),
-  phoneDeviceId: z.string().optional()
-});
+// ---------- Tipos das entidades (inferidos dos schemas) ----------
+
+export type LocalizedText = z.infer<typeof localizedTextSchema>;
+export type SheetAssignment = z.infer<typeof sheetAssignmentSchema>;
+export type TaskEventType = (typeof TASK_EVENT_TYPES)[number];
+export type Room = z.infer<typeof roomSchema>;
+export type RoomStay = z.infer<typeof roomStaySchema>;
+export type Section = z.infer<typeof sectionSchema>;
+export type ServicePlan = z.infer<typeof servicePlanSchema>;
+export type TaskSheet = z.infer<typeof taskSheetSchema>;
+export type ServiceTask = z.infer<typeof serviceTaskSchema>;
+export type TaskEvent = z.infer<typeof taskEventSchema>;
+export type OperaSyncJob = z.infer<typeof operaSyncJobSchema>;
+export type RoomAlert = z.infer<typeof roomAlertSchema>;
+export type BlockTeam = z.infer<typeof blockTeamSchema>;

@@ -46,7 +46,7 @@ const pullStatus = (
   }));
 };
 
-export const receiveOperaStatus: Command<{ roomId: string; status: RoomStatus; observedAt?: string }> = (
+export const receiveOperaStatus: Command<{ roomId: string; status: RoomStatus; observedAt?: string | undefined }> = (
   state,
   { roomId, status, observedAt },
   ctx
@@ -116,7 +116,7 @@ export const triggerNightAudit: Command = (state, _args, ctx) => {
   };
 };
 
-export const syncWithOpera: Command<{ roomId?: string } | undefined> = (state, args, ctx) => {
+export const syncWithOpera: Command<{ roomId?: string | undefined } | undefined> = (state, args, ctx) => {
   const room = args?.roomId ? findRoom(state, args.roomId) : undefined;
   const status = room?.operaStatus ?? RoomStatus.CLEAN;
   const job: OperaSyncJob = {

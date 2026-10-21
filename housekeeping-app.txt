@@ -1,0 +1,759 @@
+Levantamento funcional aprofundado — Reunião de Housekeeping
+Análise exaustiva da transcrição original · VILA VITA Parc · Base para especificação funcional e arquitetura da aplicação
+Reanalisei a transcrição com aproximadamente 10 900 palavras, procurando recuperar não apenas as funcionalidades mencionadas, mas também as regras operacionais, situações excecionais, exemplos concretos e decisões que surgiram durante a conversa.
+Esta análise aprofunda o resumo anterior e distingue três níveis de informação: requisito confirmado, funcionalidade pretendida ou discutida e ponto ainda não decidido. Não considero automaticamente aprovado tudo o que foi sugerido na reunião.
+1. O que a equipa realmente pretende construir
+A equipa de Housekeeping não pretende simplesmente uma aplicação que apresente uma lista de quartos com os estados Dirty, Clean e Inspected.
+Pretende substituir uma parte significativa da operação atualmente realizada através do Opera Cloud, folhas impressas, telemóveis, comunicações informais e aplicações anteriores.
+A aplicação deverá concentrar quatro processos operacionais interdependentes:
+Processo	Finalidade operacional
+Planeamento	Organizar os quartos que precisam de intervenção, distribuir o trabalho por secções e atribuir equipas
+Execução	Permitir que as colaboradoras consultem o trabalho, iniciem e concluam tarefas e comuniquem ocorrências
+Supervisão	Permitir que as governantas acompanhem o serviço, inspecionem, solicitem correções e comuniquem com a receção
+Controlo	Preservar o histórico das operações e recolher informação para melhorar a distribuição e produtividade
+Há ainda um requisito que condiciona toda a arquitetura: o serviço diurno e o turndown têm de funcionar de forma independente, mesmo quando decorrem em simultâneo e partilham quartos ou colaboradores.
+Esta separação foi um dos principais problemas da aplicação anterior.
+2. Reconstrução do processo atual — AS-IS
+A demonstração prática do sistema atual permitiu identificar a seguinte sequência operacional.
+2.1. Preparação do serviço diário
+A responsável entra no Opera Cloud e utiliza a área de Housekeeping para abrir o serviço da manhã.
+O sistema já contém secções e task sheets predefinidas, associadas a conjuntos de quartos.
+No entanto, a equipa necessita de preparar cuidadosamente a seleção das áreas. Como Village, Sunset e o hotel principal não estão completamente separados ao nível da propriedade no Opera, alterações feitas por uma equipa podem afetar a distribuição de outra.
+Durante a demonstração, foi explicado que algumas áreas são selecionadas ou excluídas deliberadamente para evitar interferências.
+Isto não é simplesmente um problema visual. Afeta a própria organização operacional.
+2.2. Ajuste das task sheets
+Depois de abrir o serviço, a responsável consulta as task sheets e reorganiza os quartos.
+Foi demonstrado que um quarto pode ser transferido de uma task sheet para outra.
+Essa funcionalidade é usada para corrigir desequilíbrios de trabalho. Por exemplo, duas empregadas podem estar atribuídas a corredores semelhantes, mas uma ter mais quartos com saída e chegada, exigindo muito mais trabalho.
+Foi igualmente mencionado o exemplo de juntar duas vilas numa só task sheet quando a mesma colaboradora fica responsável por ambas.
+A divisão predefinida é, portanto, apenas uma base.
+2.3. Distribuição às colaboradoras
+No processo antigo, depois de organizar as task sheets no Opera, a equipa enviava a distribuição para a aplicação instalada nos telemóveis.
+Na aplicação móvel, era possível associar o nome da colaboradora à task sheet.
+Atualmente continuam a ser utilizadas listas impressas.
+Foi dado um exemplo da substituição pretendida: a informação que aparece atualmente numa folha entregue à empregada deve passar a estar disponível no ecrã do telemóvel.
+2.4. Distribuição de responsabilidades
+A equipa dispõe de colaboradoras que habitualmente trabalham em áreas fixas e de outras que são deslocadas conforme a necessidade.
+Foram referidos exemplos de task sheets que, num determinado dia, poderiam ficar atribuídas à Adriana ou à Patrícia.
+Também foram mencionadas colaboradoras extras.
+A equipa pretende fazer essas atribuições diariamente porque nem sempre trabalham as mesmas pessoas e as necessidades operacionais são diferentes.
+2.5. Execução e supervisão
+A empregada executa a limpeza e comunica a conclusão.
+A governanta acompanha a evolução, inspeciona os quartos e determina se estão preparados para serem disponibilizados à receção.
+Quando encontra uma falha, solicita a correção.
+Parte desta comunicação é atualmente feita por telefone ou pessoalmente, provocando deslocações, interrupções e falta de histórico.
+2.6. Preparação do turndown
+A distribuição noturna começa a ser preparada durante a tarde, quando o serviço diurno ainda decorre.
+Este ponto provoca problemas no sistema anterior, porque a preparação do segundo serviço podia interferir com as task sheets que ainda estavam a ser utilizadas.
+Como solução operacional, a equipa acabou por recorrer a listas separadas.
+Conclusão do processo atual: o problema principal não é a ausência de informação, mas a dificuldade em gerir dois ciclos de trabalho flexíveis e sobrepostos com as ferramentas existentes.
+
+3. Modelo operacional pretendido — TO-BE
+A nova aplicação deverá permitir o seguinte fluxo, reconstruído a partir das intervenções dos participantes.
+Opera Cloud
+Quartos, ocupação, reservas, hóspedes e estados
+
+
+Aplicação de Housekeeping
+Planeamento diurno
+Task sheets e equipas
+
+
+Planeamento noturno
+Turndown independente
+
+
+Execução
+Limpezas e intervenções
+
+
+Supervisão
+Inspeções e correções
+
+
+
+
+
+Escritório
+
+
+Governantas
+
+
+Colaboradoras
+
+
+
+
+A direção pretende poder efetuar a distribuição, acompanhar o serviço e fazer alterações sem regressar constantemente ao Opera.
+O Opera deve continuar a receber as alterações necessárias aos estados dos quartos e fornecer os dados oficiais das reservas e da ocupação.
+Existe, contudo, uma decisão ainda por fechar: em determinado momento da reunião foi sugerido aproveitar a distribuição criada no Opera e transferi-la para a aplicação. Noutro momento, foi defendido que a distribuição e os ajustes deveriam ser realizados apenas na nova aplicação, para evitar trabalho duplicado.
+A intenção final favorece centralizar a gestão na nova aplicação, mas não foi formalmente decidido se a distribuição inicial será gerada no Opera ou inteiramente na nova solução.
+Esta diferença terá impacto direto na integração e na arquitetura.
+
+4. Informação que o sistema deve distinguir
+Um detalhe importante da conversa foi a utilização de expressões como estado, serviço, ocupação e task sheet para representar realidades diferentes.
+A futura aplicação tem de tratar estes conceitos separadamente.
+Dimensão	Valores ou exemplos retirados da reunião	Significado
+Estado de limpeza	Dirty, Clean, Inspected	Condição de limpeza do quarto no Opera
+Ocupação	Ocupado, vazio	Situação física ou operacional do quarto
+Movimento de hóspedes	Chegada, saída, estadia	Contexto da reserva
+Tipo de trabalho	Limpeza de saída, limpeza de estadia, Refresh, Turndown	Intervenção que tem de ser executada
+Execução da tarefa	Por iniciar, iniciada, concluída	Progresso da execução na nova aplicação
+Inspeção	Pendente, aprovada, com correções solicitadas	Resultado do trabalho de supervisão
+Impedimento de serviço	Do Not Disturb, Refuse Service	Motivo para não executar a tarefa
+Disponibilidade comercial	Out of Service, Out of Order	Bloqueios geridos no Opera
+Prioridade	Normal, prioritário	Ordem ou urgência de execução
+Os valores da coluna de execução e inspeção representam a interpretação operacional dos processos, não uma nomenclatura final aprovada pela equipa.
+Exemplo concreto
+Um quarto pode estar simultaneamente:
+Propriedade	Valor
+Ocupação	Vazio
+Movimento	Chegada prevista hoje
+Estado no Opera	Clean
+Tarefa	Refresh
+Execução	Ainda não iniciada
+Prioridade	Alta
+Responsável	Equipa do Bloco A
+Inspeção	Por confirmar
+Não existe contradição: cada atributo responde a uma pergunta diferente.
+Esta distinção será indispensável para evitar que o estado do Opera seja indevidamente utilizado para representar toda a operação.
+
+5. Organização do trabalho: equipas, pessoas e telemóveis
+5.1. O trabalho não é atribuído obrigatoriamente a uma única pessoa
+A reunião esclareceu que uma task sheet pode ser executada por várias pessoas.
+Foi dado o exemplo de uma secção com quatro saídas acompanhadas de chegadas. O volume de trabalho pode justificar que várias colaboradoras trabalhem nesse conjunto de quartos.
+Uma das participantes inicialmente interpretou a questão como várias pessoas a editarem a distribuição. Foi esclarecido que não era esse o caso: a distribuição é feita pela responsável, enquanto a execução pode envolver várias colaboradoras.
+Portanto, existem duas responsabilidades distintas:
+- Quem planeia e atribui o serviço.
+- Quem executa os trabalhos atribuídos.
+5.2. Colaboradoras fixas e móveis
+Algumas colaboradoras trabalham normalmente em determinadas secções.
+Outras podem ser deslocadas para reforçar áreas com maior volume de trabalho.
+Assim, o sistema deverá suportar uma associação habitual entre uma colaboradora e uma secção, mas essa relação não pode impedir alterações diárias.
+Uma atribuição permanente não significa uma obrigação operacional diária.
+5.3. Colaboradoras extras
+As extras podem variar diariamente.
+A equipa mencionou a hipótese de ter identificações provisórias ou nomes configuráveis para estas colaboradoras.
+A solução pretendida é gerir os respetivos registos na própria aplicação.
+Não foi considerada necessária uma integração com o Human ou com a aplicação de gestão de extras para a primeira versão.
+Requisito confirmado: o Housekeeping deverá conseguir acrescentar e retirar colaboradores da distribuição sem intervenção da informática.
+Ficou por definir se a gestão dessas colaboradoras será feita através de utilizadores próprios, contas provisórias ou perfis reutilizáveis.
+5.4. Telemóveis partilhados
+Esta é uma particularidade que merece bastante atenção.
+A reunião esclareceu que existem telemóveis de serviço atribuídos às responsáveis das áreas.
+A responsável transporta o telemóvel e atualiza o serviço da sua equipa.
+Logo, não é seguro assumir que cada colaboradora terá uma sessão individual num dispositivo.
+Isto tem consequências para o registo dos tempos.
+Por exemplo, se uma equipa tiver três pessoas e apenas a responsável utilizar o telemóvel, o início e a conclusão registados podem corresponder à equipa, sem permitir saber qual das três colaboradoras realizou fisicamente a tarefa.
+Ponto pendente: estabelecer se os registos de produtividade serão individuais, de equipa, ou de ambos os tipos.
+Sem esta definição, as estatísticas futuras poderão atribuir tempos à pessoa errada.
+
+6. Planeamento diário — Regras de distribuição
+6.1. Configuração base
+A equipa não quer começar a distribuir todos os quartos do zero, todos os dias.
+Foi claramente explicado que isso seria operacionalmente inviável.
+A aplicação deverá carregar uma predefinição com secções e quartos associados.
+Essa configuração deve, contudo, ser editável a longo prazo.
+Por exemplo, se a secção A tiver habitualmente os quartos 101 a 120, deverá ser possível transferir permanentemente determinados quartos para outra secção.
+Esta alteração estrutural é diferente de uma transferência feita apenas para o serviço de um dia.
+6.2. Distribuição do dia
+Depois de obter os dados do Opera, a responsável deve poder adaptar as task sheets.
+Foi demonstrado o movimento de quartos entre task sheets, permitindo equilibrar a distribuição.
+Deverá ser possível fazê-lo através de uma vista global, sem necessidade de abrir cada secção individualmente.
+A equipa destacou a vantagem de conseguir visualizar todas as task sheets no mesmo ecrã.
+6.3. Critérios de distribuição
+O número total de quartos não é suficiente para determinar a carga de trabalho.
+Na reunião foram referidos quatro fatores principais:
+Fator	Impacto na distribuição
+Saída com chegada	Exige limpeza completa e preparação em tempo útil
+Estadia	Trabalho distinto, geralmente com menor intervenção
+Saída sem chegada	Pode ser realizada mais tarde ou adiada
+Tipologia	Vilas, suites e quartos convencionais exigem tempos diferentes
+Também foi mencionado que a distribuição deve considerar quantos hóspedes estão alojados e as características específicas dos quartos.
+Não ficou aprovado nenhum algoritmo automático para esta fase.
+A distribuição continua a ser uma decisão da equipa de Housekeeping.
+6.4. Reserva de tarefas não atribuídas
+Uma situação importante surge quando há mais trabalho do que pessoas disponíveis.
+A equipa procura limpar todas as saídas no próprio dia, mas reconhece que nem sempre é possível.
+Nessas situações, pretende mover os quartos para uma task sheet sem colaboradora atribuída.
+O trabalho não é apagado nem considerado concluído.
+Simplesmente fica fora das tarefas que vão ser executadas nesse dia.
+Foi sugerida a existência de task sheets adicionais para este efeito.
+O número 20, bem como a hipótese de acrescentar duas task sheets, surgiram como exemplos. Não foram estabelecidos limites definitivos.
+Regra confirmada: as task sheets vazias têm de continuar disponíveis, pois podem servir como área de reserva ou de reorganização.
+6.5. Alterações durante a execução
+A distribuição da manhã não é definitiva.
+Pode ser necessário:
+- Transferir uma limpeza para outra equipa.
+- Alterar a prioridade de um quarto.
+- Atribuir trabalho a uma colaboradora que entrou mais tarde.
+- Reforçar uma secção com várias pessoas.
+- Retirar temporariamente uma tarefa.
+- Acrescentar uma intervenção não prevista.
+A nova aplicação deverá permitir essas operações sem obrigar a reiniciar ou reconstruir o serviço.
+Não foi definido como serão tratados os quartos que já tenham sido iniciados quando ocorrer uma transferência.
+Esse é um caso que deverá ser contemplado na especificação.
+6.6. Contadores por task sheet
+Foi pedido que os totais sejam apresentados automaticamente.
+Para o serviço diurno, a equipa quer conseguir ver tanto o número global como a composição do trabalho.
+Por exemplo, numa determinada task sheet:
+Task Sheet 06 — exemplo ilustrativo
+12 quartos
+
+4
+Saídas com chegada
+
+
+5
+Estadias
+
+
+2
+Saídas sem chegada
+
+
+1
+Refresh
+
+
+
+
+Estes números são apenas exemplificativos. O requisito é que o sistema calcule e atualize automaticamente os totais quando os quartos forem redistribuídos.
+
+7. Execução de uma tarefa de limpeza
+A reunião permite reconstruir um ciclo de trabalho relativamente preciso.
+7.1. Receção da tarefa
+A responsável da área consulta o telemóvel e identifica os quartos atribuídos.
+A lista deverá apresentar visualmente a situação de cada quarto.
+As informações consideradas importantes incluem o tipo de serviço, o estado de limpeza, a prioridade, instruções e eventuais necessidades especiais.
+A empregada deve conseguir abrir o detalhe do quarto para consultar informação adicional.
+7.2. Entrada no quarto
+Foi perguntado se seria necessário utilizar QR Codes para confirmar a presença da colaboradora.
+A alternativa que ficou em discussão foi utilizar um botão de início de tarefa.
+A colaboradora ou responsável abre a tarefa e regista o começo da execução.
+Não ficou definido que o QR Code seja obrigatório.
+7.3. Durante a limpeza
+O serviço pode decorrer normalmente ou surgir uma ocorrência.
+Na conversa foram identificadas várias possibilidades:
+Situação	Comportamento pretendido
+Limpeza normal	A equipa executa a tarefa
+Quarto prioritário	A prioridade fica visível na lista
+Equipamento danificado	Possibilidade de informar a governanta e enviar fotografia
+Instruções especiais	Consulta dos detalhes do quarto
+Do Not Disturb	Registar o impedimento
+Refuse Service	Registar a recusa do hóspede
+Necessidade de apoio	Comunicação com a governanta
+O sistema deve conservar a distinção entre terminar uma limpeza e registar que não foi possível realizá-la.
+Por exemplo, uma recusa do hóspede não deve contar automaticamente como quarto limpo.
+7.4. Conclusão
+Quando termina, a colaboradora regista o fim da tarefa.
+A aplicação deverá calcular o intervalo entre o início e o fim.
+No caso de uma limpeza normal, a conclusão permitirá atualizar o estado correspondente para Clean no Opera.
+Este comportamento aplica-se ao serviço diurno e não deve ser automaticamente reutilizado no turndown.
+7.5. Inspeção
+A governanta consulta a evolução do serviço e identifica os quartos que já podem ser inspecionados.
+Se o trabalho estiver correto, assinala a inspeção como aprovada.
+O quarto passa a Inspected.
+Se houver um problema, solicita uma correção.
+7.6. Correção e nova verificação
+Foi dado o exemplo de uma governanta encontrar o chão mal limpo e precisar que a colaboradora regresse ao quarto.
+A aplicação deverá permitir escrever instruções, como voltar a aspirar ou corrigir a limpeza da casa de banho.
+O quarto não deve passar a Inspected enquanto a falha não for resolvida.
+A conversa não definiu se é necessário registar uma segunda medição de tempo exclusivamente para a correção. Essa capacidade seria tecnicamente útil, mas deve ser considerada uma proposta.
+
+8. Máquina de estados e integração com o Opera
+A reunião clarificou que o Opera e a nova aplicação não devem gerir exatamente os mesmos estados.
+8.1. Estados que precisam de sincronização
+Acontecimento	Estado no Opera	Responsável habitual
+Quarto necessita de limpeza	Dirty	Opera ou utilizador autorizado
+Limpeza concluída	Clean	Empregada / responsável de área
+Inspeção aprovada	Inspected	Governanta
+Inspeção com falhas	Mantém o estado de limpeza anterior	Governanta
+Quarto novamente considerado sujo	Dirty	Governanta ou processo do Opera
+Foi confirmado que as mudanças para Clean e Inspected são relevantes para a receção, que consulta esses estados.
+8.2. O que não deve ser um estado de limpeza
+O pedido de correção não deve ser convertido num novo estado do Opera.
+Da mesma forma, Turndown Concluído, Do Not Disturb e Refuse Service representam acontecimentos ou resultados do serviço, não equivalentes a Dirty, Clean ou Inspected.
+8.3. Governantas podem devolver quartos a Dirty
+A reunião confirmou que as governantas devem dispor de mais permissões do que as empregadas.
+Podem inspecionar e, quando necessário, voltar a marcar um quarto como Dirty.
+Não foi estabelecido se a alteração para Dirty pode ser efetuada diretamente após Inspected, sem um motivo obrigatório.
+8.4. Fecho do dia no Opera
+Durante a demonstração, foi referido que o Opera pode modificar os estados automaticamente no fecho operacional do dia.
+Foram descritas duas situações:
+Quarto previamente inspecionado: um quarto que ficou vazio durante a noite pode surgir novamente como Clean, obrigando a uma nova verificação antes de ser considerado pronto.
+No-show: foi referido que o Opera pode colocar um quarto em Dirty após o fecho do dia, quando se verificam determinadas situações em que o hóspede esperado não chegou.
+Estas afirmações descrevem o funcionamento observado ou relatado pela equipa, não regras universais do Opera Cloud.
+A aplicação terá de ler corretamente o estado atual após o processamento noturno, sem repor automaticamente o estado anterior que tinha guardado.
+O fecho operacional foi situado aproximadamente durante a madrugada, podendo ocorrer por volta das 02h00 ou mais tarde.
+Não deverá ser usado simplesmente o relógio das 00h00 para identificar a transição de dia operacional.
+
+9. Refresh — Regras mais específicas
+O Refresh não é sinónimo de Clean.
+Foi explicado que um quarto pode ter sido limpo e inspecionado anteriormente, não ter recebido hóspedes e precisar apenas de uma pequena intervenção.
+Também foi referido que um quarto pode estar vários dias vazio e precisar de nova verificação.
+9.1. Quando poderá ser necessário
+O motivo principal mencionado foi a antecipação de uma chegada.
+A equipa não quer executar automaticamente Refresh em todos os quartos vazios.
+A decisão deve permanecer sob controlo operacional.
+9.2. Distribuição
+O Refresh pode ser atribuído através das task sheets.
+O quarto poderá estar inicialmente Clean, mas ter uma tarefa de Refresh pendente.
+Foi sugerido um botão específico para registar a conclusão do Refresh.
+A aplicação deverá conseguir preservar quantas vezes essa operação foi realizada em determinado quarto.
+9.3. Reinspeção
+A conversa admitiu a possibilidade de uma governanta voltar a inspecionar o quarto depois do Refresh e atualizar o estado no Opera.
+Contudo, não foi estabelecido que todos os Refreshes obrigam a nova inspeção.
+Essa regra tem de ficar definida.
+9.4. Não confundir com uma nova limpeza
+O facto de o quarto estar Clean não significa que uma tarefa de Refresh possa ser considerada automaticamente concluída.
+O histórico da intervenção deve existir separadamente.
+
+10. Turndown — Levantamento funcional completo
+O turndown merece tratamento separado porque constitui um dos requisitos mais exigentes da reunião.
+10.1. Natureza do serviço
+A equipa explicou que o turndown não é uma repetição da limpeza diurna.
+É um serviço de preparação noturna do quarto.
+O seu objetivo é proporcionar ao hóspede um quarto novamente organizado e confortável para a noite.
+Foram mencionadas operações como arrumar o espaço, preparar a cama e deixar os chocolates ou outros elementos de acolhimento.
+Por ser um serviço mais leve, a quantidade de quartos atribuída a uma colaboradora pode ser bastante superior à do serviço diurno.
+10.2. Horários identificados
+A reunião distinguiu a preparação da distribuição e a execução do turndown.
+Momento	Horário referido	Significado
+Possível início antecipado da preparação	14h30	Deve ser possível preparar o serviço mais cedo
+Preparação habitual	15h30	Organização e distribuição das tarefas noturnas
+Serviço diurno ainda em execução	Até cerca das 17h30	As tarefas do dia ainda podem estar abertas
+Início do turndown	18h00	Início habitual do serviço noturno
+Fim habitual do turndown	21h30	Fim referido para a operação de turndown
+Foram ainda mencionados turnos de trabalho aproximadamente das 13h30 às 22h00 e das 18h00 às 23h00.
+Esses horários de trabalho não devem ser confundidos com o intervalo de execução do turndown.
+10.3. Problema operacional da aplicação anterior
+O problema descrito foi muito concreto.
+Uma governanta podia começar a preparar a distribuição noturna às 15h30 enquanto ainda existiam quartos atribuídos ao serviço da manhã.
+Quando reorganizava tarefas para a noite, podia alterar a informação de que a equipa diurna ainda necessitava.
+A equipa nunca conseguiu resolver satisfatoriamente essa interferência na aplicação anterior.
+10.4. Requisito: independência dos serviços
+A aplicação deverá permitir que, no mesmo dia:
+- O planeamento diurno continue ativo.
+- O planeamento noturno seja preparado.
+- As equipas do dia continuem a atualizar os seus quartos.
+- As governantas distribuam os quartos do turndown.
+- Os dois serviços tenham tarefas, responsáveis e registos de execução próprios.
+As alterações na distribuição noturna não poderão apagar ou modificar as tarefas diurnas.
+Isto não significa que os dados do quarto sejam duplicados fisicamente. Significa que deverão existir registos operacionais distintos associados ao mesmo quarto.
+10.5. Distribuição do turndown
+A reunião começou por considerar uma distribuição completamente livre.
+Posteriormente, os participantes concluíram que seria útil existir uma predefinição por edifícios, blocos ou pisos.
+Foram mencionadas áreas como residências, Vista Parc e diferentes blocos do hotel.
+A configuração deverá ser alterável diariamente, em função do número de quartos ocupados.
+Por exemplo, uma colaboradora que durante o dia trabalha apenas numa zona pode receber duas zonas durante o turndown.
+A equipa comprometeu-se a enviar uma estrutura de pré-distribuição específica para este serviço.
+10.6. Estados do turndown
+Aqui existiu alguma discussão.
+Inicialmente, foi sugerido que bastaria ter um botão de Clean para registar a realização do serviço.
+Outra participante chamou a atenção para a necessidade de as governantas também poderem controlar e inspecionar o trabalho.
+A conversa terminou com o entendimento de que o turndown deve ter controlo operacional próprio, mas não deve alterar os estados de limpeza do Opera.
+Isto não fecha, por si só, os estados internos definitivos.
+Uma proposta técnica coerente seria:
+Estado interno proposto	Significado
+Pendente	Serviço atribuído, não iniciado
+Em execução	Serviço iniciado
+Concluído	Empregada terminou o turndown
+Verificado	Governanta confirmou, quando aplicável
+Correção solicitada	Existe uma intervenção por corrigir
+Não realizado	Serviço impedido ou recusado, com motivo
+Esta tabela constitui uma proposta de modelação. A equipa não aprovou formalmente cada um destes estados.
+10.7. DND e Refuse Service
+Também no turndown devem poder ser registadas as situações em que o hóspede não pretende ser incomodado ou recusa o serviço.
+A informação deve ficar visível à supervisão, permitindo distinguir uma tarefa ainda pendente de um serviço que não foi possível realizar.
+10.8. Colaboradoras com duas atribuições no mesmo dia
+Foi descrita uma situação operacional particularmente importante.
+Existem colaboradoras que entram por volta das 13h30 e permanecem até à noite.
+Na primeira parte do turno, podem ajudar as equipas da manhã ou realizar quartos sem chegada que ficaram por limpar.
+Posteriormente, recebem trabalho de turndown.
+O mesmo utilizador deve, portanto, poder ter tarefas nos dois serviços.
+Exemplo de uma colaboradora num dia operacional
+SERVIÇO DIURNO
+Task Sheet D-08
+Limpeza de saídas sem chegada e apoio às equipas
+
+
+SERVIÇO NOTURNO
+Task Sheet T-04
+Turndown de quartos de diferentes pisos ou blocos
+
+Exemplo lógico; os identificadores das task sheets são ilustrativos.
+A conclusão das tarefas diurnas não pode ser confundida com a conclusão do turndown, mesmo que sejam efetuadas no mesmo quarto.
+10.9. Evolução pretendida para o turno da tarde
+Foi também discutida uma mudança futura na forma como se distribui o trabalho às colaboradoras que entram às 13h30.
+Atualmente, estas funcionam frequentemente como reforço das equipas da manhã.
+A intenção é que, quando a ocupação do hotel diminuir, possam receber task sheets próprias desde o início do turno.
+Essas task sheets poderão incluir quartos desocupados, limpezas adiadas do dia anterior ou tarefas menos urgentes.
+Isto permitirá medir melhor o trabalho realizado por estas colaboradoras.
+Foi referido que, no processo atual, parte desse esforço não fica devidamente registado, uma vez que as colaboradoras apenas ajudam outras equipas.
+Esta evolução está relacionada com o futuro sistema de créditos, mas é funcionalmente diferente.
+
+11. Perfis e permissões — Matriz detalhada
+A reunião estabeleceu claramente que a informação e as operações disponíveis devem variar consoante o perfil.
+A matriz seguinte distingue o que foi efetivamente pedido do que ainda necessita de confirmação.
+Operação	Escritório / Direção	Governanta	Empregada / Responsável de equipa	Receção
+Consultar todos os quartos	Sim	Da área atribuída	Apenas os atribuídos	A definir
+Distribuir task sheets	Sim	A definir	Não	Não
+Atribuir colaboradores	Sim	A definir	Não	Não
+Reordenar prioridades	Sim	Sim	A definir	Sim, conforme discutido
+Iniciar e terminar tarefa	Supervisão	A definir	Sim	Não
+Alterar Dirty para Clean	A definir	Sim, com permissões	Sim	Não definido
+Marcar Inspected	Gestão / supervisão	Sim	Não	Não
+Solicitar correções	Sim	Sim	Não definido	Não
+Consultar tempos das equipas	Sim	A definir	Não, na proposta discutida	Não
+Consultar estatísticas das governantas	Sim	Não	Não	Não
+Consultar informação dos hóspedes	Conforme necessidade	Sim	Apenas informação necessária	A definir
+Enviar mensagens e alertas	Pretendido	Pretendido	Pretendido	Pretendido
+Configurar zonas e secções	Sim	A definir	Não	Não
+A coluna da receção não representa um conjunto de permissões formalmente fechado.
+A reunião confirmou a importância da comunicação com a receção e mencionou a possibilidade de esta estabelecer prioridades. Não definiu todas as operações que a receção poderá realizar diretamente.
+11.1. Empregadas de andares
+Ficou explicitamente estabelecido que as empregadas não podem marcar quartos como Inspected.
+A função principal é realizar a limpeza e atualizar o progresso do trabalho.
+11.2. Governantas
+As governantas deverão conseguir visualizar a totalidade do serviço da sua área, incluindo quartos Dirty, Clean e Inspected.
+Foi explicado que até um quarto já inspecionado poderá precisar de uma nova intervenção.
+11.3. Direção ou escritório
+A direção deverá ter acesso à distribuição global, à supervisão do trabalho das governantas e às estatísticas.
+A equipa referiu expressamente que quem controla o trabalho das governantas são as pessoas responsáveis no escritório.
+
+12. Informação detalhada necessária em cada quarto
+Durante a demonstração do Opera foram identificados vários campos que a equipa pretende transportar para a nova aplicação.
+Estes campos deverão ser confirmados através das listas atualmente utilizadas e dos dados disponibilizados pela API.
+12.1. Identificação e localização
+Campo	Finalidade
+Número do quarto	Identificação da unidade
+Bloco / edifício	Localização operacional
+Piso	Organização física
+Secção	Distribuição do trabalho
+Tipologia	Contexto da limpeza e cálculo futuro da carga
+Task sheet	Associação ao serviço do dia
+12.2. Informação da ocupação
+Campo	Finalidade
+Ocupação atual	Saber se o quarto está ocupado ou vazio
+Chegada prevista	Identificar quartos com entrada
+Saída prevista	Identificar quartos com saída
+Estadia	Identificar hóspedes que permanecem
+Hora prevista de chegada	Ajudar a organizar prioridades
+Nome do hóspede	Identificar a reserva
+Número de adultos	Preparação do quarto
+Número de crianças	Preparação de camas e outros elementos
+Idade das crianças	Determinação de necessidades específicas
+12.3. Informação especial
+Foram referidos campos ou informações como:
+- Classificação VIP.
+- Room Instructions.
+- Traces.
+- Notes.
+- Specials.
+- Preferências do hóspede.
+- Horário de limpeza.
+- Horário de turndown.
+- Informação diária de Housekeeping.
+- Solicitação de berço ou cama especial.
+- Preparação de flores.
+- Champanhe e outras atenções.
+- Lua de mel e ocasiões especiais.
+A equipa explicou que já utiliza relatórios e listas para identificar algumas destas necessidades.
+A intenção é passar a apresentar essa informação diretamente na aplicação.
+12.4. Informação das crianças
+Este foi um pedido concreto da equipa.
+Atualmente, não existe uma lista prática que apresente todas as idades das crianças.
+As governantas precisam frequentemente de acrescentar esses dados manualmente.
+Foi explicado que a idade é necessária para determinar o tipo de cama ou berço a preparar.
+A aplicação deverá procurar apresentar a idade quando essa informação existir na reserva.
+Ficou também reconhecido que, se a idade não tiver sido introduzida, a API não conseguirá fornecer um dado inexistente.
+12.5. Horas previstas de chegada
+A hora prevista de chegada pode ajudar na distribuição de prioridades.
+Contudo, a reunião evidenciou que esta informação nem sempre é fiável.
+Uma participante explicou que, por vezes, os hóspedes chegam mais cedo do que o esperado, principalmente quando não dependem de transporte organizado pelo hotel.
+Por isso, a hora prevista pode servir como informação auxiliar, mas não deve determinar automaticamente a prioridade sem possibilidade de intervenção humana.
+12.6. Aniversários
+Foi mencionada a possibilidade de disponibilizar informação sobre aniversariantes.
+A reação foi de que essa informação não era particularmente importante para o Housekeeping, embora outras ocasiões especiais, como luas de mel, sejam relevantes.
+Assim, aniversários não ficaram estabelecidos como requisito obrigatório.
+
+13. Comunicação, alertas e ocorrências
+A equipa mostrou interesse em substituir parte das comunicações informais por registos associados às tarefas.
+13.1. Mensagens relacionadas com quartos
+O objetivo principal não é construir uma alternativa genérica ao WhatsApp.
+É permitir que uma colaboradora comunique rapidamente uma situação relacionada com o trabalho.
+Por exemplo, ao identificar uma televisão danificada, deverá poder comunicar à governanta e enviar uma fotografia.
+13.2. Fotografias
+Foi especificamente mencionada a vantagem de a fotografia ficar disponível no telemóvel da governanta.
+Esta poderia utilizá-la posteriormente para criar um pedido de manutenção ou outro registo.
+Não foi pedida uma integração automática obrigatória com esses sistemas.
+13.3. Pedidos especiais
+Foi dado o exemplo de a receção pedir a preparação urgente de um berço.
+A aplicação deverá tornar possível transmitir essa necessidade sem depender exclusivamente de um telefonema.
+13.4. Chat geral
+Foram discutidas funcionalidades como mensagens individuais, grupos e envio de fotografias.
+Embora a equipa tenha considerado a ideia interessante, a necessidade principal ficou centrada na comunicação operacional e no envio de ocorrências.
+Portanto, um chat completo com todas as funcionalidades de uma aplicação de mensagens não ficou aprovado como requisito obrigatório da primeira versão.
+13.5. Estrutura funcional recomendada
+Para satisfazer o que foi pedido, proponho distinguir:
+Mecanismo	Utilização
+Alerta	Quarto prioritário ou situação urgente
+Pedido de correção	Falha identificada numa inspeção
+Ocorrência	Equipamento danificado ou problema encontrado
+Mensagem	Informação operacional enviada à governanta ou equipa
+Anexo	Fotografia associada à ocorrência
+Esta separação é uma recomendação técnica.
+Facilita a criação de histórico e impede que uma ocorrência importante fique perdida numa conversa extensa.
+
+14. Estatísticas — Que dados precisam realmente de ser registados
+O objetivo da direção não é apenas consultar quantos quartos ficaram limpos.
+Pretende avaliar como o serviço foi executado, identificar padrões e fundamentar futuras decisões.
+14.1. Dados de execução
+Dado	Necessidade expressa
+Quarto	Saber onde decorreu o serviço
+Colaboradora / equipa	Identificar quem executou
+Tipo de serviço	Comparar limpezas diferentes
+Hora de início	Determinar quando começou
+Hora de fim	Determinar quando terminou
+Duração	Medir tempo de execução
+Tipologia	Comparar quartos semelhantes
+Inspeção	Registar a intervenção da governanta
+Resultado	Saber se houve aprovação ou necessidade de correção
+14.2. Análises que a equipa pretende obter
+Foi mencionada a intenção de calcular tempos médios para diferentes tipologias e tipos de serviço.
+Uma limpeza de estadia num quarto convencional pode ter uma duração bastante diferente de uma limpeza de saída numa vila com várias divisões.
+Foram usados exemplos de aproximadamente 50 minutos e 1h30 para ilustrar diferenças de trabalho, não para estabelecer tempos oficiais.
+A equipa pretende construir referências com base em registos reais.
+14.3. Tempos anómalos
+A direção quer poder consultar o histórico quando algo corre mal.
+Foi utilizado o exemplo de uma tarefa que aparece concluída após apenas 30 segundos.
+Essa informação permitiria questionar se a limpeza foi efetivamente realizada.
+Não foi decidido impor automaticamente um tempo mínimo nem bloquear tarefas consideradas demasiado rápidas.
+14.4. Inspeções das governantas
+A direção pretende também conhecer a atividade de supervisão.
+Por exemplo, quantos quartos uma governanta inspecionou num determinado dia e quais eram chegadas ou estadias.
+Foi ainda referida a necessidade de analisar o serviço noturno separadamente.
+14.5. O problema dos registos efetuados por terceiros
+Há aqui uma limitação importante que decorre da utilização de telemóveis partilhados.
+Se a responsável da área iniciar e concluir tarefas em nome das restantes colaboradoras, a aplicação pode estar a medir o momento do registo, não necessariamente o tempo efetivo de limpeza da pessoa que realizou o trabalho.
+Para garantir estatísticas fiáveis, será necessário definir a diferença entre:
+Executor físico, responsável da equipa e utilizador que registou a operação.
+Esta distinção não ficou resolvida na reunião, mas é indispensável para o futuro sistema de produtividade.
+
+15. Sistema de créditos — Detalhes adicionais da proposta
+Este tema foi discutido expressamente como uma evolução futura, depois de existir histórico suficiente.
+15.1. Problema que se pretende resolver
+Distribuir dez quartos a uma colaboradora e dez a outra não significa necessariamente distribuir a mesma quantidade de trabalho.
+As diferenças podem resultar da tipologia, dimensão do quarto e tipo de serviço.
+15.2. Valorização proposta
+O conceito consiste em atribuir créditos ao trabalho esperado em cada combinação de tipologia e serviço.
+Os exemplos apresentados foram:
+Tipologia	Estadia	Saída
+Quarto standard	1 crédito	2 créditos
+Junior Suite	1,5 créditos	3 créditos
+Suite	2 créditos	4 créditos
+Estes são valores ilustrativos usados na reunião.
+Não foi estabelecida uma tabela oficial de créditos.
+15.3. Cálculo da carga diária
+Foi dado o exemplo de nove estadias standard e uma Junior Suite de saída.
+A soma seria:
+\[
+(9 \times 1) + (1 \times 3) = 12\ \text{créditos}
+\]
+
+O valor de 12 créditos por dia foi apresentado como exemplo para explicar a lógica de distribuição.
+Não representa uma meta de produção aprovada.
+15.4. Créditos por quarto e por tipo de serviço
+A conversa esclareceu que os créditos não devem ser atribuídos à pessoa.
+Devem refletir uma estimativa média do esforço necessário para executar uma tarefa específica.
+Foi reconhecido, no entanto, que colaboradoras diferentes podem executar a mesma tarefa em tempos diferentes.
+A direção manterá, por isso, a responsabilidade de ajustar as atribuições à realidade da equipa.
+15.5. Possível automatização futura
+Depois de recolher dados suficientes, o sistema poderá ajudar a distribuir tarefas segundo uma carga estimada.
+A equipa admitiu a possibilidade de automatizar parte do processo, mantendo a possibilidade de correção manual.
+Não foram definidos os critérios matemáticos, os limites máximos ou as regras de distribuição automática.
+
+16. Separação entre Opera Cloud e aplicação própria
+A reunião permite estabelecer uma fronteira funcional, embora a implementação técnica ainda precise de validação.
+Informação ou operação	Sistema principal pretendido
+Reservas e hóspedes	Opera Cloud
+Inventário e identificação dos quartos	Opera Cloud
+Ocupação e movimentos de hóspedes	Opera Cloud
+Estado Dirty, Clean e Inspected	Opera Cloud, com alterações pela aplicação
+Bloqueios OOS e OOO	Opera Cloud
+Organização operacional de áreas	Nova aplicação
+Distribuição diária	Nova aplicação, aproveitando predefinições
+Atribuição das colaboradoras	Nova aplicação
+Execução das tarefas	Nova aplicação
+Pedidos de correção	Nova aplicação
+Turndown	Nova aplicação
+Refresh	Nova aplicação, com eventual atualização de estado no Opera
+Mensagens e fotografias	Nova aplicação
+Histórico de tempos	Nova aplicação
+Créditos	Nova aplicação, em fase posterior
+16.1. A questão das múltiplas propriedades
+Foi explicado que, atualmente, Village, Sunset e o hotel principal não estão completamente separados como propriedades independentes no Opera.
+A alternativa discutida foi utilizar a identificação dos quartos e respetivas áreas para construir divisões lógicas na aplicação.
+O desenvolvimento inicial deverá concentrar-se no hotel principal, porque os processos do Village e Sunset são diferentes e, segundo a equipa, não justificam a mesma prioridade.
+16.2. Limitações da OHIP
+Durante a reunião foi afirmado que a API permite consultar grande parte dos dados, mas que existem limitações em determinadas operações de escrita, particularmente em alguns anexos ou campos específicos.
+Não foram apresentados endpoints concretos nem efetuados testes técnicos na reunião.
+Portanto, a existência de uma operação na interface do Opera não garante que a mesma operação esteja disponível na OHIP da instalação.
+16.3. Sincronização
+A equipa quer que as alterações dos estados dos quartos possam circular entre os dois sistemas.
+Por exemplo, se um quarto mudar de estado no Opera, a aplicação não deve continuar a mostrar indefinidamente o estado anterior.
+O mecanismo de sincronização não foi decidido.
+Ainda é necessário definir como serão detetadas as alterações, como tratar falhas de comunicação e o que fazer quando ocorrerem atualizações concorrentes.
+
+17. Requisitos de interface extraídos da reunião
+A equipa pediu uma interface prática, visual e adequada aos telemóveis existentes.
+17.1. Ecrã de planeamento
+Deverá permitir ver várias task sheets, arrastar quartos e consultar contadores.
+O ecrã deverá facilitar a distribuição sem necessidade de navegar repetidamente entre secções.
+17.2. Ecrã da colaboradora
+Deverá apresentar a lista de quartos atribuídos, com informação visual suficiente para identificar o trabalho e a prioridade.
+Foi solicitado o uso de cores e ícones, em vez de depender exclusivamente de descrições textuais.
+17.3. Detalhe do quarto
+Deverá apresentar informações adicionais, como os hóspedes, crianças, especiais, instruções e horários relevantes.
+O objetivo é evitar que a colaboradora tenha de consultar uma folha adicional ou pedir informação que já está no sistema.
+17.4. Ecrã da governanta
+Deverá permitir acompanhar todos os estados dos quartos da área, realizar inspeções, solicitar correções e consultar alertas.
+17.5. Ecrã de turndown
+Deverá apresentar uma distribuição específica, independente da distribuição diurna.
+A equipa deverá conseguir alternar de serviço quando aplicável, sem afetar os registos anteriores.
+17.6. Ecrã de estatísticas
+A necessidade foi identificada, mas não foram definidos gráficos ou relatórios específicos para a primeira versão.
+17.7. Desempenho nos telemóveis
+Foi referido que os dispositivos de serviço deverão ser avaliados.
+A intenção expressa pelo desenvolvimento foi evitar colocar processamento pesado no telemóvel e concentrar a maior parte da carga nos servidores.
+Não foi escolhida uma tecnologia específica, nem ficou definido se a aplicação será nativa, web ou PWA.
+
+18. Casos de utilização concretos para validar a futura aplicação
+Estes cenários traduzem as situações discutidas em testes funcionais. São uma proposta de validação, não testes executados nem critérios formalmente aprovados.
+ID	Cenário	Resultado esperado
+CT-01	Abrir o serviço da manhã	Carregar quartos, ocupação e distribuição inicial
+CT-02	Mover quarto entre task sheets	A distribuição atualiza sem perder a tarefa
+CT-03	Juntar quartos de duas vilas	Permitir uma única atribuição
+CT-04	Associar várias pessoas à mesma task sheet	Manter a relação com a equipa
+CT-05	Criar colaboradora extra	Permitir incluí-la na distribuição
+CT-06	Marcar limpeza como concluída	Atualizar Clean no Opera
+CT-07	Aprovar inspeção	Atualizar Inspected no Opera
+CT-08	Reprovar inspeção	Manter o estado anterior e solicitar correção
+CT-09	Receber quarto prioritário	Destacar e permitir alterar a ordem
+CT-10	Registar DND	Guardar impedimento sem considerar limpeza concluída
+CT-11	Registar Refuse Service	Guardar recusa e preservar o histórico
+CT-12	Criar tarefa de Refresh	Permitir conclusão independente da limpeza anterior
+CT-13	Preparar turndown durante o serviço diurno	Não modificar as tarefas do dia
+CT-14	Colaboradora com serviços diurno e noturno	Permitir duas atribuições independentes
+CT-15	Deixar task sheet vazia	Mantê-la disponível
+CT-16	Fotografar uma avaria	Enviar ocorrência à governanta
+CT-17	Consultar idade de crianças	Apresentar dados quando disponíveis
+CT-18	Quarto OOO ou OOS	Não remover o bloqueio comercial
+CT-19	Consultar histórico de uma tarefa	Mostrar registos de início, fim e inspeção
+CT-20	Alteração de estado no Opera	Refletir corretamente a alteração na aplicação
+Estes cenários deverão ser complementados com casos de erro, particularmente falhas de sincronização, perda de ligação e alterações simultâneas.
+
+19. Questões que ficaram verdadeiramente em aberto
+É importante distinguir as decisões que a equipa já tomou daquelas que apenas foram discutidas.
+Tema	O que ficou por decidir	Impacto
+Origem das task sheets	Criadas no Opera ou na nova aplicação?	Arquitetura do planeamento
+Atribuição individual	Como identificar o executor quando o telefone é partilhado?	Auditoria e produtividade
+Permissões das governantas	Podem redistribuir qualquer secção ou apenas a sua área?	Controlo de acessos
+Inspeção do turndown	É obrigatória, opcional ou aplicável apenas a certos quartos?	Modelo de tarefas
+Refresh	Quando deve exigir nova inspeção?	Regras de negócio
+Prioridades	Quem pode criar, cancelar ou substituir prioridades?	Controlo operacional
+Chat	Mensagens simples ou sistema completo?	Complexidade do MVP
+Recusas de serviço	Devem atualizar algum campo no Opera?	Integração
+Horários	Como tratar alterações ao fecho operacional do dia?	Calendário operacional
+Histórico	Qual é o período de retenção dos registos?	Base de dados e auditoria
+Estatísticas	Como atribuir tempos quando várias pessoas trabalham juntas?	Fiabilidade dos indicadores
+QR Codes	Implementar ou não?	Experiência de utilização
+Dispositivos	Que sistemas operativos e versões terão de ser suportados?	Implementação móvel
+Rede	Como tratar tarefas durante falhas de Wi-Fi?	Fiabilidade operacional
+Estes são pontos que surgem diretamente das discussões ou das dependências necessárias para implementar o comportamento pedido.
+
+20. Priorização funcional resultante da reunião
+A reunião não produziu um backlog formal, mas permite organizar o desenvolvimento em fases.
+Fase 1 — Estrutura essencial e MVP
+Componentes necessários para substituir o processo de trabalho principal
+Módulo	Funcionalidades essenciais
+Estrutura	Quartos, blocos, secções, tipologias e predefinições
+Opera	Consulta dos dados necessários e atualização dos estados
+Planeamento	Distribuição de tarefas, drag-and-drop e contadores
+Equipas	Colaboradoras fixas, móveis, extras e responsáveis
+Execução	Início, conclusão, DND e recusa de serviço
+Supervisão	Inspeções e pedidos de correção
+Turndown	Distribuição e execução independentes
+Refresh	Atribuição e registo da intervenção
+Informação	Consulta das instruções necessárias por quarto
+Histórico	Registo dos eventos operacionais
+Fase 2 — Comunicação e acompanhamento
+Funcionalidades desejadas, cujo âmbito inicial ainda pode ser ajustado
+Módulo	Funcionalidades
+Comunicação	Mensagens e notificações
+Ocorrências	Registos associados a quartos
+Fotografias	Anexos e comunicação à governanta
+Prioridades avançadas	Pedidos urgentes e alterações de sequência
+Estatísticas	Relatórios de tempos e produtividade
+Algumas destas funcionalidades, nomeadamente prioridades e comunicação de correções, podem precisar de estar no MVP em versão simplificada.
+Fase 3 — Evolução operacional
+Módulo	Funcionalidades
+Créditos	Valorização das tarefas por tipologia e serviço
+Distribuição assistida	Propostas de equilíbrio de carga
+Análise avançada	Comparações de tempos e produtividade
+Integrações adicionais	Manutenção, Lost & Found ou outros sistemas
+Out of Service / Out of Order	Eventuais operações adicionais pela API
+Expansão	Outras áreas e propriedades
+A fronteira entre fases terá de ser validada com o Housekeeping. Esta priorização é uma interpretação estruturada da conversa.
+
+21. Informação que a equipa ficou de fornecer
+Houve compromissos concretos para permitir o desenvolvimento do protótipo.
+Informação	Origem	Utilização
+Divisão dos quartos	Housekeeping	Construir o inventário operacional
+Blocos e pisos	Housekeeping	Definir a hierarquia de áreas
+Secções atuais	Housekeeping	Criar predefinições
+Exemplo de lista impressa	Housekeeping	Identificar campos visíveis às colaboradoras
+Predefinição do turndown	Housekeeping	Organizar o segundo serviço
+Campos específicos do Opera	Housekeeping, com validação técnica	Mapear os dados necessários
+Telemóveis existentes	Equipa operacional / informática	Validar compatibilidade
+O desenvolvimento ficou responsável por organizar esta informação, estudar a estrutura de dados e preparar os primeiros desenhos da aplicação.
+Foi expressamente mencionado que os primeiros desenhos seriam um protótipo visual não funcional, a apresentar para avaliação antes da implementação.
+A possibilidade de os disponibilizar até ao final do mês foi uma previsão informal, não um compromisso formal.
+
+22. A minha leitura técnica: as decisões de arquitetura que não devemos deixar para depois
+Esta secção é uma análise técnica minha, separada dos requisitos extraídos da reunião.
+22.1. Separar quarto, tarefa e serviço
+A entidade Room deve representar a unidade física.
+Uma entidade como ServiceTask deve representar uma intervenção operacional concreta.
+Uma entidade como ServicePlan deve representar a distribuição de trabalho para um período e tipo de serviço.
+Assim, o mesmo quarto poderá ter uma tarefa diurna, uma tarefa de turndown e uma tarefa de Refresh sem que estas se substituam.
+22.2. Separar estado do PMS e estado da tarefa
+O estado Dirty, Clean ou Inspected representa a informação de limpeza comunicada ao Opera.
+O estado da tarefa deve permitir controlar o seu progresso interno.
+Por exemplo, uma tarefa de turndown pode estar concluída sem que o quarto tenha mudado de estado no Opera.
+22.3. Tratar as task sheets como conjuntos de tarefas atribuíveis
+Uma task sheet não deve ser apenas um conjunto fixo de quartos.
+Deve ser possível criar uma instância de distribuição para determinado dia e serviço, associando-lhe tarefas e colaboradores.
+A configuração base da secção deve permanecer independente da distribuição concreta desse dia.
+22.4. Preservar eventos, não apenas o estado atual
+Guardar apenas status = clean não é suficiente.
+A aplicação deverá conservar eventos como início da tarefa, conclusão, inspeção, correção, redistribuição e sincronização.
+Isso permitirá reconstruir o histórico de trabalho e fundamentar estatísticas futuras.
+22.5. Distinguir quem executa e quem regista
+Dado que os telemóveis podem ser partilhados, o modelo deve permitir identificar o utilizador responsável pelo registo e, quando possível, o executor da tarefa.
+Se a operação for registada em nome da equipa, essa circunstância deve ficar explícita.
+22.6. Proteger a integração com o Opera
+A sincronização deverá respeitar a separação entre estados de limpeza e bloqueios comerciais.
+Também será necessário impedir que uma alteração antiga da aplicação substitua indevidamente um estado mais recente recebido do Opera.
+Os mecanismos concretos dependerão das capacidades da OHIP disponíveis na instalação.
+
+23. Resultado consolidado da reunião
+Da transcrição resulta um sistema que precisa de suportar, desde o início, uma operação mais complexa do que a gestão simples de tarefas.
+A equipa pretende controlar o ciclo diário desde a preparação das task sheets até à inspeção dos quartos, trabalhar com equipas flexíveis, substituir listas impressas, receber informação do Opera e atualizar os estados relevantes.
+O turndown terá de coexistir com a limpeza diurna sem causar interferências.
+Os refreshes, as recusas de serviço, os pedidos de correção e as ocorrências deverão ser tratados como acontecimentos próprios, sem sobrecarregar artificialmente os estados Dirty, Clean e Inspected.
+A aplicação também terá de começar a recolher dados suficientemente fiáveis para permitir, numa fase posterior, analisar tempos por tipologia, produtividade, carga de trabalho e distribuição através de créditos.
+A conclusão mais importante desta análise é que a reunião já definiu grande parte do comportamento funcional, mas ainda não fechou integralmente as regras de identidade, atribuição, sincronização, inspeção do turndown e gestão dos casos excecionais.
+Esses são os pontos que mais influenciam a estrutura de dados e que devem ser resolvidos antes da implementação definitiva. O protótipo visual pode avançar com base no levantamento existente, desde que essas decisões permaneçam identificadas como pendentes de validação.

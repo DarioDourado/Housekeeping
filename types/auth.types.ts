@@ -7,16 +7,10 @@ export enum UserRole {
   RECEPTION = 'reception'        // Receção do hotel
 }
 
+// - mensagens são chaves i18n; o formulário traduz (nunca texto fixo no schema)
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email ou identificador é obrigatório')
-    .toLowerCase()
-    .trim(),
-  password: z
-    .string()
-    .min(4, 'Password deve ter no mínimo 4 caracteres'),
-  areaBlock: z.string().optional(),
+  email: z.string().trim().toLowerCase().min(1, 'login.errors.emailRequired'),
+  password: z.string().min(4, 'login.errors.passwordMin'),
   rememberMe: z.boolean().optional()
 });
 
@@ -32,7 +26,6 @@ export interface User {
   isOnDuty?: boolean;     // De serviço hoje (true) ou folga/ausente (false)
   shift?: string;         // "Manhã" | "Tarde 13h30" | "Turndown" | "Geral"
   notes?: string;
-  assignedSheetId?: string;
   avatar?: string;
   isExtra?: boolean;
   phoneDeviceId?: string;

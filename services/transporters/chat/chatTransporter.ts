@@ -1,4 +1,4 @@
-import { ChatChannel, ChatMessage } from '../../../types/chat.types';
+import { ChatChannel, ChatMessage } from '@/types/chat.types';
 
 const STORAGE_CHANNELS = 'vvp_hk_chat_channels_v1';
 const STORAGE_MESSAGES = 'vvp_hk_chat_messages_v1';

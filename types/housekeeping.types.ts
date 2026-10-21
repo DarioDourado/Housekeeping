@@ -1,167 +1,274 @@
+// - Modelo do contrato FE↔BE (ver .agents/34-backend-fastapi/references/domain-contract.md).
+//   Room (físico, vem do Opera) ≠ ServiceTask (intervenção) ≠ ServicePlan (distribuição de um dia e serviço).
+
 export enum RoomStatus {
   DIRTY = 'DIRTY',
   CLEAN = 'CLEAN',
   INSPECTED = 'INSPECTED'
 }
 
-export enum ServiceType {
-  DEPARTURE_ARRIVAL = 'DEPARTURE_ARRIVAL', // Saída com chegada (Alta prioridade)
-  STAYOVER = 'STAYOVER',                   // Estadia in-house (Média)
-  DEPARTURE_ONLY = 'DEPARTURE_ONLY',       // Só saída (Baixa / Estacionamento)
-  REFRESH = 'REFRESH'                      // Quarto já limpo de dias anteriores antes de chegada
-}
-
-export enum ServiceShift {
-  MORNING = 'MORNING',     // Serviço da manhã (sincroniza com Opera nos 2 sentidos)
-  TURNDOWN = 'TURNDOWN'    // Serviço da noite (18h-21h30, isolado do Opera)
-}
-
 export enum RoomTypology {
-  STANDARD = 'STANDARD',             // Quarto normal (1 cr estadia / 2 cr saída)
-  JUNIOR_SUITE = 'JUNIOR_SUITE',     // Junior Suite (1.5 cr estadia / 3 cr saída)
-  SUITE = 'SUITE',                   // Suite Hotel / Oasis (2 cr estadia / 4 cr saída)
-  VILLA = 'VILLA'                    // Master Villa (3 cr estadia / 6 cr saída)
+  STANDARD = 'STANDARD',
+  JUNIOR_SUITE = 'JUNIOR_SUITE',
+  SUITE = 'SUITE',
+  VILLA = 'VILLA'
 }
 
-export interface GuestOperaInfo {
-  guestName: string;
-  vipType?: string;            // 'VIP 1', 'VIP 2', 'VVIP', 'Repeat Guest'
-  adults: number;
-  children: number;
-  childAges?: string;          // Ex: "2 anos (berço), 6 anos" - dor principal da governanta
-  arrivalEta?: string;         // Ex: "14:30 (Transfer privado)"
-  departureEta?: string;       // Ex: "11:00"
-  isLinenChangeDue: boolean;   // "Muda" - troca de lençóis
-  dailyInstructions?: string;  // Housekeeping room instructions
-  traces?: string[];           // Pedidos e traces da receção (ex: "Colocar berço", "Rosas de boas-vindas")
-  notes?: string;              // Observações gerais da receção
-  specials?: string[];         // Luas de mel, aniversários, amenidades especiais
-  preferences?: string;        // "Almofadas extras de penas, temperatura 21C"
+export enum Movement {
+  DEPARTURE_ARRIVAL = 'DEPARTURE_ARRIVAL',
+  STAYOVER = 'STAYOVER',
+  DEPARTURE_ONLY = 'DEPARTURE_ONLY',
+  VACANT = 'VACANT'
 }
 
-export interface RoomOperationalState {
-  activeStartTime?: string;      // ISO String
-  activeEndTime?: string;        // ISO String
-  activeWorkerId?: string;
-  activeWorkerName?: string;
-  lastDurationSeconds?: number;
-  totalRefreshCount: number;
-  isDND: boolean;
-  dndRecordedAt?: string;
-  isRefusedService: boolean;
-  refusedRecordedAt?: string;
-  inspectionReprovalNote?: string;
-  inspectionReprovalAt?: string;
-  inspectionReprovalAcknowledged?: boolean;
+export enum TaskKind {
+  CLEANING = 'CLEANING',
+  REFRESH = 'REFRESH',
+  TURNDOWN = 'TURNDOWN'
 }
+
+export enum PlanKind {
+  DAY = 'DAY',
+  NIGHT = 'NIGHT'
+}
+
+export enum PlanStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  CLOSED = 'CLOSED'
+}
+
+// - execução da tarefa; nunca se mistura com o estado do quarto no Opera
+export enum TaskStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  NOT_PERFORMED = 'NOT_PERFORMED'
+}
+
+export enum NotPerformedReason {
+  DND = 'DND',
+  REFUSE_SERVICE = 'REFUSE_SERVICE'
+}
+
+export enum InspectionStatus {
+  NOT_REQUIRED = 'NOT_REQUIRED',
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  CORRECTION_REQUESTED = 'CORRECTION_REQUESTED'
+}
+
+// - bloqueios comerciais são geridos no Opera: a app só os lê
+export enum CommercialBlock {
+  NONE = 'NONE',
+  OOS = 'OOS',
+  OOO = 'OOO'
+}
+
+export enum PriorityOrigin {
+  RECEPTION = 'RECEPTION',
+  HOUSEKEEPING = 'HOUSEKEEPING'
+}
+
+export enum SyncState {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  FAILED = 'FAILED',
+  CONFLICT = 'CONFLICT'
+}
+
+export enum SheetRole {
+  LEAD = 'LEAD',
+  MEMBER = 'MEMBER'
+}
+
+// - Texto gerado pelo sistema: guarda-se a chave i18n + parâmetros, nunca a frase (a UI traduz ao mostrar)
+export interface LocalizedText {
+  key: string;
+  params?: Record<string, string | number>;
+}
+
+// ---------- Opera (só leitura na app, exceto o estado de limpeza) ----------
 
 export interface Room {
   id: string;
-  number: string;               // Ex: "101", "204", "Vila 1"
-  block: string;                // "Bloco A", "Bloco B", "Bloco C", "Bloco D", "Oasis Parc", "Master Villas"
-  defaultBlock?: string;        // Bloco de partida por default (configurável)
+  number: string;
+  block: string;
   floor: number;
   typology: RoomTypology;
-  
-  // Morning Service (com Opera)
-  morningStatus: RoomStatus;
-  operaStatus: RoomStatus;      // Último estado sincronizado com o Opera Cloud
-  operaLastSyncedAt: string;
-  serviceType: ServiceType;
+  operaStatus: RoomStatus;
+  operaStatusUpdatedAt: string;   // ISO-8601; base da deteção de conflitos
+  commercialBlock: CommercialBlock;
+  occupied: boolean;
+}
 
-  // Turndown Service (Sem Opera, isolado)
-  turndownStatus: RoomStatus;
-  turndownRequired: boolean;
-  turndownSheetId?: string;
-  turndownWorkerName?: string;
-  turndownCompletedAt?: string;
+// - Reserva do dia (snapshot do Opera). Dados pessoais: mostrar só o necessário por perfil.
+export interface RoomStay {
+  roomId: string;
+  date: string;                   // dia operacional YYYY-MM-DD
+  movement: Movement;
+  guestName?: string;
+  vipType?: string;
+  adults: number;
+  children: number;
+  childAges: (number | null)[];   // null = idade não introduzida na reserva
+  arrivalEta?: string;
+  departureEta?: string;
+  isLinenChangeDue: boolean;
+  instructions?: string;
+  traces: string[];
+  notes?: string;
+  specials: string[];
+  preferences?: string;
+}
 
-  // Order & Priority
-  isPriority: boolean;
-  prioritySetBy?: string;       // "Receção" | "Governanta"
-  priorityReason?: string;
-  assignedSheetId: string;      // ID da Task Sheet da manhã
-  orderIndex: number;
+// ---------- Configuração base (permanente) e distribuição do dia ----------
 
-  // Guest & Opera fields
-  guest: GuestOperaInfo;
+export interface Section {
+  id: string;
+  name: string;
+  block: string;
+  defaultRoomIds: string[];
+  defaultStaffIds: string[];
+}
 
-  // Operational State & Time tracking
-  operational: RoomOperationalState;
+export interface ServicePlan {
+  id: string;
+  operationalDate: string;
+  kind: PlanKind;
+  status: PlanStatus;
+}
+
+export interface SheetAssignment {
+  staffId: string;
+  role: SheetRole;
 }
 
 export interface TaskSheet {
   id: string;
-  sheetNumber: number;          // Ex: 1 a 20 + 21 e 22 (estacionamento)
-  title: string;                // Ex: "Secção 1 - Bloco A Piso 0"
+  planId: string;
+  number: number;
+  title: string;
   block: string;
-  assignedUserIds: string[];    // Pode ter 1 ou mais pessoas
-  assignedUserNames: string[];
-  roomIds: string[];
-  isParkingSheet: boolean;      // Task sheet extra para estacionar quartos não prioritários
-  serviceShift: ServiceShift;
+  sectionId?: string;
+  isReserve: boolean;             // área de reserva/estacionamento: trabalho adiado, não apagado
+  assignments: SheetAssignment[];
   notes?: string;
 }
 
-export type RoomEventType =
+export interface ServiceTask {
+  id: string;
+  planId: string;
+  sheetId: string;
+  roomId: string;
+  kind: TaskKind;
+  movement: Movement;
+  status: TaskStatus;
+  notPerformedReason?: NotPerformedReason;
+  isPriority: boolean;
+  priorityOrigin?: PriorityOrigin;
+  priorityReason?: string;
+  orderIndex: number;
+  inspectionStatus: InspectionStatus;
+  inspectionNote?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  durationSeconds?: number;
+  startedById?: string;           // quem registou o início
+  executorIds: string[];          // quem executou fisicamente (vazio = desconhecido)
+  onBehalfOfTeam: boolean;        // registado em nome da equipa (telemóvel partilhado)
+}
+
+// ---------- Histórico (append-only) ----------
+
+export type TaskEventType =
   | 'ROOM_STARTED'
   | 'ROOM_FINISHED'
   | 'INSPECTION_APPROVED'
   | 'INSPECTION_REPROVED'
+  | 'CORRECTION_DONE'
   | 'REFRESH_RECORDED'
   | 'DND_RECORDED'
   | 'SERVICE_REFUSED'
   | 'PRIORITY_TOGGLED'
   | 'MOVED_TASK_SHEET'
+  | 'ROOM_REOPENED'
+  | 'TURNDOWN_UPDATED'
+  | 'STAFF_MOVED'
+  | 'PLAN_OPENED'
   | 'OPERA_SYNC_PUSH'
   | 'OPERA_SYNC_PULL'
+  | 'OPERA_CONFLICT_DETECTED'
   | 'NIGHT_AUDIT_TRIGGERED';
 
-export interface RoomEvent {
+export interface TaskEvent {
   id: string;
-  timestamp: string;
+  occurredAt: string;             // ISO-8601, relógio do servidor
+  type: TaskEventType;
   roomId: string;
-  roomNumber: string;
-  eventType: RoomEventType;
-  userId: string;
-  userName: string;
-  userRole: string;
-  details?: string;
+  roomNumber: string;             // snapshot para a auditoria ('ALL' = vários)
+  taskId?: string;
+  registeredById: string;         // utilizador que registou
+  registeredByName: string;
+  registeredByRole: string;
+  executorIds: string[];
+  onBehalfOfTeam: boolean;
+  supervisorId?: string;          // quem inspecionou/corrigiu
+  deviceId?: string;
+  detail?: LocalizedText;
   durationSeconds?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface OperaSyncJob {
+  id: string;
+  roomId: string | null;          // null = todos os quartos
+  direction: 'APP_TO_OPERA' | 'OPERA_TO_APP';
+  previousStatus?: RoomStatus;
+  targetStatus: RoomStatus;
+  state: SyncState;
+  attempts: number;
+  idempotencyKey: string;
+  lastError?: LocalizedText;
+  operaObservedAt?: string;
+  createdAt: string;
+  source: LocalizedText;
 }
 
 export interface RoomAlert {
   id: string;
-  timestamp: string;
+  timestamp: string;              // ISO-8601
   roomId: string;
   roomNumber: string;
+  taskId?: string;
   targetWorkerName?: string;
   targetArea?: string;
   type: 'REPROVAL' | 'RECEPTION_TRACE' | 'PRIORITY_NOTICE' | 'DND_ALERT';
-  message: string;
+  message: LocalizedText;
   acknowledged: boolean;
-  acknowledgedAt?: string;
+  acknowledgedAt?: string;        // ISO-8601
 }
 
 export interface TaskSheetCounters {
-  totalRooms: number;
-  stayoverCount: number;         // Estadias
-  departureArrivalCount: number; // Saídas com chegada
-  departureOnlyCount: number;    // Só saídas
-  refreshCount: number;          // Refreshes
-  dirtyCount: number;
-  cleanCount: number;
+  totalTasks: number;
+  stayoverCount: number;          // Estadias
+  departureArrivalCount: number;  // Saídas com chegada
+  departureOnlyCount: number;     // Só saídas
+  refreshCount: number;           // Refreshes
+  pendingCount: number;
+  inProgressCount: number;
+  completedCount: number;
+  notPerformedCount: number;
   inspectedCount: number;
   estimatedCredits: number;
 }
 
 export interface BlockTeam {
   id: string;
-  block: string;                // "Bloco A", "Bloco B", "Bloco C", "Bloco D", "Oasis Parc", "Master Villas", "Apoio & Rotativas"
-  name: string;                 // "Equipa Bloco A"
-  description: string;          // "Pisos 0, 1 e 2 - 18 quartos"
+  block: string;
+  name: string;
+  description: string;
   supervisorId?: string;
   supervisorName?: string;
-  color: string;                // "blue" | "indigo" | "violet" | "emerald" | "amber" | "rose" | "slate"
+  color: string;
 }

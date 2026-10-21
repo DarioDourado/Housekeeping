@@ -1,6 +1,39 @@
-import { Room, RoomStatus, ServiceType, RoomTypology, TaskSheet, ServiceShift, BlockTeam } from '../types/housekeeping.types';
-import { User, UserRole } from '../types/auth.types';
 import { BLOCK } from './constants';
+import { todayAt } from '@/lib/clock';
+import { operationalDate } from '@/lib/operationalDate';
+import { UserRole, type User } from '@/types/auth.types';
+import {
+  CommercialBlock,
+  InspectionStatus,
+  Movement,
+  PlanKind,
+  PlanStatus,
+  PriorityOrigin,
+  RoomStatus,
+  RoomTypology,
+  SheetRole,
+  SyncState,
+  TaskKind,
+  TaskStatus,
+  type BlockTeam,
+  type OperaSyncJob,
+  type Room,
+  type RoomAlert,
+  type RoomStay,
+  type Section,
+  type ServicePlan,
+  type ServiceTask,
+  type TaskEvent,
+  type TaskSheet
+} from '@/types/housekeeping.types';
+
+// =====================================================================================
+// MOCK DE DEMONSTRAÇÃO (Vila Vita Parc). Não é código de produção: no BE estes dados vêm
+// do Opera (quartos, estadias), da configuração (secções, equipas) e da base de dados
+// (planos, tarefas, histórico). Está na forma do contrato FE↔BE (ver 34-backend-fastapi).
+// =====================================================================================
+
+const TODAY = operationalDate();
 
 export const INITIAL_STAFF: User[] = [
   {
@@ -45,7 +78,6 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.A,
     isOnDuty: true,
     shift: 'Manhã',
-    assignedSheetId: 'sheet-6',
     phoneDeviceId: 'TEL-AREA-06'
   },
   {
@@ -57,7 +89,6 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.B,
     isOnDuty: true,
     shift: 'Manhã',
-    assignedSheetId: 'sheet-7',
     phoneDeviceId: 'TEL-AREA-07'
   },
   {
@@ -69,7 +100,6 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.C,
     isOnDuty: true,
     shift: 'Manhã',
-    assignedSheetId: 'sheet-1',
     phoneDeviceId: 'TEL-AREA-01'
   },
   {
@@ -81,7 +111,6 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.OASIS,
     isOnDuty: true,
     shift: 'Manhã',
-    assignedSheetId: 'sheet-4',
     phoneDeviceId: 'TEL-AREA-04'
   },
   {
@@ -93,7 +122,6 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.VILLAS,
     isOnDuty: true,
     shift: 'Tarde 13h30',
-    assignedSheetId: 'sheet-3',
     phoneDeviceId: 'TEL-AREA-02'
   },
   {
@@ -130,592 +158,6 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.SUPPORT,
     isOnDuty: true,
     shift: 'Geral'
-  }
-];
-
-
-export const INITIAL_ROOMS: Room[] = [
-  // BLOCO A
-  {
-    id: 'room-101',
-    number: '101',
-    block: BLOCK.A,
-    floor: 1,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.DEPARTURE_ARRIVAL,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-1',
-    isPriority: true,
-    prioritySetBy: 'Receção',
-    priorityReason: 'Chegada antecipada VIP 11:30',
-    assignedSheetId: 'sheet-1',
-    orderIndex: 0,
-    guest: {
-      guestName: 'Dr. Klaus Schmidt',
-      vipType: 'VIP 1',
-      adults: 2,
-      children: 1,
-      childAges: '1 ano e meio (Berço solicitado com urgência)',
-      arrivalEta: '11:30 (Transfer Privado Aeroporto Faro)',
-      departureEta: '10:00',
-      isLinenChangeDue: true,
-      dailyInstructions: 'Preparar berço com mosquiteiro e rosas de boas-vindas.',
-      traces: ['Receção: Colocar berço e banheira de bebé', 'Guest Relations: Carta GM no quarto'],
-      notes: 'Hóspede regular de Munique, 8ª estadia no resort.',
-      specials: ['Rosas vermelhas', 'Champanhe Vila Vita na geleira'],
-      preferences: 'Almofadas de penas, temperatura regulada a 21°C'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-102',
-    number: '102',
-    block: BLOCK.A,
-    floor: 1,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.STAYOVER,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-1',
-    isPriority: false,
-    assignedSheetId: 'sheet-1',
-    orderIndex: 1,
-    guest: {
-      guestName: 'Família Martins',
-      adults: 2,
-      children: 2,
-      childAges: '4 anos e 7 anos',
-      isLinenChangeDue: false,
-      dailyInstructions: 'Limpeza matinal após as 10:30 (família toma pequeno-almoço tardio).',
-      traces: ['Toalhas de piscina adicionais'],
-      notes: 'Estadia até sexta-feira.'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-103',
-    number: '103',
-    block: BLOCK.A,
-    floor: 1,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.CLEAN,
-    operaStatus: RoomStatus.CLEAN,
-    operaLastSyncedAt: '04:00 (Night Audit)',
-    serviceType: ServiceType.REFRESH,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-1',
-    isPriority: false,
-    assignedSheetId: 'sheet-1',
-    orderIndex: 2,
-    guest: {
-      guestName: 'Sr. Alexander Weber',
-      adults: 1,
-      children: 0,
-      arrivalEta: '15:00',
-      isLinenChangeDue: false,
-      dailyInstructions: 'Quarto limpo ontem. Fazer refresh de solo, varanda e arejamento.',
-      traces: ['Verificar água mineral fresca e máquina Nespresso']
-    },
-    operational: {
-      totalRefreshCount: 1,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-104',
-    number: '104',
-    block: BLOCK.A,
-    floor: 1,
-    typology: RoomTypology.JUNIOR_SUITE,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.DEPARTURE_ONLY,
-    turndownStatus: RoomStatus.CLEAN,
-    turndownRequired: false,
-    isPriority: false,
-    assignedSheetId: 'sheet-21', // Estacionado para amanhã conforme reunião
-    orderIndex: 3,
-    guest: {
-      guestName: 'Quarto Vago após check-out',
-      adults: 0,
-      children: 0,
-      isLinenChangeDue: true,
-      dailyInstructions: 'Saída sem chegada hoje. Pode ser feito no fim do turno ou passado para amanhã.'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-
-  // BLOCO B
-  {
-    id: 'room-201',
-    number: '201',
-    block: BLOCK.B,
-    floor: 2,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.DEPARTURE_ARRIVAL,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-1',
-    isPriority: true,
-    prioritySetBy: 'Governanta',
-    priorityReason: 'Chegada às 13:00',
-    assignedSheetId: 'sheet-7',
-    orderIndex: 0,
-    guest: {
-      guestName: 'Mme. Claire Dupont',
-      vipType: 'VIP 2',
-      adults: 2,
-      children: 0,
-      arrivalEta: '13:00',
-      departureEta: '11:00',
-      isLinenChangeDue: true,
-      dailyInstructions: 'Lua de Mel: decorar cama com cisnes de toalhas e flores do jardim.',
-      specials: ['Lua de Mel', 'Garrafa de espumante e morangos'],
-      preferences: 'Travesseiros antialérgicos'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-202',
-    number: '202',
-    block: BLOCK.B,
-    floor: 2,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.STAYOVER,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-1',
-    isPriority: false,
-    assignedSheetId: 'sheet-7',
-    orderIndex: 1,
-    guest: {
-      guestName: 'Sr. James Sterling',
-      adults: 2,
-      children: 0,
-      isLinenChangeDue: true,
-      dailyInstructions: 'Dia de Muda completa de lençóis e toalhões.',
-      traces: ['Trocar roupões de banho por tamanho L']
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-203',
-    number: '203',
-    block: BLOCK.B,
-    floor: 2,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.CLEAN,
-    operaStatus: RoomStatus.CLEAN,
-    operaLastSyncedAt: '09:10',
-    serviceType: ServiceType.STAYOVER,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-1',
-    isPriority: false,
-    assignedSheetId: 'sheet-7',
-    orderIndex: 2,
-    guest: {
-      guestName: 'Sra. Elena Ivanova',
-      adults: 1,
-      children: 0,
-      isLinenChangeDue: false,
-      dailyInstructions: 'Limpeza terminada pela Patrícia. A aguardar inspeção da governanta.'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      activeStartTime: '08:30',
-      activeEndTime: '09:10',
-      activeWorkerName: 'Patrícia Gomes',
-      lastDurationSeconds: 2400, // 40 minutos
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-
-  // BLOCO C
-  {
-    id: 'room-301',
-    number: '301',
-    block: BLOCK.C,
-    floor: 1,
-    typology: RoomTypology.JUNIOR_SUITE,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.DEPARTURE_ARRIVAL,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-2',
-    isPriority: false,
-    assignedSheetId: 'sheet-6',
-    orderIndex: 0,
-    guest: {
-      guestName: 'Mr. & Mrs. Robinson',
-      vipType: 'Repeat Guest',
-      adults: 2,
-      children: 1,
-      childAges: '5 anos (Cama extra)',
-      arrivalEta: '14:00',
-      isLinenChangeDue: true,
-      dailyInstructions: 'Instalar cama extra e kit infantil Vila Vita.'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-302',
-    number: '302',
-    block: BLOCK.C,
-    floor: 1,
-    typology: RoomTypology.STANDARD,
-    morningStatus: RoomStatus.INSPECTED,
-    operaStatus: RoomStatus.INSPECTED,
-    operaLastSyncedAt: '08:45',
-    serviceType: ServiceType.STAYOVER,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-2',
-    isPriority: false,
-    assignedSheetId: 'sheet-6',
-    orderIndex: 1,
-    guest: {
-      guestName: 'Sr. António Costa',
-      adults: 2,
-      children: 0,
-      isLinenChangeDue: false,
-      dailyInstructions: 'Inspecionado e aprovado pela Filipa às 08:45.'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      activeStartTime: '08:00',
-      activeEndTime: '08:35',
-      activeWorkerName: 'Adriana Silva',
-      lastDurationSeconds: 2100,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-
-  // OASIS PARC
-  {
-    id: 'room-501',
-    number: '501',
-    block: BLOCK.OASIS,
-    floor: 1,
-    typology: RoomTypology.SUITE,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.DEPARTURE_ARRIVAL,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-3',
-    isPriority: true,
-    prioritySetBy: 'Receção',
-    priorityReason: 'Chegada VIP Suite 14:00',
-    assignedSheetId: 'sheet-4',
-    orderIndex: 0,
-    guest: {
-      guestName: 'Família Al-Mansoor',
-      vipType: 'VVIP',
-      adults: 2,
-      children: 3,
-      childAges: '1 ano (berço), 4 anos, 8 anos',
-      arrivalEta: '14:00',
-      isLinenChangeDue: true,
-      dailyInstructions: 'Suite presidencial com terraço. Berço especial + cama extra júnior.',
-      traces: ['Receção: Fruteira exótica + champanhe Dom Pérignon', 'GM: Acompanhar entrada pessoalmente'],
-      specials: ['Aniversário da criança de 4 anos - balões e bolo infantil'],
-      preferences: 'Serviço discreto, água Fiji'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-502',
-    number: '502',
-    block: BLOCK.OASIS,
-    floor: 1,
-    typology: RoomTypology.SUITE,
-    morningStatus: RoomStatus.CLEAN,
-    operaStatus: RoomStatus.CLEAN,
-    operaLastSyncedAt: '04:00 (Night Audit)',
-    serviceType: ServiceType.REFRESH,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-3',
-    isPriority: false,
-    assignedSheetId: 'sheet-4',
-    orderIndex: 1,
-    guest: {
-      guestName: 'Lord & Lady Harrington',
-      vipType: 'VIP 1',
-      adults: 2,
-      children: 0,
-      arrivalEta: '16:30',
-      isLinenChangeDue: false,
-      dailyInstructions: 'Refresh antes da chegada das 16:30. Flores frescas e varanda arejada.'
-    },
-    operational: {
-      totalRefreshCount: 2,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-
-  // MASTER VILLAS
-  {
-    id: 'room-601',
-    number: 'Vila Atlântico',
-    block: BLOCK.VILLAS,
-    floor: 1,
-    typology: RoomTypology.VILLA,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.STAYOVER,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-3',
-    isPriority: false,
-    assignedSheetId: 'sheet-3',
-    orderIndex: 0,
-    guest: {
-      guestName: 'Sr. Henrik Lindqvist',
-      vipType: 'VVIP',
-      adults: 4,
-      children: 2,
-      childAges: '3 anos e 10 anos',
-      isLinenChangeDue: true,
-      dailyInstructions: 'Vila de 4 quartos com piscina privada e jardim. Requer equipa de 2 empregadas.',
-      traces: ['Toalhas de piscina e praia repostas no gazebo', 'Limpeza da cozinha e barbecue']
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  },
-  {
-    id: 'room-602',
-    number: 'Vila Praia',
-    block: BLOCK.VILLAS,
-    floor: 1,
-    typology: RoomTypology.VILLA,
-    morningStatus: RoomStatus.DIRTY,
-    operaStatus: RoomStatus.DIRTY,
-    operaLastSyncedAt: '08:00',
-    serviceType: ServiceType.DEPARTURE_ARRIVAL,
-    turndownStatus: RoomStatus.DIRTY,
-    turndownRequired: true,
-    turndownSheetId: 'td-3',
-    isPriority: true,
-    prioritySetBy: 'Governanta',
-    priorityReason: 'Chegada às 15:00',
-    assignedSheetId: 'sheet-3',
-    orderIndex: 1,
-    guest: {
-      guestName: 'Dra. Sofia Carvalheiro',
-      vipType: 'VIP 1',
-      adults: 2,
-      children: 0,
-      arrivalEta: '15:00',
-      departureEta: '11:00',
-      isLinenChangeDue: true,
-      dailyInstructions: 'Preparação completa para casamento amanhã.'
-    },
-    operational: {
-      totalRefreshCount: 0,
-      isDND: false,
-      isRefusedService: false
-    }
-  }
-];
-
-export const INITIAL_TASK_SHEETS: TaskSheet[] = [
-  {
-    id: 'sheet-1',
-    sheetNumber: 1,
-    title: 'Secção 01 · Bloco A Piso 1',
-    block: BLOCK.A,
-    assignedUserIds: ['user-maria'],
-    assignedUserNames: ['Maria João'],
-    roomIds: ['room-101', 'room-102', 'room-103'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  {
-    id: 'sheet-3',
-    sheetNumber: 3,
-    title: 'Secção 03 · Master Villas',
-    block: BLOCK.VILLAS,
-    assignedUserIds: ['user-extra-1', 'user-celia'],
-    assignedUserNames: ['Extra #1 (Gás Extra)', 'Célia Duarte'],
-    roomIds: ['room-601', 'room-602'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  {
-    id: 'sheet-4',
-    sheetNumber: 4,
-    title: 'Secção 04 · Oasis Parc Suites',
-    block: BLOCK.OASIS,
-    assignedUserIds: ['user-sandra'],
-    assignedUserNames: ['Sandra Ferreira'],
-    roomIds: ['room-501', 'room-502'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  {
-    id: 'sheet-6',
-    sheetNumber: 6,
-    title: 'Secção 06 · Bloco C Pisos 1-2',
-    block: BLOCK.C,
-    assignedUserIds: ['user-adriana'],
-    assignedUserNames: ['Adriana Silva (Fixa)'],
-    roomIds: ['room-301', 'room-302'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  {
-    id: 'sheet-7',
-    sheetNumber: 7,
-    title: 'Secção 07 · Bloco B Piso 2',
-    block: BLOCK.B,
-    assignedUserIds: ['user-patricia'],
-    assignedUserNames: ['Patrícia Gomes (Fixa)'],
-    roomIds: ['room-201', 'room-202', 'room-203'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  // Sheets vazias necessárias (devem permanecer visíveis conforme reunião)
-  {
-    id: 'sheet-8',
-    sheetNumber: 8,
-    title: 'Secção 08 · Bloco B Piso 1',
-    block: BLOCK.B,
-    assignedUserIds: [],
-    assignedUserNames: [],
-    roomIds: [],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  {
-    id: 'sheet-9',
-    sheetNumber: 9,
-    title: 'Secção 09 · Bloco D Ala Norte',
-    block: BLOCK.D,
-    assignedUserIds: [],
-    assignedUserNames: [],
-    roomIds: [],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.MORNING
-  },
-  // Task sheets extras para estacionar quartos (Secção 4 dos requisitos: "exemplo 22 para 20 secções")
-  {
-    id: 'sheet-21',
-    sheetNumber: 21,
-    title: 'Secção 21 [Estacionamento] · Saídas p/ Amanhã',
-    block: BLOCK.PARKING,
-    assignedUserIds: [],
-    assignedUserNames: [],
-    roomIds: ['room-104'],
-    isParkingSheet: true,
-    serviceShift: ServiceShift.MORNING,
-    notes: 'Quartos de saída sem chegada previstos para limpeza no dia seguinte.'
-  },
-  {
-    id: 'sheet-22',
-    sheetNumber: 22,
-    title: 'Secção 22 [Estacionamento] · Refreshes Pendentes',
-    block: BLOCK.PARKING,
-    assignedUserIds: [],
-    assignedUserNames: [],
-    roomIds: [],
-    isParkingSheet: true,
-    serviceShift: ServiceShift.MORNING,
-    notes: 'Quartos limpos que só serão inspecionados se houver antecipação de chegada.'
-  }
-];
-
-export const INITIAL_TURNDOWN_GROUPS: TaskSheet[] = [
-  {
-    id: 'td-1',
-    sheetNumber: 101,
-    title: 'Turndown Zona 1 · Bloco A & B (Hotel)',
-    block: 'Blocos A & B',
-    assignedUserIds: ['user-celia'],
-    assignedUserNames: ['Célia Duarte (Turno Tarde 13h30-22h)'],
-    roomIds: ['room-101', 'room-102', 'room-103', 'room-201', 'room-202', 'room-203'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.TURNDOWN,
-    notes: 'Serviço das 18h00 às 21h30. Não comunica com o Opera.'
-  },
-  {
-    id: 'td-2',
-    sheetNumber: 102,
-    title: 'Turndown Zona 2 · Bloco C & D',
-    block: 'Blocos C & D',
-    assignedUserIds: ['user-extra-2'],
-    assignedUserNames: ['Nova Admissão (Turno Noite 18h-23h)'],
-    roomIds: ['room-301', 'room-302'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.TURNDOWN,
-    notes: 'Preparação noturna com chocolates e água mineral de cabeceira.'
-  },
-  {
-    id: 'td-3',
-    sheetNumber: 103,
-    title: 'Turndown Zona 3 · Oasis Suites & Vilas',
-    block: 'Oasis & Vilas',
-    assignedUserIds: ['user-sandra'],
-    assignedUserNames: ['Sandra Ferreira'],
-    roomIds: ['room-501', 'room-502', 'room-601', 'room-602'],
-    isParkingSheet: false,
-    serviceShift: ServiceShift.TURNDOWN,
-    notes: 'Vilas e suites com recolha de cortinas e velas aromáticas exteriores.'
   }
 ];
 
@@ -777,3 +219,268 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     supervisorName: 'Dario Dourado'
   }
 ];
+
+// ---------- Quartos e estadias (Opera) ----------
+
+const room = (
+  id: string, number: string, block: string, floor: number, typology: RoomTypology,
+  operaStatus: RoomStatus, syncedAt: string, occupied: boolean
+): Room => ({
+  id, number, block, floor, typology, operaStatus,
+  operaStatusUpdatedAt: todayAt(syncedAt), commercialBlock: CommercialBlock.NONE, occupied
+});
+
+export const INITIAL_ROOMS: Room[] = [
+  room('room-101', '101', BLOCK.A, 1, RoomTypology.STANDARD, RoomStatus.DIRTY, '08:00', false),
+  room('room-102', '102', BLOCK.A, 1, RoomTypology.STANDARD, RoomStatus.DIRTY, '08:00', true),
+  room('room-103', '103', BLOCK.A, 1, RoomTypology.STANDARD, RoomStatus.CLEAN, '04:00', false),
+  room('room-104', '104', BLOCK.A, 1, RoomTypology.JUNIOR_SUITE, RoomStatus.DIRTY, '08:00', false),
+  room('room-201', '201', BLOCK.B, 2, RoomTypology.STANDARD, RoomStatus.DIRTY, '08:00', false),
+  room('room-202', '202', BLOCK.B, 2, RoomTypology.STANDARD, RoomStatus.DIRTY, '08:00', true),
+  room('room-203', '203', BLOCK.B, 2, RoomTypology.STANDARD, RoomStatus.CLEAN, '09:10', true),
+  room('room-301', '301', BLOCK.C, 1, RoomTypology.JUNIOR_SUITE, RoomStatus.DIRTY, '08:00', false),
+  room('room-302', '302', BLOCK.C, 1, RoomTypology.STANDARD, RoomStatus.INSPECTED, '08:45', true),
+  room('room-501', '501', BLOCK.OASIS, 1, RoomTypology.SUITE, RoomStatus.DIRTY, '08:00', false),
+  room('room-502', '502', BLOCK.OASIS, 1, RoomTypology.SUITE, RoomStatus.CLEAN, '04:00', false),
+  room('room-601', 'Vila Atlântico', BLOCK.VILLAS, 1, RoomTypology.VILLA, RoomStatus.DIRTY, '08:00', true),
+  room('room-602', 'Vila Praia', BLOCK.VILLAS, 1, RoomTypology.VILLA, RoomStatus.DIRTY, '08:00', false)
+];
+
+const stay = (roomId: string, movement: Movement, rest: Partial<RoomStay> & { adults: number; children: number }): RoomStay => ({
+  roomId, date: TODAY, movement, childAges: [], isLinenChangeDue: false, traces: [], specials: [], ...rest
+});
+
+export const INITIAL_STAYS: RoomStay[] = [
+  stay('room-101', Movement.DEPARTURE_ARRIVAL, {
+    guestName: 'Dr. Klaus Schmidt', vipType: 'VIP 1', adults: 2, children: 1, childAges: [1],
+    arrivalEta: '11:30 (Transfer Privado Aeroporto Faro)', departureEta: '10:00', isLinenChangeDue: true,
+    instructions: 'Preparar berço com mosquiteiro e rosas de boas-vindas. Berço solicitado com urgência (criança de 1 ano e meio).',
+    traces: ['Receção: Colocar berço e banheira de bebé', 'Guest Relations: Carta GM no quarto'],
+    notes: 'Hóspede regular de Munique, 8ª estadia no resort.',
+    specials: ['Rosas vermelhas', 'Champanhe Vila Vita na geleira'],
+    preferences: 'Almofadas de penas, temperatura regulada a 21°C'
+  }),
+  stay('room-102', Movement.STAYOVER, {
+    guestName: 'Família Martins', adults: 2, children: 2, childAges: [4, 7],
+    instructions: 'Limpeza matinal após as 10:30 (família toma pequeno-almoço tardio).',
+    traces: ['Toalhas de piscina adicionais'], notes: 'Estadia até sexta-feira.'
+  }),
+  stay('room-103', Movement.VACANT, {
+    guestName: 'Sr. Alexander Weber', adults: 1, children: 0, arrivalEta: '15:00',
+    instructions: 'Quarto limpo ontem. Fazer refresh de solo, varanda e arejamento.',
+    traces: ['Verificar água mineral fresca e máquina Nespresso']
+  }),
+  stay('room-104', Movement.DEPARTURE_ONLY, {
+    guestName: 'Quarto Vago após check-out', adults: 0, children: 0, isLinenChangeDue: true,
+    instructions: 'Saída sem chegada hoje. Pode ser feito no fim do turno ou passado para amanhã.'
+  }),
+  stay('room-201', Movement.DEPARTURE_ARRIVAL, {
+    guestName: 'Mme. Claire Dupont', vipType: 'VIP 2', adults: 2, children: 0, arrivalEta: '13:00', departureEta: '11:00',
+    isLinenChangeDue: true, instructions: 'Lua de Mel: decorar cama com cisnes de toalhas e flores do jardim.',
+    specials: ['Lua de Mel', 'Garrafa de espumante e morangos'], preferences: 'Travesseiros antialérgicos'
+  }),
+  stay('room-202', Movement.STAYOVER, {
+    guestName: 'Sr. James Sterling', adults: 2, children: 0, isLinenChangeDue: true,
+    instructions: 'Dia de Muda completa de lençóis e toalhões.', traces: ['Trocar roupões de banho por tamanho L']
+  }),
+  stay('room-203', Movement.STAYOVER, {
+    guestName: 'Sra. Elena Ivanova', adults: 1, children: 0,
+    instructions: 'Limpeza terminada pela Patrícia. A aguardar inspeção da governanta.'
+  }),
+  stay('room-301', Movement.DEPARTURE_ARRIVAL, {
+    guestName: 'Mr. & Mrs. Robinson', vipType: 'Repeat Guest', adults: 2, children: 1, childAges: [5],
+    arrivalEta: '14:00', isLinenChangeDue: true, instructions: 'Instalar cama extra e kit infantil Vila Vita.'
+  }),
+  stay('room-302', Movement.STAYOVER, {
+    guestName: 'Sr. António Costa', adults: 2, children: 0, instructions: 'Inspecionado e aprovado pela Filipa às 08:45.'
+  }),
+  stay('room-501', Movement.DEPARTURE_ARRIVAL, {
+    guestName: 'Família Al-Mansoor', vipType: 'VVIP', adults: 2, children: 3, childAges: [1, 4, 8], arrivalEta: '14:00',
+    isLinenChangeDue: true, instructions: 'Suite presidencial com terraço. Berço especial + cama extra júnior.',
+    traces: ['Receção: Fruteira exótica + champanhe Dom Pérignon', 'GM: Acompanhar entrada pessoalmente'],
+    specials: ['Aniversário da criança de 4 anos - balões e bolo infantil'], preferences: 'Serviço discreto, água Fiji'
+  }),
+  stay('room-502', Movement.VACANT, {
+    guestName: 'Lord & Lady Harrington', vipType: 'VIP 1', adults: 2, children: 0, arrivalEta: '16:30',
+    instructions: 'Refresh antes da chegada das 16:30. Flores frescas e varanda arejada.'
+  }),
+  stay('room-601', Movement.STAYOVER, {
+    guestName: 'Sr. Henrik Lindqvist', vipType: 'VVIP', adults: 4, children: 2, childAges: [3, 10], isLinenChangeDue: true,
+    instructions: 'Vila de 4 quartos com piscina privada e jardim. Requer equipa de 2 empregadas.',
+    traces: ['Toalhas de piscina e praia repostas no gazebo', 'Limpeza da cozinha e barbecue']
+  }),
+  stay('room-602', Movement.DEPARTURE_ARRIVAL, {
+    guestName: 'Dra. Sofia Carvalheiro', vipType: 'VIP 1', adults: 2, children: 0, arrivalEta: '15:00', departureEta: '11:00',
+    isLinenChangeDue: true, instructions: 'Preparação completa para casamento amanhã.'
+  })
+];
+
+// ---------- Configuração base (secções) ----------
+
+export const INITIAL_SECTIONS: Section[] = [
+  { id: 'sec-1', name: 'Secção 01 · Bloco A Piso 1', block: BLOCK.A, defaultRoomIds: ['room-101', 'room-102', 'room-103', 'room-104'], defaultStaffIds: ['user-maria'] },
+  { id: 'sec-3', name: 'Secção 03 · Master Villas', block: BLOCK.VILLAS, defaultRoomIds: ['room-601', 'room-602'], defaultStaffIds: ['user-celia'] },
+  { id: 'sec-4', name: 'Secção 04 · Oasis Parc Suites', block: BLOCK.OASIS, defaultRoomIds: ['room-501', 'room-502'], defaultStaffIds: ['user-sandra'] },
+  { id: 'sec-6', name: 'Secção 06 · Bloco C Pisos 1-2', block: BLOCK.C, defaultRoomIds: ['room-301', 'room-302'], defaultStaffIds: ['user-adriana'] },
+  { id: 'sec-7', name: 'Secção 07 · Bloco B Piso 2', block: BLOCK.B, defaultRoomIds: ['room-201', 'room-202', 'room-203'], defaultStaffIds: ['user-patricia'] },
+  { id: 'sec-8', name: 'Secção 08 · Bloco B Piso 1', block: BLOCK.B, defaultRoomIds: [], defaultStaffIds: [] },
+  { id: 'sec-9', name: 'Secção 09 · Bloco D Ala Norte', block: BLOCK.D, defaultRoomIds: [], defaultStaffIds: [] }
+];
+
+// ---------- Distribuição de hoje: plano diurno e noturno (independentes) ----------
+
+export const DAY_PLAN_ID = 'plan-day';
+export const NIGHT_PLAN_ID = 'plan-night';
+
+export const INITIAL_PLANS: ServicePlan[] = [
+  { id: DAY_PLAN_ID, operationalDate: TODAY, kind: PlanKind.DAY, status: PlanStatus.ACTIVE },
+  { id: NIGHT_PLAN_ID, operationalDate: TODAY, kind: PlanKind.NIGHT, status: PlanStatus.ACTIVE }
+];
+
+const lead = (staffId: string) => ({ staffId, role: SheetRole.LEAD });
+const member = (staffId: string) => ({ staffId, role: SheetRole.MEMBER });
+
+const sheet = (
+  id: string, planId: string, number: number, title: string, block: string,
+  extra: Partial<TaskSheet> = {}
+): TaskSheet => ({ id, planId, number, title, block, isReserve: false, assignments: [], ...extra });
+
+export const INITIAL_TASK_SHEETS: TaskSheet[] = [
+  sheet('sheet-1', DAY_PLAN_ID, 1, 'Secção 01 · Bloco A Piso 1', BLOCK.A, { sectionId: 'sec-1', assignments: [lead('user-maria')] }),
+  sheet('sheet-3', DAY_PLAN_ID, 3, 'Secção 03 · Master Villas', BLOCK.VILLAS, { sectionId: 'sec-3', assignments: [lead('user-extra-1'), member('user-celia')] }),
+  sheet('sheet-4', DAY_PLAN_ID, 4, 'Secção 04 · Oasis Parc Suites', BLOCK.OASIS, { sectionId: 'sec-4', assignments: [lead('user-sandra')] }),
+  sheet('sheet-6', DAY_PLAN_ID, 6, 'Secção 06 · Bloco C Pisos 1-2', BLOCK.C, { sectionId: 'sec-6', assignments: [lead('user-adriana')] }),
+  sheet('sheet-7', DAY_PLAN_ID, 7, 'Secção 07 · Bloco B Piso 2', BLOCK.B, { sectionId: 'sec-7', assignments: [lead('user-patricia')] }),
+  // - Sheets vazias têm de continuar visíveis (reunião §6.4)
+  sheet('sheet-8', DAY_PLAN_ID, 8, 'Secção 08 · Bloco B Piso 1', BLOCK.B, { sectionId: 'sec-8' }),
+  sheet('sheet-9', DAY_PLAN_ID, 9, 'Secção 09 · Bloco D Ala Norte', BLOCK.D, { sectionId: 'sec-9' }),
+  sheet('sheet-21', DAY_PLAN_ID, 21, 'Secção 21 [Estacionamento] · Saídas p/ Amanhã', BLOCK.PARKING, {
+    isReserve: true, notes: 'Quartos de saída sem chegada previstos para limpeza no dia seguinte.'
+  }),
+  sheet('sheet-22', DAY_PLAN_ID, 22, 'Secção 22 [Estacionamento] · Refreshes Pendentes', BLOCK.PARKING, {
+    isReserve: true, notes: 'Quartos limpos que só serão inspecionados se houver antecipação de chegada.'
+  }),
+  sheet('td-1', NIGHT_PLAN_ID, 101, 'Turndown Zona 1 · Bloco A & B (Hotel)', 'Blocos A & B', {
+    assignments: [lead('user-celia')], notes: 'Serviço das 18h00 às 21h30. Não comunica com o Opera.'
+  }),
+  sheet('td-2', NIGHT_PLAN_ID, 102, 'Turndown Zona 2 · Bloco C & D', 'Blocos C & D', {
+    assignments: [lead('user-extra-2')], notes: 'Preparação noturna com chocolates e água mineral de cabeceira.'
+  }),
+  sheet('td-3', NIGHT_PLAN_ID, 103, 'Turndown Zona 3 · Oasis Suites & Vilas', 'Oasis & Vilas', {
+    assignments: [lead('user-sandra')], notes: 'Vilas e suites com recolha de cortinas e velas aromáticas exteriores.'
+  })
+];
+
+const MOVEMENT_OF = new Map(INITIAL_STAYS.map(s => [s.roomId, s.movement]));
+
+const task = (
+  roomId: string, sheetId: string, orderIndex: number, kind: TaskKind,
+  extra: Partial<ServiceTask> = {}
+): ServiceTask => ({
+  id: `task-${roomId.replace('room-', '')}-${kind.toLowerCase()}`,
+  planId: sheetId.startsWith('td-') ? NIGHT_PLAN_ID : DAY_PLAN_ID,
+  sheetId, roomId, kind,
+  movement: MOVEMENT_OF.get(roomId) ?? Movement.VACANT,
+  status: TaskStatus.PENDING,
+  isPriority: false,
+  orderIndex,
+  inspectionStatus: kind === TaskKind.CLEANING ? InspectionStatus.PENDING : InspectionStatus.NOT_REQUIRED,
+  executorIds: [],
+  onBehalfOfTeam: false,
+  ...extra
+});
+
+const completed = (workerId: string, from: string, to: string, seconds: number): Partial<ServiceTask> => ({
+  status: TaskStatus.COMPLETED, startedAt: todayAt(from), finishedAt: todayAt(to), durationSeconds: seconds,
+  startedById: workerId, executorIds: [workerId]
+});
+
+const priority = (origin: PriorityOrigin, reason: string): Partial<ServiceTask> => ({
+  isPriority: true, priorityOrigin: origin, priorityReason: reason
+});
+
+const NIGHT_ROOMS: Record<string, string[]> = {
+  'td-1': ['room-101', 'room-102', 'room-103', 'room-201', 'room-202', 'room-203'],
+  'td-2': ['room-301', 'room-302'],
+  'td-3': ['room-501', 'room-502', 'room-601', 'room-602']
+};
+
+export const INITIAL_TASKS: ServiceTask[] = [
+  // Plano diurno
+  task('room-101', 'sheet-1', 0, TaskKind.CLEANING, priority(PriorityOrigin.RECEPTION, 'Chegada antecipada VIP 11:30')),
+  task('room-102', 'sheet-1', 1, TaskKind.CLEANING),
+  task('room-103', 'sheet-1', 2, TaskKind.REFRESH),
+  task('room-104', 'sheet-21', 0, TaskKind.CLEANING),
+  task('room-201', 'sheet-7', 0, TaskKind.CLEANING, priority(PriorityOrigin.HOUSEKEEPING, 'Chegada às 13:00')),
+  task('room-202', 'sheet-7', 1, TaskKind.CLEANING),
+  task('room-203', 'sheet-7', 2, TaskKind.CLEANING, completed('user-patricia', '08:30', '09:10', 2400)),
+  task('room-301', 'sheet-6', 0, TaskKind.CLEANING),
+  task('room-302', 'sheet-6', 1, TaskKind.CLEANING, { ...completed('user-adriana', '08:00', '08:35', 2100), inspectionStatus: InspectionStatus.APPROVED }),
+  task('room-501', 'sheet-4', 0, TaskKind.CLEANING, priority(PriorityOrigin.RECEPTION, 'Chegada VIP Suite 14:00')),
+  task('room-502', 'sheet-4', 1, TaskKind.REFRESH),
+  task('room-601', 'sheet-3', 0, TaskKind.CLEANING),
+  task('room-602', 'sheet-3', 1, TaskKind.CLEANING, priority(PriorityOrigin.HOUSEKEEPING, 'Chegada às 15:00')),
+  // Plano noturno (turndown): tarefas próprias dos mesmos quartos
+  ...Object.entries(NIGHT_ROOMS).flatMap(([sheetId, roomIds]) =>
+    roomIds.map((roomId, index) => task(roomId, sheetId, index, TaskKind.TURNDOWN))
+  )
+];
+
+// ---------- Histórico, Opera e alertas ----------
+
+const SYSTEM = { registeredById: 'system-opera', registeredByName: 'Opera Cloud OHIP', registeredByRole: 'PMS Sync', executorIds: [], onBehalfOfTeam: false };
+
+const byUser = (userId: string, name: string, role: string, onBehalf = false) => ({
+  registeredById: userId, registeredByName: name, registeredByRole: role, executorIds: [userId], onBehalfOfTeam: onBehalf
+});
+
+export const INITIAL_EVENTS: TaskEvent[] = [
+  { id: 'ev-seed-9', occurredAt: todayAt('08:45'), type: 'INSPECTION_APPROVED', roomId: 'room-302', roomNumber: '302', taskId: 'task-302-cleaning',
+    ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), executorIds: [], supervisorId: 'user-filipa',
+    detail: { key: 'events.inspectionApproved', params: { name: 'Filipa Mendes' } } },
+  { id: 'ev-seed-8', occurredAt: todayAt('08:35'), type: 'ROOM_FINISHED', roomId: 'room-302', roomNumber: '302', taskId: 'task-302-cleaning',
+    ...byUser('user-adriana', 'Adriana Silva', 'housekeeper'), durationSeconds: 2100,
+    detail: { key: 'events.roomFinished', params: { name: 'Adriana Silva', minutes: 35 } } },
+  { id: 'ev-seed-7', occurredAt: todayAt('08:00'), type: 'ROOM_STARTED', roomId: 'room-302', roomNumber: '302', taskId: 'task-302-cleaning',
+    ...byUser('user-adriana', 'Adriana Silva', 'housekeeper'), detail: { key: 'events.roomStarted', params: { name: 'Adriana Silva' } } },
+  { id: 'ev-seed-6', occurredAt: todayAt('09:10'), type: 'ROOM_FINISHED', roomId: 'room-203', roomNumber: '203', taskId: 'task-203-cleaning',
+    ...byUser('user-patricia', 'Patrícia Gomes', 'housekeeper'), durationSeconds: 2400,
+    detail: { key: 'events.roomFinished', params: { name: 'Patrícia Gomes', minutes: 40 } } },
+  { id: 'ev-seed-5', occurredAt: todayAt('08:30'), type: 'ROOM_STARTED', roomId: 'room-203', roomNumber: '203', taskId: 'task-203-cleaning',
+    ...byUser('user-patricia', 'Patrícia Gomes', 'housekeeper'), detail: { key: 'events.roomStarted', params: { name: 'Patrícia Gomes' } } },
+  { id: 'ev-seed-1', occurredAt: todayAt('08:00'), type: 'OPERA_SYNC_PULL', roomId: 'room-101', roomNumber: '101', ...SYSTEM, detail: { key: 'events.seedPull' } },
+  // - refreshes de dias anteriores: a contagem por quarto sai dos eventos, não de um contador guardado
+  { id: 'ev-hist-3', occurredAt: todayAt('15:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-502', roomNumber: '502', ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } },
+  { id: 'ev-hist-2', occurredAt: todayAt('11:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-502', roomNumber: '502', ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } },
+  { id: 'ev-hist-1', occurredAt: todayAt('15:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-103', roomNumber: '103', ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } }
+];
+
+const job = (
+  id: string, roomId: string | null, direction: OperaSyncJob['direction'], previous: RoomStatus, target: RoomStatus,
+  at: string, sourceKey: string
+): OperaSyncJob => ({
+  id, roomId, direction, previousStatus: previous, targetStatus: target, state: SyncState.CONFIRMED, attempts: 1,
+  idempotencyKey: `seed-${id}`, createdAt: todayAt(at), operaObservedAt: todayAt(at), source: { key: sourceKey }
+});
+
+export const INITIAL_SYNC_JOBS: OperaSyncJob[] = [
+  job('job-seed-4', 'room-302', 'APP_TO_OPERA', RoomStatus.CLEAN, RoomStatus.INSPECTED, '08:45', 'opera.source.inspectionApproved'),
+  job('job-seed-3', 'room-302', 'APP_TO_OPERA', RoomStatus.DIRTY, RoomStatus.CLEAN, '08:35', 'opera.source.cleanFinished'),
+  job('job-seed-2', 'room-203', 'APP_TO_OPERA', RoomStatus.DIRTY, RoomStatus.CLEAN, '09:10', 'opera.source.cleanFinished'),
+  job('job-seed-1', 'room-101', 'OPERA_TO_APP', RoomStatus.DIRTY, RoomStatus.DIRTY, '08:00', 'opera.source.openDay')
+];
+
+export const INITIAL_ALERTS: RoomAlert[] = [
+  {
+    id: 'alt-init-1',
+    timestamp: todayAt('08:15'),
+    roomId: 'room-101',
+    roomNumber: '101',
+    targetWorkerName: 'Maria João',
+    targetArea: BLOCK.A,
+    type: 'RECEPTION_TRACE',
+    message: { key: 'alerts.seedTrace', params: { number: '101' } },
+    acknowledged: false
+  }
+];
+

@@ -1,85 +1,50 @@
-import { User, AuthResponse, LoginFormData } from '../../../types/auth.types';
-import { INITIAL_STAFF } from '../../../config/hotelData';
+import { localServer } from '@/services/local-api/server';
+import type { AuthResponse, LoginFormData, User } from '@/types/auth.types';
 
-const STORAGE_USERS_KEY = 'vvp_hk_staff_users';
-const STORAGE_CURRENT_USER_KEY = 'vvp_hk_current_user';
+// - Sessão de demonstração: guarda só o id do utilizador. Com o BE: access token em memória + refresh em cookie
+//   httpOnly (08-auth); nunca tokens em localStorage.
+const SESSION_KEY = 'vvp_hk_session_v2';
+
+const readSessionUserId = (): string | null => {
+  try {
+    return localStorage.getItem(SESSION_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export class InvalidCredentialsError extends Error {
+  constructor() {
+    super('login.errors.invalidCredentials');
+  }
+}
 
 export const authTransporter = {
-  /**
-   * Obtém a lista atual de utilizadores do hotel (fixas, rotativas, extras, etc.)
-   */
-  getUsers: async (): Promise<User[]> => {
-    if (typeof window === 'undefined') return INITIAL_STAFF;
-    const stored = localStorage.getItem(STORAGE_USERS_KEY);
-    if (!stored) {
-      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(INITIAL_STAFF));
-      return INITIAL_STAFF;
-    }
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return INITIAL_STAFF;
-    }
-  },
-
-  /**
-   * Salva/atualiza lista de utilizadores
-   */
-  saveUsers: async (users: User[]): Promise<User[]> => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
-    }
-    return users;
-  },
-
-  /**
-   * Login do utilizador
-   */
+  // - ponytail: demonstração aceita qualquer password para um utilizador existente; o BE valida (argon2) e devolve 401
   login: async (credentials: LoginFormData): Promise<AuthResponse> => {
-    const users = await authTransporter.getUsers();
-    // Procura por email ou ID ou área
-    const matched = users.find(u => 
-      u.email.toLowerCase() === credentials.email.toLowerCase() ||
-      u.id.toLowerCase() === credentials.email.toLowerCase() ||
-      (credentials.areaBlock && u.assignedArea?.toLowerCase().includes(credentials.areaBlock.toLowerCase()))
-    ) || users[0];
+    const wanted = credentials.email.toLowerCase();
+    const matched = localServer.query().staff.find(user => user.email.toLowerCase() === wanted || user.id.toLowerCase() === wanted);
+    if (!matched) throw new InvalidCredentialsError();
 
-    const tokens = {
-      accessToken: `jwt_vvp_${matched.id}_${Date.now()}`,
-      refreshToken: `refresh_vvp_${matched.id}`,
-      expiresIn: 3600
-    };
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_CURRENT_USER_KEY, JSON.stringify(matched));
-    }
-
+    localStorage.setItem(SESSION_KEY, matched.id);
     return {
       user: matched,
-      tokens
+      tokens: { accessToken: `demo-${matched.id}`, refreshToken: `demo-refresh-${matched.id}`, expiresIn: 3600 }
     };
   },
 
-  /**
-   * Logout
-   */
   logout: async (): Promise<void> => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_CURRENT_USER_KEY);
-    }
+    localStorage.removeItem(SESSION_KEY);
   },
 
-  /**
-   * Obter utilizador atual
-   */
   getCurrentUser: async (): Promise<User | null> => {
-    if (typeof window === 'undefined') return INITIAL_STAFF[0];
-    const stored = localStorage.getItem(STORAGE_CURRENT_USER_KEY);
-    if (!stored) return INITIAL_STAFF[0];
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return INITIAL_STAFF[0];
-    }
+    const sessionId = readSessionUserId();
+    return localServer.query().staff.find(user => user.id === sessionId) ?? null;
+  },
+
+  setSession: async (userId: string): Promise<User | null> => {
+    const user = localServer.query().staff.find(candidate => candidate.id === userId) ?? null;
+    if (user) localStorage.setItem(SESSION_KEY, user.id);
+    return user;
   }
 };

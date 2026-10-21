@@ -72,15 +72,64 @@
 - [x] Regra 17 em `20-rules` e linha em `instructions/core.md`: alterar types/transporters/constants ⇒ atualizar skill 34.
 - [x] Corrigido: `.agents` normalizado para LF + `.gitattributes` (o `core.autocrlf` do Windows partia o gerador); `npm test` passa a usar `--environment jsdom`; `corpus.test.ts` 35→36 módulos.
 
-### Task 4: Stack do FE conforme `.agents` — PENDENTE (requer revisão do contrato da Task 3)
+### Task 4: Stack do FE conforme `.agents` (aprovada em 2026-10-21)
 
-- [ ] Instalar TanStack Query, React Router, axios, i18next, Vitest, Testing Library.
-- [ ] Migrar imports `../../` para `@/`.
-- [ ] Partir `HousekeepingContext` (988 linhas) em hooks por domínio + transporters HTTP com `schema.parse`.
-- [ ] i18n real (remover ~195 textos hardcoded), ErrorBoundary, ConfirmDialog, 4 estados de UI.
-- [ ] Permissões por perfil (matriz §11) em vez de roles hardcoded.
-- [ ] Páginas em `pages/`, rotas lazy, login split-screen (Theme.txt).
-- [ ] Componentes > 200 linhas divididos; `ConfigurationPage` ligada ou removida.
+Regra de execução: cada sub-tarefa termina verde (`npx tsc --noEmit`, `npm run lint`, `npm test`, `npm run build`) antes de começar a seguinte. Dados continuam num adaptador local (localStorage) **atrás do transporter**; o BE troca só o transporter.
+
+**4.1 Ferramentas** — Files: `package.json`, `eslint.config.mjs`, `vitest.config.ts`, `tests/setup.ts`; apagar `.eslintrc.json`
+- [x] Instalar `@tanstack/react-query`, `react-router-dom`, `axios`, `i18next`, `react-i18next`; dev: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `typescript-eslint`.
+- [x] ESLint com `typescript-eslint`; regras: `no-explicit-any`, `no-console`, `no-restricted-imports` (`../../*`), sem default export fora de config. `npm run lint` corre sem erros de parsing.
+- [x] Vitest (jsdom, alias `@`, setup jest-dom); scripts `test`, `test:run`; um teste de fumo passa.
+
+**4.2 Imports `@/`** — todos os `../../` e `../` entre pastas de topo passam a `@/`.
+- [x] Migração mecânica (124 imports em 40 ficheiros); `tsc`, `lint`, `test` e `build` verdes; regra `no-restricted-imports` em `error`.
+  - Nota 4.1: `@types/node` subiu para 24 (exigido pelo vitest 5); `no-unused-vars`, `no-explicit-any` e default-export em `warn` até 4.5/4.6/4.8.
+
+**4.3 Fundações de UI e permissões** — Files: `UI/components/feedback/ErrorBoundary`, `UI/components/feedback/ConfirmDialog`, `lib/queryClient.ts`, `hooks/auth/usePermission.ts`
+- [x] `ErrorBoundary` no root; `ConfirmDialog` acessível (foco, Esc); `QueryClientProvider` no root.
+- [x] `usePermission(permission)` sobre `ROLE_PERMISSIONS`; substituir as 42 comparações com `UserRole.X` na UI. Teste: perfis × permissões confirmadas.
+- [x] Ações destrutivas sem confirmação (remover colaborador no StaffManager, recarregar pré-definição) passam por `ConfirmDialog` via `useConfirm`. Verificado no browser (foco em Cancelar, Esc fecha).
+  - Nota: das 42 ocorrências de `UserRole.X`, só 4 eram decisões de autorização (RoomCard, RoomDetailModal, MobileView); o resto são opções de `<select>`/rótulos e ficam. Efeito da matriz §11: empregadas deixam de ver o botão de prioridade; escritório deixa de ver "reabrir a Dirty" (§8.3 só confirma governantas) — rever com a equipa.
+  - Nota: tsconfig target/lib → ES2022 (`.at()` do useFocusTrap).
+
+**4.4 i18n real** — Files: `lang/i18n.config.ts`, `lang/pt.json`, `lang/en.json`; remover `hooks/i18n` e `lang/i18n.ts` antigos
+- [x] `react-i18next` com `LanguageDetector` (09-i18n), `lang/pt.json` + `lang/en.json`, chaves `domínio.grupo.chave`; `lang/i18n.config.ts` carregado em `main.tsx` e nos testes.
+- [x] 16 componentes + `app/page.tsx` + `App.tsx` extraídos (Navbar, MoveRoom, Inspection, OperaSync, Audit, Credits, Chat, Turndown, Mobile, RoomCard, RoomDetail, TaskSheetColumn, StaffManager, BlockTeamRosterBar, TeamManagerModal, CollaboratorDirectoryTab); scanner sem textos hardcoded restantes.
+- [x] `lang/lang.test.ts`: mesmas chaves pt/en, sem vazios, mesmas variáveis `{{}}`, **todas as chaves `t('…')` usadas no código existem** (red-green verificado), chaves dinâmicas (`roles.*`, `teamColors.*`). Percurso no browser em PT e EN sem chaves a vazar.
+- [ ] Pendente (fora da 4.4): `ConfigurationPage` (traduz-se ao dividi-lo na 4.6); textos gerados em contexto/transporters (eventos `Início de serviço às…`, canais de chat, seed) passam a estruturados na 4.5.
+  - Notas: DRY `lib/credits.ts` (créditos) e `lib/staffBlock.ts` (bloco do utilizador); turndown deixou de mostrar "(Clean)/(Dirty)" (§10.6); matriz de créditos lê `CREDIT_TABLE` (refresh da Villa passa a 0,5 como no cálculo); favicon da marca.
+
+**4.5 Dados: API local + transporters + React Query** — remove `context/HousekeepingContext.tsx` (988 linhas: regras + persistência + UI misturadas)
+
+Fase A (mesmo modelo de domínio; troca de arquitetura):
+- [x] **A1 Tipos:** timestamps passam a ISO-8601 (contrato §2); textos gerados deixam de ser frases PT guardadas e passam a `LocalizedText {key, params}` (eventos, alertas, logs Opera, toasts); novos tipos de evento `ROOM_REOPENED`, `TURNDOWN_UPDATED`, `STAFF_MOVED` (hoje reabrir/turndown/mover pessoa são registados com tipos errados). `lib/datetime.ts` formata com `Intl`.
+- [x] **A2 Schemas Zod** (`types/housekeeping.schemas.ts`, `auth`) alinhados com os tipos; usados no transporter (`schema.parse`, 20-rules #7). Seed passa a ISO e sai do transporter para `config/hotelData.ts`.
+- [x] **A3 API local** (`services/local-api/`): regras como funções puras `(estado, args, {actor, now}) → estado`, uma por comando, com testes (CLEAN ao terminar; DND/recusa ≠ limpo; turndown não toca no Opera; reprovar mantém CLEAN + alerta; inspeção → INSPECTED; mover/fundir sheets; night audit; prioridade; mover pessoa). É o que o BE FastAPI vai implementar.
+- [x] **A4 Transporters** API-shaped (`housekeeping`, `staff`, `auth`, `chat`) sobre o store local (localStorage) com `schema.parse`; `_queryKeys.ts`; `calculateCounters`/`calculateRoomCredits` em `lib/`.
+- [x] **A5 Hooks** (1 por ficheiro, <100 linhas): queries (`useRooms`, `useTaskSheets`, `useEvents`…) e mutações (`useStartRoom`, `useFinishRoom`, …) com invalidação; estado de UI cliente (arrastar, toast) em Zustand (`store/uiStore.ts`).
+- [x] **A6 Migração dos componentes** (14 ficheiros) para os hooks; `HousekeepingContext` e `useHousekeeping` apagados; `AuthContext` só com sessão; `ChatDrawer` deixa de chamar o transporter diretamente.
+- [x] **A7 Verificação:** `tsc` 0 erros; `lint` 0 erros (82 avisos de `no-unused-vars`/`any` a limpar na 4.8); 53 testes; `build` ok; percurso real no browser com 16 asserções (iniciar→terminar→Opera, mover quarto com toast e coluna, turndown independente, auditoria traduzida, persistência com validação Zod, night audit, reset com confirmação, 0 erros de consola).
+  - Resultado: `HousekeepingContext` (988 linhas) apagado; regras em `services/local-api` (19 comandos puros, 27 testes), 36 hooks de 1 ficheiro, `store/uiStore` (Zustand) para arrastar/toast, `AuthContext` só com sessão.
+  - Bugs encontrados e corrigidos ao extrair as regras (ver contrato 0.2): reabrir a Dirty era registado como prioridade e não escrevia no Opera; turndown era registado como `ROOM_FINISHED`; recomeçar uma limpeza herdava o fim anterior (não dava para terminar); largar um quarto numa posição não reordenava; mover quarto de bloco deixava `assignedSheetId` inconsistente; eliminar pessoa deixava ids pendurados nas sheets; seeds com horas `HH:mm` em campos ISO (`Invalid Date`).
+  - Fora desta fase: `chatTransporter` (Fase 2 do requisito) mantém-se tal como estava, agora atrás de hooks; `ConfigurationPage` só trocou os hooks (traduz-se/divide-se na 4.6).
+
+Fase B (contrato) — decisões: `hotelData.ts` continua a ser o mock/seed, agora em forma de contrato; a UI deixa de ler "quartos com estado" e passa a ler **tarefas** (`TaskView` = tarefa + quarto + estadia + sheet + executores), que é o que um cartão realmente representa.
+- [x] **B1 Tipos e schemas do contrato** (`types/housekeeping.types.ts` reescrito): `Room` (físico, Opera), `RoomStay`, `Section`, `ServicePlan`, `TaskSheet` (+ atribuições), `ServiceTask`, `TaskEvent` (registador/executor/supervisor), `OperaSyncJob`; enums `Movement`, `TaskKind`, `PlanKind`, `TaskStatus`, `NotPerformedReason`, `InspectionStatus`, `CommercialBlock`, `PriorityOrigin`, `SyncState`. `operationalDate()` com o fecho às 02h.
+- [x] **B2 Seed** em `config/hotelData.ts` na forma do contrato (13 quartos → quartos + estadias + secções + plano diurno e noturno + tarefas + eventos + jobs).
+- [x] **B3 Comandos** (testes primeiro): `startTask`, `finishTask`, `inspectTask`, `requestCorrection`, `completeCorrection`, `reopenRoom`, `recordRefresh`, `recordNotPerformed` (DND/recusa), `togglePriority`, `moveTask`, `mergeSheets`, `assignStaffToSheet`, `openPlan`, `receiveOperaStatus`, `retryOperaJob`, `triggerNightAudit`, … Regras novas: tarefas independentes por tipo (CT-13/14), DND ≠ concluído (CT-10/11), executor ≠ registador, Opera: estado mais recente nunca é sobrescrito → job `CONFLICT` (CT-20), abrir dia a partir das secções sem as alterar (CT-01).
+- [x] **B4 Camada de dados**: store/server/transporters/query keys/hooks; `lib/taskViews.ts` (junta tarefa+quarto+estadia+sheet+executores) e `useTaskViews(kind)`; créditos e contadores sobre tarefas.
+- [x] **B5 Componentes** migrados para `TaskView` (cartão, detalhe, coluna, turndown, mobile, auditoria, Opera por jobs).
+- [x] **B6 Verificação**: `tsc`, `lint`, testes, build e percurso no browser; contrato 0.3. Resultado: 103 testes (49 comandos, 8 de rotas/páginas com red-green por mutação), `tsc`/`lint` sem erros nem avisos, build ok; browser: login/validação/credenciais inválidas, 6 rotas, logout, permissões (empregada sem Configuração), empregada inicia→termina 102 → governanta aprova (Inspecionado), painéis Opera/Créditos/Equipas/Chat abrem e fecham com Esc, 0 erros de consola.
+
+**4.6 Páginas, rotas e componentes** — Files: `pages/`, `routes/`, `UI/containers/`
+- [x] `app/page.tsx` → `pages/Planning`, `pages/Turndown`, `pages/Live`, `pages/Audit`, `pages/Settings`, `pages/Login` (split-screen Theme.txt), rotas lazy + `ProtectedRoute`.
+- [x] 4 estados de UI (loading/error/empty/success) em cada página (`PageStates`; Settings delega nas abas).
+- [x] Componentes > 200 linhas divididos (nenhum componente passa de 200; `services/local-api/executionCommands.ts` tem 343 e divide-se na 4.8). `ConfigurationPage` (1537 linhas) substituída por `pages/Settings`: secções (CRUD, base permanente), quartos só de leitura (Opera) e atalhos para equipas/pessoal; permissão `config.zones`.
+- [x] Sem `export default` na app; `'use client'` removido. Rotas em `routes/` (`ROUTES` em `config/constants.ts`), `UI/containers/{AppLayout,Overlays,ToastHost}`; login sem sessão implícita; `app/` e `types/components|pages` apagados.
+
+**4.7 Tema residual** — [ ] `shadow-*`, cores cruas e `type=checkbox` revistos nos componentes; sem classes fora do sistema.
+
+**4.8 Fecho** — [ ] contrato (`domain-contract.md`) reconciliado com o FE; changelog atualizado; verificação completa.
 
 ### Task 5: BE MVP FastAPI — PENDENTE
 

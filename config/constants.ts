@@ -4,6 +4,9 @@ import { UserRole } from '@/types/auth.types';
 // - Constantes globais da app (não são dados de demonstração; ver hotelData.ts para seed).
 // - Valores marcados PENDENTE vêm da reunião como exemplos, não como regra aprovada.
 
+// - roomNumber de eventos/logs que abrangem todos os quartos
+export const ALL_ROOMS = 'ALL';
+
 export const BLOCK = {
   A: 'Bloco A',
   B: 'Bloco B',
@@ -24,6 +27,7 @@ export const OPERATIONAL_BLOCKS: readonly BlockName[] = [
 export const SHIFT = {
   MORNING: 'Manhã',
   AFTERNOON: 'Tarde 13h30',
+  TURNDOWN: 'Turndown',
   GENERAL: 'Geral',
 } as const;
 
@@ -58,6 +62,9 @@ export const CREDIT_TABLE: Record<RoomTypology, { stayover: number; departure: n
   [RoomTypology.VILLA]: { stayover: 3, departure: 6 },
 };
 export const REFRESH_CREDITS = 0.5;
+// - PENDENTE: meta de 12 créditos/dia e ~30 min por crédito são exemplos da reunião (§15.3)
+export const DAILY_CREDIT_TARGET = 12;
+export const MINUTES_PER_CREDIT = 30;
 
 export type Permission =
   | 'rooms.viewAll'
@@ -93,3 +100,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
   ],
   [UserRole.RECEPTION]: ['priority.reorder', 'messages.send'],
 };
+
+// - Rotas da aplicação (fonte única; navbar e router usam isto)
+export const ROUTES = {
+  PLANNING: '/',
+  TURNDOWN: '/turndown',
+  LIVE: '/live',
+  AUDIT: '/audit',
+  SETTINGS: '/settings',
+  MOBILE: '/mobile',
+  LOGIN: '/login',
+} as const;

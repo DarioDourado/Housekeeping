@@ -46,13 +46,13 @@ export const Navbar = () => {
         <div className="flex items-center gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-1">
             <button onClick={() => openPanel('opera')} className={ghostButton} title={t('navbar.operaSyncTitle')} aria-label={t('navbar.operaSync')}>
-              <Server className="w-3.5 h-3.5 text-blue-600" /><span className="hidden 2xl:inline">{t('navbar.operaSync')}</span>
+              <Server className="w-3.5 h-3.5 text-blue-600" /><span className="hidden min-[1800px]:inline">{t('navbar.operaSync')}</span>
             </button>
             <button onClick={() => openPanel('credits')} className={ghostButton} title={t('navbar.creditsTitle')} aria-label={t('navbar.credits')}>
-              <Award className="w-3.5 h-3.5 text-purple-600" /><span className="hidden 2xl:inline">{t('navbar.credits')}</span>
+              <Award className="w-3.5 h-3.5 text-purple-600" /><span className="hidden min-[1800px]:inline">{t('navbar.credits')}</span>
             </button>
             <button onClick={() => openPanel('team')} className={ghostButton} title={t('navbar.teamManagerTitle')} aria-label={t('navbar.teamManager')}>
-              <Users className="w-3.5 h-3.5 text-emerald-600" /><span className="hidden 2xl:inline">{t('navbar.teamManager')}</span>
+              <Users className="w-3.5 h-3.5 text-emerald-600" /><span className="hidden min-[1800px]:inline">{t('navbar.teamManager')}</span>
             </button>
             <button onClick={() => openPanel('chat')} className={iconButton} title={t('navbar.chatTitle')} aria-label={t('navbar.chat')}>
               <MessageSquare className="w-4 h-4" />

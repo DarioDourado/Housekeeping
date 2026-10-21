@@ -127,7 +127,7 @@ Fase B (contrato) — decisões: `hotelData.ts` continua a ser o mock/seed, agor
 - [x] Componentes > 200 linhas divididos (nenhum componente passa de 200; `services/local-api/executionCommands.ts` tem 343 e divide-se na 4.8). `ConfigurationPage` (1537 linhas) substituída por `pages/Settings`: secções (CRUD, base permanente), quartos só de leitura (Opera) e atalhos para equipas/pessoal; permissão `config.zones`.
 - [x] Sem `export default` na app; `'use client'` removido. Rotas em `routes/` (`ROUTES` em `config/constants.ts`), `UI/containers/{AppLayout,Overlays,ToastHost}`; login sem sessão implícita; `app/` e `types/components|pages` apagados.
 
-**4.7 Tema residual** — [ ] `shadow-*`, cores cruas e `type=checkbox` revistos nos componentes; sem classes fora do sistema.
+**4.7 Tema residual** — [x] Revisto: `shadow-*` já resolvem para as sombras difusas do tema (`--shadow-*`) e ficam a zero no dark; os `type=checkbox` são estilizados globalmente como squircle da marca (regra em `index.css`, não há nativos). Cores: o tema só tinha 400/500 de emerald/red/amber, o resto vinha dos defaults do Tailwind (rose, purple, indigo, sky, cyan, stone, orange). Agora há escalas completas derivadas dos tokens do Theme.txt (emerald/red/amber + purple/indigo do sistema Apple) e aliases (rose→red, orange→amber, green→emerald, sky/cyan→blue, stone→slate). `config/theme.test.ts` falha se um componente usar famílias fora do tema ou cores cruas (red-green verificado com `pink-500` e `#123456`). Navbar sem overflow a 1280/1600/1920 px; verificado em light e dark.
 
 **4.8 Fecho** — [ ] contrato (`domain-contract.md`) reconciliado com o FE; changelog atualizado; verificação completa.
 

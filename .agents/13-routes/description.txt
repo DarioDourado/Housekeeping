@@ -1,0 +1,1 @@
+React Router configuration with lazy loading, protected routes, and RBAC. Load when setting up routing, adding new pages, or implementing navigation.

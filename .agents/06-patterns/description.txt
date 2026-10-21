@@ -1,0 +1,1 @@
+Code patterns and templates for Pages, Hooks, Transporters, Components, Containers. Load when creating any new file or implementing features.

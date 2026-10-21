@@ -1,0 +1,538 @@
+
+Com base no manual de normas da Vila Vita Parc, aqui está um resumo estruturado para facilitar a criação do seu tema em React (usando bibliotecas como Tailwind, Styled Components ou Material UI):
+
+🎨 Paleta de Cores (Theming)
+A identidade visual é centrada em um tom de azul turquesa/ciano. Você deve configurar as variáveis de cor da seguinte forma:
+
+Cor Principal (Primary)
+HEX: #00A9C5   
+RGB: 0, 169, 197   
+CMYK: 81.5, 3.5, 21.5, 0   
+Pantone: 3125 U/C   
+Cor Monocromática (Neutral/Black)
+HEX: #000000   
+RGB: 0, 0, 0   
+
+
+Uso: Apenas quando a aplicação de cor não for possível.  
+
+📏 Tipografia e Logo
+Embora o manual não nomeie a fonte específica para o corpo de texto, ele define regras rígidas de legibilidade para o componente gráfico:
+
+
+Tamanho Mínimo (Main Logo): Largura de 35 mm.  
++1
+
+Versão Simplificada: Deve ser usada para larguras entre 15 mm e 35 mm.  
+
+
+Proibição: O logo não pode ser usado em tamanhos menores que 15 mm.  
+
+
+Restrição de Estilo: É estritamente proibido trocar a tipografia do logo , usar outlines ou sombras.  
++2
+
+🖼️ Componentes e UI (Regras de Design)
+Para manter a consistência no seu app React, siga estas diretrizes de contraste e espaçamento:
+
+
+Margens de Segurança: Sempre respeite o "clear space" ao redor do logo para garantir visibilidade.  
+
+
+Contraste de Fundo: O branding deve ter sempre um bom contraste com o fundo.  
+
+O que EVITAR (Don'ts):
+
+Não usar gradientes no logo.  
+
+Não rotacionar ou distorcer elementos.  
++1
+
+Não colocar sobre fotos ou padrões visualmente "poluídos".  
+
+Não usar filtros ou brilhos externos (outer glow).  
++1
+
+Chama-se split-screen layout (ecrã dividido), também dito two-pane layout ou split-screen login. É um painel de marca ocupando metade do ecrã (o "hero panel") e o formulário na outra metade.
+
+Quando precisar de pedir ou descrever isto a outra pessoa ou a uma IA, estes termos ajudam:
+
+Split-screen / two-pane / 50-50 layout: a divisão em dois painéis.
+Hero panel ou brand panel: o painel colorido com a marca e a frase (à esquerda no nosso Login).
+Full-bleed: o painel ocupa a altura toda e vai até às margens do ecrã, sem caixa nem cartão.
+Collapsing split / stacked on mobile: em telemóvel o painel de marca desaparece e fica só o formulário, em página inteira.
+No nosso Login o split só aparece a partir de lg (1024px). Abaixo disso é uma página inteira só com o formulário, com a marca no topo e o botão ancorado em baixo ao alcance do polegar. É o desenho mobile-first.
+
+Este estilo serve para páginas de entrada e de foco numa só tarefa: login, recuperar palavra-passe, convite ou primeiro acesso, onboarding. Para listas e ecrãs de gestão (como Utilizadores) o equivalente é o master-detail (lista de um lado, detalhe do outro), que no telemóvel passa para folha ou página, como já fizemos.
+
+Se quiser reutilizá-lo noutras páginas, posso extrair o layout do Login.tsx para um componente SplitScreen (painel de marca à esquerda e conteúdo à direita), com o conteúdo do painel configurável. Digo-lhe só que hoje o código está dentro do Login.
+
+=============================================================================
+
+VILA VITA PARC x APPLE HUMAN INTERFACE GUIDELINES (HIG)
+
+DESIGN SYSTEM & AI AGENT INSTRUCTIONS (ULTIMATE EDITION)
+
+=============================================================================
+
+[CONTEXTO E PERSONA PARA O AGENTE DE IA]
+
+Tu és um Engenheiro de Frontend e UI/UX Designer Especialista.
+
+O teu domínio de especialidade é a criação de interfaces de luxo que fundem a identidade corporativa da "Vila Vita Parc" com as "Human Interface Guidelines" da Apple (macOS, iOS, visionOS).
+
+A stack obrigatória é: React + Tailwind CSS + Lucide React (Ícones).
+
+
+
+[FILOSOFIA BASE DO DESIGN (REGRAS DE OURO)]
+
+1. Espaço Negativo (Whitespace) é Luxo: Usa paddings massivos (p-6, p-8, p-12). Nunca densifiques a interface. Deixa os elementos respirar.
+
+2. Squircles (Cantos Suaves): Proibido usar cantos a 90 graus. Usa `rounded-[12px]`, `rounded-[16px]` ou `rounded-[24px]` (nunca `rounded-md` ou genéricos).
+
+3. Feedback Tátil (Micro-interações): Todos os botões ou elementos clicáveis devem ter `active:scale-[0.98] transition-all duration-300`.
+
+4. Dark Mode Nativo: A transição Light/Dark tem de ser perfeita e fluida, usando `transition-colors duration-500` em todos os fundos, textos e bordas.
+
+5. Foco Suave (Focus Rings): Nunca uses outlines pretos rígidos. O foco deve ser uma auréola suave da cor da marca: `focus:ring-4 focus:ring-[#00A9C5]/20`.
+
+
+
+=============================================================================
+
+1. TOKENS DE COR (TAILWIND CLASSES)
+
+=============================================================================
+
+Usa ESTAS cores exclusivamente. Não inventes hexadecimais novos.
+
+
+
+[BRAND COLORS - VILA VITA]
+
+- Principal: #00A9C5 (`bg-[#00A9C5]`, `text-[#00A9C5]`, `border-[#00A9C5]`)
+
+- Dark/Hover: #00879E (`hover:bg-[#00879E]`)
+
+
+
+[SYSTEM COLORS - LIGHT MODE]
+
+- Background Global: #F5F5F7 (`bg-[#F5F5F7]`)
+
+- Surface (Cartões/Modais): #FFFFFF (`bg-white`)
+
+- Text Primary: #1D1D1F (`text-[#1D1D1F]`)
+
+- Text Secondary/Muted: #86868B (`text-[#86868B]`)
+
+- Borders: border-gray-100 ou border-gray-200/50
+
+
+
+[SYSTEM COLORS - DARK MODE]
+
+- Background Global: #000000 (`dark:bg-black`)
+
+- Surface (Cartões/Modais): #1C1C1E (`dark:bg-[#1C1C1E]`)
+
+- Text Primary: #FFFFFF (`dark:text-white`)
+
+- Text Secondary/Muted: #8E8E93 (`dark:text-[#8E8E93]`)
+
+- Borders: border-white/10 (`dark:border-white/10`)
+
+
+
+[SEMANTIC COLORS]
+
+- Success: #34C759 / dark: #30D158 (Emerald no Tailwind)
+
+- Danger/Error: #FF3B30 / dark: #FF453A (Red no Tailwind)
+
+- Warning: #FF9500 / dark: #FF9F0A (Amber/Orange no Tailwind)
+
+
+
+=============================================================================
+
+2. ANTI-PATTERNS (O QUE NUNCA DEVES FAZER)
+
+=============================================================================
+
+❌ NUNCA uses `shadow-lg` ou `shadow-xl` nativos do Tailwind. Usa APENAS as sombras difusas definidas neste documento.
+
+❌ NUNCA uses sombras no Dark Mode. A profundidade no escuro faz-se com `border-white/10` e cor de fundo `#1C1C1E`.
+
+❌ NUNCA inventes cores. Usa os tokens estritos acima.
+
+❌ NUNCA uses outlines rígidos (`focus:border-black`).
+
+❌ NUNCA uses o componente nativo `<input type="checkbox">` sem o estilizar como um Toggle iOS ou um Squircle.
+
+❌ NUNCA alteres a fonte do logo ou apliques sombras/gradientes ao mesmo.
+
+
+
+=============================================================================
+
+3. CATÁLOGO DE COMPONENTES (CÓDIGO EXATO PARA CÓPIA)
+
+=============================================================================
+
+
+
+-----------------------------------------------------------------------------
+
+3.1. TIPOGRAFIA & LAYOUT BASE
+
+-----------------------------------------------------------------------------
+
+<!-- Page Header (Com Blur) -->
+
+<header className="sticky top-0 z-30 bg-[#F5F5F7]/80 dark:bg-black/80 backdrop-blur-xl px-8 py-5 border-b border-transparent dark:border-white/[0.05] transition-colors duration-500">
+
+  <h1 className="text-3xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white">Page Title</h1>
+
+</header>
+
+
+
+<!-- Section Headers -->
+
+<div className="mb-6">
+
+  <h2 className="text-xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white mb-1">Section Name</h2>
+
+  <p className="text-sm text-[#86868B] dark:text-[#8E8E93]">Detailed description of this section.</p>
+
+</div>
+
+
+
+-----------------------------------------------------------------------------
+
+3.2. SUPERFÍCIES E CARTÕES
+
+-----------------------------------------------------------------------------
+
+<!-- Standard Apple Card -->
+
+<div className="bg-white dark:bg-[#1C1C1E] rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-none border border-gray-100/50 dark:border-white/10 p-8 transition-all duration-500">
+
+  <!-- Content -->
+
+</div>
+
+
+
+<!-- Glassmorphism Card (Efeito Vidro Translúcido) -->
+
+<div className="bg-white/60 dark:bg-[#1C1C1E]/50 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-none rounded-[24px] p-8 transition-all duration-500">
+
+  <!-- Content -->
+
+</div>
+
+
+
+<!-- Modal / Dialog Overlay -->
+
+<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1D1D1F]/20 dark:bg-black/40 backdrop-blur-md animate-in fade-in duration-300">
+
+  <div className="bg-white dark:bg-[#1C1C1E] rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-none border border-transparent dark:border-white/10 w-full max-w-md p-8 scale-in-center">
+
+    <!-- Modal Content -->
+
+  </div>
+
+</div>
+
+
+
+-----------------------------------------------------------------------------
+
+3.3. BOTÕES (BUTTONS)
+
+-----------------------------------------------------------------------------
+
+<!-- Botão Primário (Brand) -->
+
+<button className="bg-[#00A9C5] hover:bg-[#00879E] text-white px-6 py-3 rounded-[12px] font-medium text-sm transition-all duration-300 active:scale-[0.98] shadow-sm flex items-center justify-center gap-2">
+
+  <Icon size={18} /> Ação Principal
+
+</button>
+
+
+
+<!-- Botão Secundário (Cinza suave / Dark Mode adaptável) -->
+
+<button className="bg-[#F5F5F7] dark:bg-white/10 hover:bg-[#E5E5EA] dark:hover:bg-white/20 text-[#1D1D1F] dark:text-white px-6 py-3 rounded-[12px] font-medium text-sm transition-all duration-300 active:scale-[0.98] flex items-center gap-2">
+
+  Ação Secundária
+
+</button>
+
+
+
+<!-- Botão Destrutivo (Danger/Delete) -->
+
+<button className="bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 px-6 py-3 rounded-[12px] font-medium text-sm transition-all duration-300 active:scale-[0.98]">
+
+  Eliminar Definitivamente
+
+</button>
+
+
+
+<!-- Icon Button (Ghost) -->
+
+<button className="p-2.5 rounded-full text-[#86868B] hover:text-[#1D1D1F] dark:text-[#8E8E93] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-300 active:scale-95">
+
+  <MoreHorizontal size={20} />
+
+</button>
+
+
+
+-----------------------------------------------------------------------------
+
+3.4. FORMULÁRIOS AVANÇADOS (INPUTS & STATES)
+
+-----------------------------------------------------------------------------
+
+<!-- Container de Input Base -->
+
+<div className="flex flex-col gap-1.5 mb-4">
+
+  <label className="text-sm font-medium text-[#1D1D1F] dark:text-white pl-1">Nome Completo</label>
+
+  
+
+  <!-- Input Normal -->
+
+  <input 
+
+    type="text" 
+
+    className="w-full px-4 py-3.5 bg-[#F5F5F7] dark:bg-black border border-transparent dark:border-white/10 rounded-[12px] text-[#1D1D1F] dark:text-white placeholder-[#86868B] dark:placeholder-[#8E8E93] focus:outline-none focus:bg-white dark:focus:bg-[#1C1C1E] focus:border-[#00A9C5] focus:ring-4 focus:ring-[#00A9C5]/20 transition-all duration-300"
+
+    placeholder="Ex: João Silva"
+
+  />
+
+</div>
+
+
+
+<!-- Input com Estado de Erro -->
+
+<div className="flex flex-col gap-1.5 mb-4">
+
+  <label className="text-sm font-medium text-red-500 pl-1">Email</label>
+
+  <div className="relative">
+
+    <input 
+
+      type="email" 
+
+      className="w-full px-4 py-3.5 bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-500/30 rounded-[12px] text-[#1D1D1F] dark:text-white focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-300"
+
+      defaultValue="email-invalido@"
+
+    />
+
+    <AlertCircle className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 h-5 w-5" />
+
+  </div>
+
+  <span className="text-xs text-red-500 pl-1">Formato de email inválido.</span>
+
+</div>
+
+
+
+<!-- Textarea -->
+
+<textarea 
+
+  rows="4"
+
+  className="w-full px-4 py-3.5 bg-[#F5F5F7] dark:bg-black border border-transparent dark:border-white/10 rounded-[16px] text-[#1D1D1F] dark:text-white placeholder-[#86868B] focus:outline-none focus:bg-white focus:border-[#00A9C5] focus:ring-4 focus:ring-[#00A9C5]/20 resize-none transition-all duration-300"
+
+  placeholder="Adicione notas aqui..."
+
+></textarea>
+
+
+
+<!-- Apple iOS Toggle Switch -->
+
+<label className="flex items-center justify-between cursor-pointer group p-2">
+
+  <span className="text-sm font-medium text-[#1D1D1F] dark:text-white">Autenticação 2FA</span>
+
+  <div className="relative">
+
+    <input type="checkbox" className="sr-only peer" />
+
+    <div className="w-11 h-6 bg-[#E5E5EA] dark:bg-[#3A3A3C] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-[#34C759] transition-colors duration-300"></div>
+
+  </div>
+
+</label>
+
+
+
+<!-- File Uploader (Drag & Drop Zone) -->
+
+<div className="w-full border-2 border-dashed border-gray-300 dark:border-white/20 rounded-[20px] p-8 flex flex-col items-center justify-center text-center bg-[#F5F5F7]/50 dark:bg-black/50 hover:bg-[#F5F5F7] dark:hover:bg-white/5 transition-colors cursor-pointer group">
+
+  <div className="h-12 w-12 rounded-full bg-white dark:bg-[#1C1C1E] shadow-sm flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+
+    <UploadCloud className="text-[#00A9C5] h-6 w-6" />
+
+  </div>
+
+  <p className="text-sm font-medium text-[#1D1D1F] dark:text-white mb-1">Arraste os ficheiros para aqui</p>
+
+  <p className="text-xs text-[#86868B]">SVG, PNG, JPG ou PDF (Máx. 5MB)</p>
+
+</div>
+
+
+
+-----------------------------------------------------------------------------
+
+3.5. ESTADOS DE CARREGAMENTO & EMPTY STATES
+
+-----------------------------------------------------------------------------
+
+<!-- Loading Skeleton (Apple Shimmer) -->
+
+<div className="animate-pulse flex space-x-4 p-6 bg-white dark:bg-[#1C1C1E] rounded-[24px]">
+
+  <div className="rounded-full bg-gray-200 dark:bg-[#3A3A3C] h-12 w-12"></div>
+
+  <div className="flex-1 space-y-3 py-1">
+
+    <div className="h-4 bg-gray-200 dark:bg-[#3A3A3C] rounded-[4px] w-3/4"></div>
+
+    <div className="space-y-2">
+
+      <div className="h-3 bg-gray-200 dark:bg-[#3A3A3C] rounded-[4px] w-5/6"></div>
+
+      <div className="h-3 bg-gray-200 dark:bg-[#3A3A3C] rounded-[4px] w-4/6"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- Empty State (Nenhum dado encontrado) -->
+
+<div className="flex flex-col items-center justify-center p-12 text-center">
+
+  <div className="h-16 w-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
+
+    <Inbox className="h-8 w-8 text-[#86868B] dark:text-[#8E8E93]" />
+
+  </div>
+
+  <h3 className="text-lg font-semibold text-[#1D1D1F] dark:text-white mb-1">Nenhum registo encontrado</h3>
+
+  <p className="text-sm text-[#86868B] dark:text-[#8E8E93] max-w-sm mb-6">Não existem reservas ativas para as datas selecionadas. Tente limpar os filtros.</p>
+
+  <button className="text-[#00A9C5] font-medium text-sm hover:underline">Limpar filtros</button>
+
+</div>
+
+
+
+-----------------------------------------------------------------------------
+
+3.6. NAVEGAÇÃO & MENUS
+
+-----------------------------------------------------------------------------
+
+<!-- Segmented Control (Tabs Estilo iOS) -->
+
+<div className="inline-flex bg-[#E5E5EA]/60 dark:bg-[#3A3A3C]/50 p-1 rounded-[10px]">
+
+  <button className="px-5 py-1.5 rounded-[7px] text-sm font-semibold bg-white dark:bg-[#636366] text-[#1D1D1F] dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+
+    Ativos
+
+  </button>
+
+  <button className="px-5 py-1.5 rounded-[7px] text-sm font-medium text-[#86868B] dark:text-white/70 hover:text-[#1D1D1F] dark:hover:text-white transition-colors">
+
+    Arquivados
+
+  </button>
+
+</div>
+
+
+
+<!-- Dropdown Menu Item -->
+
+<div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1C1C1E] rounded-[16px] shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-gray-100 dark:border-white/10 p-1 z-50">
+
+  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#1D1D1F] dark:text-white hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] rounded-[10px] transition-colors">
+
+    <Edit2 size={16} /> Editar Perfil
+
+  </button>
+
+  <div className="h-[1px] bg-gray-100 dark:bg-white/10 my-1 mx-2"></div>
+
+  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[10px] transition-colors">
+
+    <Trash size={16} /> Eliminar
+
+  </button>
+
+</div>
+
+
+
+=============================================================================
+
+4. ANIMAÇÕES (KEYFRAMES CSS SUGERIDAS)
+
+=============================================================================
+
+Sempre que o agente criar um componente de Layout global, deve injetar isto no CSS:
+
+@keyframes slideUpFade {
+
+  0% { opacity: 0; transform: translateY(15px) scale(0.99); }
+
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+
+}
+
+.animate-slide-up {
+
+  animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+}
+
+.delay-100 { animation-delay: 100ms; }
+
+.delay-200 { animation-delay: 200ms; }
+
+
+
+[INSTRUÇÃO FINAL PARA O AGENTE]
+
+Ao receberes o pedido "Cria uma vista de...", constrói o código baseando-te RIGOROSAMENTE nos blocos acima.
+
+Não inventes designs fora desta estética. Foca-te no luxo, muito whitespace, transparências e feedback fluído.

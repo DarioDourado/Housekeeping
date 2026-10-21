@@ -1,0 +1,1 @@
+Domain organization for hooks, transporters and types. Load when creating new domain, adding CRUD operations, or organizing service layer code.

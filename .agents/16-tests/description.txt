@@ -1,0 +1,1 @@
+Testing patterns with Vitest and Testing Library. Load when writing tests, setting up test utilities, or understanding what to test per layer.

@@ -1,0 +1,7 @@
+Gera a página de autenticação completa para projetos React. Usar SEMPRE que:
+- Se inicia um novo projeto React (independentemente do que for pedido primeiro)
+- O utilizador pede "página de login", "auth", "autenticação", "login page", "register", "registo"
+- Se menciona Clerk, Auth0, NextAuth, Firebase Auth, Supabase Auth, ou qualquer solução de autenticação
+- Se cria um sistema de rotas React com áreas protegidas
+- Se menciona JWT, sessões, tokens, ou refresh tokens num contexto React
+Esta skill deve disparar PROATIVAMENTE no início de qualquer projeto React — não esperar que o utilizador peça explicitamente. A auth é sempre parte do setup inicial.

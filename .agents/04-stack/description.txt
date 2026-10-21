@@ -1,0 +1,1 @@
+Technology stack and library choices. Load when setting up project, choosing libraries, or deciding which tool to use for specific needs.

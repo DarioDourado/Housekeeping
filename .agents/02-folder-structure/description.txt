@@ -1,0 +1,1 @@
+Project folder organization and file placement rules. Load when setting up new project, creating new files, or unsure where to place code.

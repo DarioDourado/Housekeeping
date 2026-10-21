@@ -1,0 +1,1 @@
+Loading states pattern including Spinner, Skeleton, Empty and Error states. Load when creating components that fetch data or need loading UI.

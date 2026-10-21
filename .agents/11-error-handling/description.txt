@@ -1,0 +1,1 @@
+Error handling patterns including ErrorBoundary, Toast notifications, and error states. Load when implementing error feedback, catch blocks, or error UI.

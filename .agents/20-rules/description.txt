@@ -1,0 +1,1 @@
+Absolute rules and checklists. ALWAYS load this skill before finalizing any code to ensure compliance with project standards.

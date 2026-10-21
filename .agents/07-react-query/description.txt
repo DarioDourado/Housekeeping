@@ -1,0 +1,1 @@
+React Query patterns for data fetching, caching, mutations and invalidation. Load when creating hooks that fetch or mutate server data.

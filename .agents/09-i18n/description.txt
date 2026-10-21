@@ -1,0 +1,1 @@
+Internationalization with react-i18next. Load when adding translations, creating UI text, or implementing language switching.

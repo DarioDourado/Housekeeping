@@ -1,0 +1,2 @@
+# .agents: o gerador do corpus exige LF
+.agents/** text eol=lf

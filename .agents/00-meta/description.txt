@@ -1,0 +1,1 @@
+Instructions and overview for React Enterprise modular skill system. Load when starting a new project or when needing guidance on which skills to use.

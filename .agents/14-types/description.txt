@@ -1,0 +1,1 @@
+TypeScript types organization with Zod schemas. Load when defining entities, DTOs, creating validation schemas, or structuring type files.

@@ -1,0 +1,1 @@
+JWT authentication with memory storage, httpOnly cookies, RBAC, and protected routes. Load when implementing login, logout, auth guards, or role-based access.

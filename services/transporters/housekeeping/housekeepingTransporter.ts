@@ -1,4 +1,5 @@
-import { Room, TaskSheet, RoomEvent, RoomAlert, RoomStatus, ServiceType, RoomTypology, TaskSheetCounters, ServiceShift, BlockTeam } from '../../../types/housekeeping.types';
+import { Room, TaskSheet, RoomEvent, RoomAlert, RoomStatus, ServiceType, TaskSheetCounters, BlockTeam } from '../../../types/housekeeping.types';
+import { CREDIT_TABLE, REFRESH_CREDITS } from '../../../config/constants';
 import { INITIAL_ROOMS, INITIAL_TASK_SHEETS, INITIAL_TURNDOWN_GROUPS, INITIAL_BLOCK_TEAMS } from '../../../config/hotelData';
 
 const STORAGE_ROOMS = 'vvp_hk_rooms_v1';
@@ -118,20 +119,10 @@ export const housekeepingTransporter = {
   },
 
   calculateRoomCredits: (room: Room): number => {
-    if (room.serviceType === ServiceType.REFRESH) return 0.5;
+    if (room.serviceType === ServiceType.REFRESH) return REFRESH_CREDITS;
     const isDeparture = room.serviceType === ServiceType.DEPARTURE_ARRIVAL || room.serviceType === ServiceType.DEPARTURE_ONLY;
-    switch (room.typology) {
-      case RoomTypology.STANDARD:
-        return isDeparture ? 2 : 1;
-      case RoomTypology.JUNIOR_SUITE:
-        return isDeparture ? 3 : 1.5;
-      case RoomTypology.SUITE:
-        return isDeparture ? 4 : 2;
-      case RoomTypology.VILLA:
-        return isDeparture ? 6 : 3;
-      default:
-        return 1;
-    }
+    const credits = CREDIT_TABLE[room.typology];
+    return isDeparture ? credits.departure : credits.stayover;
   },
 
   calculateCounters: (roomsInSheet: Room[]): TaskSheetCounters => {

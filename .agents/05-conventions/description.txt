@@ -1,0 +1,1 @@
+Naming conventions, import order, and export patterns. Load when creating any file, naming variables, or organizing imports.

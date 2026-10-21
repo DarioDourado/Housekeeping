@@ -3,8 +3,175 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-@layer base {
-  body {
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+/*
+  Design system Vila Vita Parc x Apple HIG (ver Theme.txt).
+  - Tokens semânticos (bg-primary, bg-surface...) para código novo.
+  - Escalas blue/slate remapeadas para a marca/cinzas Apple: componentes antigos herdam o tema.
+*/
+
+:root {
+  --canvas: #F5F5F7;
+  --surface: #FFFFFF;
+  --content: #1D1D1F;
+  --muted: #86868B;
+  --line: rgb(229 229 234 / 0.6);
+  --success: #34C759;
+  --danger: #FF3B30;
+  --warning: #FF9500;
+}
+
+.dark {
+  --canvas: #000000;
+  --surface: #1C1C1E;
+  --content: #FFFFFF;
+  --muted: #8E8E93;
+  --line: rgb(255 255 255 / 0.1);
+  --success: #30D158;
+  --danger: #FF453A;
+  --warning: #FF9F0A;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-content: var(--content);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+}
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Marca */
+  --color-primary: #00A9C5;
+  --color-primary-hover: #00879E;
+  --color-primary-foreground: #FFFFFF;
+
+  --color-blue-50: #E6F7FA;
+  --color-blue-100: #CCEFF4;
+  --color-blue-200: #99DFE9;
+  --color-blue-300: #66CFDE;
+  --color-blue-400: #33BFD4;
+  --color-blue-500: #00A9C5;
+  --color-blue-600: #00A9C5;
+  --color-blue-700: #00879E;
+  --color-blue-800: #006578;
+  --color-blue-900: #00444F;
+  --color-blue-950: #00222A;
+
+  /* Cinzas Apple (light: canvas/bordas/texto; dark: superfícies) */
+  --color-slate-50: #F5F5F7;
+  --color-slate-100: #F2F2F7;
+  --color-slate-200: #E5E5EA;
+  --color-slate-300: #D1D1D6;
+  --color-slate-400: #8E8E93;
+  --color-slate-500: #86868B;
+  --color-slate-600: #636366;
+  --color-slate-700: #3A3A3C;
+  --color-slate-800: #2C2C2E;
+  --color-slate-900: #1C1C1E;
+  --color-slate-950: #000000;
+
+  /* Semânticas (500 = light, 400 = dark) */
+  --color-emerald-500: #34C759;
+  --color-emerald-400: #30D158;
+  --color-red-500: #FF3B30;
+  --color-red-400: #FF453A;
+  --color-amber-500: #FF9500;
+  --color-amber-400: #FF9F0A;
+
+  /* Squircles: nunca cantos a 90º nem genéricos */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 24px;
+
+  /* Sombras difusas (sem shadow-lg/xl nativos) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+
+  --animate-slide-up: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(15px) scale(0.99); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
 }
+
+@layer base {
+  body {
+    background-color: var(--canvas);
+    color: var(--content);
+    transition: background-color 500ms, color 500ms;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Dark mode: profundidade por borda/fundo, nunca por sombra (rings de foco não são afetados) */
+  .dark * {
+    --tw-shadow: 0 0 #0000 !important;
+  }
+
+  /* Feedback tátil em todos os clicáveis */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    transition-property: color, background-color, border-color, box-shadow, opacity, scale;
+    transition-duration: 300ms;
+  }
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    scale: 0.98;
+  }
+
+  /* Foco: auréola suave da marca, nunca outline rígido */
+  :focus-visible {
+    outline: 4px solid rgb(0 169 197 / 0.2);
+    outline-offset: 0;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--color-primary);
+  }
+
+  /* Checkbox nativo estilizado como squircle da marca */
+  input[type="checkbox"] {
+    appearance: none;
+    display: inline-grid;
+    place-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 6px;
+    border: 1.5px solid var(--color-slate-300);
+    background-color: var(--surface);
+    transition: background-color 300ms, border-color 300ms;
+    cursor: pointer;
+  }
+  .dark input[type="checkbox"] {
+    border-color: rgb(255 255 255 / 0.2);
+  }
+  input[type="checkbox"]:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  input[type="checkbox"]:checked::after {
+    content: "";
+    width: 0.6rem;
+    height: 0.3rem;
+    margin-top: -0.1rem;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg);
+  }
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }

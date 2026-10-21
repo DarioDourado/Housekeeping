@@ -1,0 +1,1 @@
+Core architecture pattern: Pages, Hooks, Transporters. Load when creating new features, understanding data flow, or deciding where to place code.

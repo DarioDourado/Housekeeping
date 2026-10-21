@@ -133,6 +133,8 @@ Fase B (contrato) — decisões: `hotelData.ts` continua a ser o mock/seed, agor
 
 ### Task 5: BE MVP FastAPI — PENDENTE
 
+> Plano detalhado (rascunho para análise, nada implementado): `docs/superpowers/plans/2026-10-21-backend-fastapi.md`. Decisão do utilizador em 2026-10-21: por agora só se escreve o plano; o BE não é implementado.
+
 - [ ] Projeto `backend/` conforme skill 34; modelos e migrações do contrato.
 - [ ] Endpoints de planeamento, execução, inspeção e eventos; Opera atrás de interface simulada.
 - [ ] Testes pytest dos cenários CT-01 a CT-20 aplicáveis.

@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "Vila Vita Parc — Housekeeping OS",
+    "subtitle": "Gestão Operacional de Andares & Integração Opera Cloud",
+    "resort": "Vila Vita Parc Resort & Spa · Porches, Algarve"
+  },
+  "roles": {
+    "admin": "Escritório (Chefia)",
+    "supervisor": "Governanta de Serviço",
+    "housekeeper": "Empregada de Andares",
+    "reception": "Receção (Front Desk)"
+  },
+  "nav": {
+    "morningDistribution": "Distribuição Manhã",
+    "turndownDistribution": "Turndown (Noite)",
+    "realtimeOverview": "Quartos em Direto",
+    "timeAudit": "Auditoria de Tempos",
+    "creditsAndStats": "Estatísticas & Créditos",
+    "chat": "Chat Interno",
+    "staffManager": "Gestor de Equipa",
+    "operaStatus": "Sincronização Opera"
+  },
+  "status": {
+    "dirty": "Sujo (Dirty)",
+    "clean": "Limpo (Clean)",
+    "inspected": "Inspecionado (Inspected)"
+  },
+  "serviceTypes": {
+    "departureArrival": "Saída com Chegada",
+    "stayover": "Estadia (In-house)",
+    "departureOnly": "Só Saída",
+    "refresh": "Refresh (Toque)"
+  },
+  "actions": {
+    "startRoom": "Iniciar Quarto",
+    "finishRoom": "Terminar Quarto",
+    "approveInspection": "Aprovar (Inspected)",
+    "reproveInspection": "Reprovar c/ Nota",
+    "markRefresh": "Registar Refresh Feito",
+    "markDnd": "Não Incomodar (DND)",
+    "markRefused": "Recusou Serviço",
+    "togglePriority": "Prioridade Urgente",
+    "viewDetail": "Ver Ficha Completa",
+    "moveRoom": "Mover Secção",
+    "mergeSheets": "Juntar Secções",
+    "simulateNightAudit": "Simular Night Audit (03:00)",
+    "operaSync": "Sincronizar com Opera Cloud",
+    "sendPhoto": "Enviar Fotografia",
+    "sendMessage": "Enviar Mensagem",
+    "acknowledgeAlert": "Confirmar Receção",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "save": "Guardar Alterações"
+  },
+  "counters": {
+    "stayovers": "Estadias",
+    "departuresWithArrival": "Saídas c/ Chegada",
+    "departuresOnly": "Só Saídas",
+    "refreshes": "Refreshes",
+    "totalRooms": "Total Quartos",
+    "credits": "Créditos Est."
+  },
+  "badges": {
+    "vip": "VIP",
+    "babyCot": "Berço Bebé",
+    "linenChange": "Muda Lençóis",
+    "priority": "Urgente",
+    "parked": "Estacionado",
+    "inProgress": "Em Limpeza"
+  },
+  "mobile": {
+    "myList": "A Minha Lista",
+    "servicePhone": "Telemóvel de Serviço",
+    "shiftMorning": "Serviço da Manhã",
+    "shiftTurndown": "Serviço Turndown",
+    "alerts": "Alertas e Pedidos"
+  }
+}

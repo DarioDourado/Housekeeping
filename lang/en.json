@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "Vila Vita Parc — Housekeeping OS",
+    "subtitle": "Operations & Opera Cloud PMS Integration",
+    "resort": "Vila Vita Parc Resort & Spa · Porches, Algarve"
+  },
+  "roles": {
+    "admin": "Housekeeping Office (Head)",
+    "supervisor": "Floor Supervisor (Governanta)",
+    "housekeeper": "Area Housekeeper (Maid)",
+    "reception": "Front Desk Reception"
+  },
+  "nav": {
+    "morningDistribution": "Morning Task Sheets",
+    "turndownDistribution": "Turndown Service",
+    "realtimeOverview": "Live Rooms Board",
+    "timeAudit": "Time Audit Log",
+    "creditsAndStats": "Stats & Credits",
+    "chat": "Internal Chat",
+    "staffManager": "Staff Profiles",
+    "operaStatus": "Opera Sync Monitor"
+  },
+  "status": {
+    "dirty": "Dirty",
+    "clean": "Clean",
+    "inspected": "Inspected"
+  },
+  "serviceTypes": {
+    "departureArrival": "Departure with Arrival",
+    "stayover": "Stayover (In-house)",
+    "departureOnly": "Departure Only",
+    "refresh": "Refresh Touch-up"
+  },
+  "actions": {
+    "startRoom": "Start Cleaning",
+    "finishRoom": "Finish Cleaning",
+    "approveInspection": "Approve (Inspected)",
+    "reproveInspection": "Reject with Note",
+    "markRefresh": "Record Refresh Done",
+    "markDnd": "Do Not Disturb (DND)",
+    "markRefused": "Refused Service",
+    "togglePriority": "Urgent Priority",
+    "viewDetail": "View Full Sheet",
+    "moveRoom": "Move Section",
+    "mergeSheets": "Merge Sheets",
+    "simulateNightAudit": "Simulate Night Audit (03:00)",
+    "operaSync": "Sync with Opera Cloud",
+    "sendPhoto": "Send Photo",
+    "sendMessage": "Send Message",
+    "acknowledgeAlert": "Acknowledge Alert",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save Changes"
+  },
+  "counters": {
+    "stayovers": "Stayovers",
+    "departuresWithArrival": "Dep. w/ Arrival",
+    "departuresOnly": "Dep. Only",
+    "refreshes": "Refreshes",
+    "totalRooms": "Total Rooms",
+    "credits": "Est. Credits"
+  },
+  "badges": {
+    "vip": "VIP",
+    "babyCot": "Baby Cot",
+    "linenChange": "Linen Change",
+    "priority": "Urgent",
+    "parked": "Parked",
+    "inProgress": "In Progress"
+  },
+  "mobile": {
+    "myList": "My Assigned Rooms",
+    "servicePhone": "Service Handset",
+    "shiftMorning": "Morning Service",
+    "shiftTurndown": "Turndown Service",
+    "alerts": "Alerts & Traces"
+  }
+}

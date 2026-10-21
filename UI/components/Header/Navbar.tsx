@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useAuth } from '../../../services/hooks/auth/useAuth';
 import { useTheme } from '../../../services/hooks/theme/useTheme';
 import { UserRole } from '../../../types/auth.types';
@@ -52,7 +51,7 @@ export const Navbar = ({
         
         {/* Zone 1: Single text element brand wordmark (Top Bar Contract Zone 1) */}
         <div className="flex items-center gap-3 shrink-0">
-          <Link
+          <a
             href="/"
             className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap shrink-0 flex items-center gap-2"
           >
@@ -60,7 +59,7 @@ export const Navbar = ({
             <span>Vila Vita Parc</span>
             <span className="text-slate-400 font-normal">/</span>
             <span className="font-semibold text-slate-600 dark:text-slate-300">Housekeeping OS</span>
-          </Link>
+          </a>
         </div>
 
         {/* Zone 2: 4 clean single-line nav links (Top Bar Contract Zone 2) */}

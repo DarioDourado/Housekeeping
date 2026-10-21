@@ -7,7 +7,8 @@ import { HousekeepingProvider } from '../context/HousekeepingContext';
 import { useHousekeeping } from '../services/hooks/housekeeping/useHousekeeping';
 import { useAuth } from '../services/hooks/auth/useAuth';
 import { Room, TaskSheet, RoomStatus, ServiceType, RoomTypology } from '../types/housekeeping.types';
-import { Navbar, ActiveNavTab } from '../UI/components/Header/Navbar';
+import { Navbar } from '../UI/components/Header/Navbar';
+import type { HousekeepingPageUiState } from '../types/pages/housekeeping-page.types';
 import { TaskSheetColumn } from '../UI/components/TaskSheetColumn/TaskSheetColumn';
 import { TurndownView } from '../UI/components/Turndown/TurndownView';
 import { AuditingTimeline } from '../UI/components/Auditing/AuditingTimeline';
@@ -51,10 +52,10 @@ function HousekeepingAppContent() {
     dismissMoveToast
   } = useHousekeeping();
 
-  const [activeTab, setActiveTab] = useState<ActiveNavTab>('MORNING');
-  const [isMobileSimulator, setIsMobileSimulator] = useState(false);
-  const [selectedBlockFilter, setSelectedBlockFilter] = useState('ALL');
-  const [layoutMode, setLayoutMode] = useState<'EXPANDED' | 'AUTO_FIT' | 'COMPACT'>('EXPANDED');
+  const [activeTab, setActiveTab] = useState<HousekeepingPageUiState['activeTab']>('MORNING');
+  const [isMobileSimulator, setIsMobileSimulator] = useState<HousekeepingPageUiState['isMobileSimulator']>(false);
+  const [selectedBlockFilter, setSelectedBlockFilter] = useState<HousekeepingPageUiState['selectedBlockFilter']>('ALL');
+  const [layoutMode, setLayoutMode] = useState<HousekeepingPageUiState['layoutMode']>('EXPANDED');
 
   // Modals state
   const [detailRoom, setDetailRoom] = useState<Room | null>(null);

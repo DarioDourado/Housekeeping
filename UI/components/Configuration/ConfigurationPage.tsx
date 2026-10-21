@@ -277,6 +277,8 @@ export const ConfigurationPage = ({ onBackToBoard }: ConfigurationPageProps) => 
         turndownStatus: RoomStatus.DIRTY,
         turndownRequired: true,
         isPriority: roomFormData.isPriority,
+        assignedSheetId: 'UNASSIGNED',
+        orderIndex: 0,
         guest: {
           guestName: 'Hóspede Previsto',
           adults: 2,

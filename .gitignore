@@ -1,11 +1,9 @@
 # Dependencies
 node_modules/
 
-# Next.js
-.next/
-out/
-.vercel/
-.turbo/
+# Vite / React build output
+.dist/
+dist/
 
 # Build and test output
 coverage/

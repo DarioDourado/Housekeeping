@@ -1,6 +1,7 @@
 'use client';
 
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import type { OperaSyncModalProps } from '../../../types/components/opera-sync-modal.types';
 import {
   X,
   RefreshCw,
@@ -11,10 +12,6 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-
-interface OperaSyncModalProps {
-  onClose: () => void;
-}
 
 export const OperaSyncModal = ({ onClose }: OperaSyncModalProps) => {
   const { operaLogs, triggerNightAudit, syncWithOpera } = useHousekeeping();
@@ -132,3 +129,4 @@ export const OperaSyncModal = ({ onClose }: OperaSyncModalProps) => {
     </div>
   );
 };
+

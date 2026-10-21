@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import type { StaffManagerModalProps } from '../../../types/components/staff-manager-modal.types';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { User, UserRole } from '../../../types/auth.types';
 import {
   X,
@@ -13,10 +14,6 @@ import {
   Check,
   UserPlus
 } from 'lucide-react';
-
-interface StaffManagerModalProps {
-  onClose: () => void;
-}
 
 export const StaffManagerModal = ({ onClose }: StaffManagerModalProps) => {
   const { users, addUser, deleteUser, switchUser } = useAuth();
@@ -258,3 +255,4 @@ export const StaffManagerModal = ({ onClose }: StaffManagerModalProps) => {
     </div>
   );
 };
+

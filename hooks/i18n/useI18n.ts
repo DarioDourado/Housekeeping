@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Language, translate } from '../../../lang/i18n';
+import { Language, translate } from '../../lang/i18n';
 
 const LANG_KEY = 'vvp_hk_lang';
 

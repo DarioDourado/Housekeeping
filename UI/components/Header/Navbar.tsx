@@ -1,8 +1,8 @@
 'use client';
 
-import { useAuth } from '../../../services/hooks/auth/useAuth';
-import { useTheme } from '../../../services/hooks/theme/useTheme';
-import { UserRole } from '../../../types/auth.types';
+import { useAuth } from '../../../hooks/auth/useAuth';
+import { useTheme } from '../../../hooks/theme/useTheme';
+import type { ActiveNavTab, NavbarProps } from '../../../types/components/header.types';
 import {
   Smartphone,
   Server,
@@ -15,20 +15,7 @@ import {
   UserCheck
 } from 'lucide-react';
 
-export type ActiveNavTab = 'MORNING' | 'TURNDOWN' | 'LIVE' | 'AUDIT';
-
-interface NavbarProps {
-  activeTab: ActiveNavTab;
-  onSelectTab: (tab: ActiveNavTab) => void;
-  isMobileSimulator: boolean;
-  onToggleMobileSimulator: () => void;
-  onOpenOperaModal: () => void;
-  onOpenCreditsModal: () => void;
-  onOpenStaffModal: () => void;
-  onOpenTeamManager?: () => void;
-  onOpenChat: () => void;
-  onResetPreset: () => void;
-}
+export type { ActiveNavTab } from '../../../types/components/header.types';
 
 export const Navbar = ({
   activeTab,
@@ -195,3 +182,4 @@ export const Navbar = ({
     </header>
   );
 };
+

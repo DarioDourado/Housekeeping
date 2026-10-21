@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import type { RoomCardProps } from '../../../types/components/room-card.types';
 import { Room, RoomStatus, ServiceType, RoomTypology } from '../../../types/housekeeping.types';
 import { UserRole } from '../../../types/auth.types';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
-import { useI18n } from '../../../services/hooks/i18n/useI18n';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../../../hooks/auth/useAuth';
+import { useI18n } from '../../../hooks/i18n/useI18n';
 import {
   Play,
   Check,
@@ -25,14 +26,6 @@ import {
   Info,
   GripVertical
 } from 'lucide-react';
-
-interface RoomCardProps {
-  room: Room;
-  onOpenDetail: (room: Room) => void;
-  onOpenReproval: (room: Room) => void;
-  onMoveRoom?: (room: Room) => void;
-  compact?: boolean;
-}
 
 export const RoomCard = ({
   room,
@@ -446,3 +439,4 @@ export const RoomCard = ({
     </div>
   );
 };
+

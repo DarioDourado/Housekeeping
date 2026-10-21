@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import type { TeamManagerModalProps } from '../../../types/components/team-manager-modal.types';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { useHousekeeping } from '../../../context/HousekeepingContext';
 import { User, UserRole } from '../../../types/auth.types';
 import {
@@ -28,12 +29,6 @@ import {
 import { housekeepingTransporter } from '../../../services/transporters/housekeeping/housekeepingTransporter';
 import { getTeamColorPalette, AVAILABLE_TEAM_COLORS } from './teamColorUtils';
 import { CollaboratorDirectoryTab } from './CollaboratorDirectoryTab';
-
-interface TeamManagerModalProps {
-  onClose: () => void;
-  initialSelectedBlock?: string;
-  initialTab?: 'BOARD' | 'DIRECTORY';
-}
 
 export const TeamManagerModal = ({ onClose, initialSelectedBlock, initialTab = 'BOARD' }: TeamManagerModalProps) => {
   const { users, addUser, updateUser, deleteUser, switchUser } = useAuth();
@@ -854,3 +849,4 @@ export const TeamManagerModal = ({ onClose, initialSelectedBlock, initialTab = '
     </div>
   );
 };
+

@@ -1,15 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Room, TaskSheet } from '../../../types/housekeeping.types';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
+import type { MoveRoomModalProps } from '../../../types/components/move-room-modal.types';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
 import { X, ArrowRightLeft, Check } from 'lucide-react';
-
-interface MoveRoomModalProps {
-  room: Room;
-  sheets: TaskSheet[];
-  onClose: () => void;
-}
 
 export const MoveRoomModal = ({
   room,
@@ -112,3 +106,4 @@ export const MoveRoomModal = ({
     </div>
   );
 };
+

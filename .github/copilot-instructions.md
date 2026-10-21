@@ -9,7 +9,7 @@ Aplicar estes princípios durante o desenvolvimento deste projeto. Priorizar o q
   - `app/`: páginas e layout principal
   - `UI/components/`: componentes reutilizáveis da interface
   - `context/`: providers e estado global
-  - `services/hooks/`: hooks de domínio e acesso a contexto
+  - `hooks/`: hooks de domínio e acesso a contexto
   - `services/transporters/`: acesso a dados e persistência local/externa
   - `types/`: contratos e DTOs da aplicação
   - `lang/`: i18n e textos
@@ -21,7 +21,7 @@ Aplicar estes princípios durante o desenvolvimento deste projeto. Priorizar o q
 
 - O ponto de entrada da aplicação fica em `app/page.tsx` e funciona como orquestrador da UI, montando providers e compondo módulos.
 - Os providers de estado ficam em `context/`, por exemplo `HousekeepingProvider`, `AuthProvider` e `ThemeProvider`.
-- Os hooks ficam em `services/hooks/<dominio>/` e devem consumir o contexto relevante ou expor uma API simples para a UI.
+- Os hooks ficam em `hooks/<dominio>/` e devem consumir o contexto relevante ou expor uma API simples para a UI.
 - Os transporters ficam em `services/transporters/<dominio>/` e encapsulam acesso a dados, regras de persistência e cálculo de dados derivados.
 - Os tipos ficam em `types/*.types.ts` e devem refletir os contratos usados pelos providers, hooks e componentes.
 - As interfaces das páginas devem ficar separadas dos componentes, em `types/pages/` ou em ficheiros dedicados por feature, por exemplo `types/pages/housekeeping-page.types.ts`.

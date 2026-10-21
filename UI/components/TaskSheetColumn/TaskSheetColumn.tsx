@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import type { TaskSheetColumnProps } from '../../../types/components/task-sheet-column.types';
 import { TaskSheet, Room, RoomStatus, ServiceType } from '../../../types/housekeeping.types';
 import { User } from '../../../types/auth.types';
 import { housekeepingTransporter } from '../../../services/transporters/housekeeping/housekeepingTransporter';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { RoomCard } from '../RoomCard/RoomCard';
 import {
   Users,
@@ -21,17 +22,6 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { getTeamColorPalette } from '../TeamManager/teamColorUtils';
-
-interface TaskSheetColumnProps {
-  sheet: TaskSheet;
-  allSheets: TaskSheet[];
-  roomsInSheet: Room[];
-  allStaff: User[];
-  onOpenDetail: (room: Room) => void;
-  onOpenReproval: (room: Room) => void;
-  onMoveRoomPrompt: (room: Room) => void;
-  layoutMode?: 'PANORAMIC' | 'GRID' | 'FULL_FIT';
-}
 
 export const TaskSheetColumn = ({
   sheet,
@@ -364,3 +354,4 @@ export const TaskSheetColumn = ({
     </div>
   );
 };
+

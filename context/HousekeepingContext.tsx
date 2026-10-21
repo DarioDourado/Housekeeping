@@ -23,7 +23,7 @@ import {
   housekeepingTransporter,
   OperaSyncLogEntry
 } from '../services/transporters/housekeeping/housekeepingTransporter';
-import { useAuth } from '../services/hooks/auth/useAuth';
+import { useAuth } from '../hooks/auth/useAuth';
 
 interface HousekeepingContextType {
   rooms: Room[];
@@ -985,3 +985,4 @@ export const HousekeepingProvider = ({ children }: { children: ReactNode }) => {
     </HousekeepingContext.Provider>
   );
 };
+

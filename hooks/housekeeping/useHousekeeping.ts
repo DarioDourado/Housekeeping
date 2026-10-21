@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext } from 'react';
-import { HousekeepingContext } from '../../../context/HousekeepingContext';
+import { HousekeepingContext } from '../../context/HousekeepingContext';
 
 export const useHousekeeping = () => {
   const context = useContext(HousekeepingContext);

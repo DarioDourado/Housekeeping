@@ -4,8 +4,8 @@ import { useState, useRef } from 'react';
 import { ThemeProvider } from '../context/ThemeContext';
 import { AuthProvider } from '../context/AuthContext';
 import { HousekeepingProvider } from '../context/HousekeepingContext';
-import { useHousekeeping } from '../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../services/hooks/auth/useAuth';
+import { useHousekeeping } from '../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../hooks/auth/useAuth';
 import { Room, TaskSheet, RoomStatus, ServiceType, RoomTypology } from '../types/housekeeping.types';
 import { Navbar } from '../UI/components/Header/Navbar';
 import type { HousekeepingPageUiState } from '../types/pages/housekeeping-page.types';
@@ -25,20 +25,10 @@ import { RoomCard } from '../UI/components/RoomCard/RoomCard';
 import {
   Layers,
   RotateCcw,
-  Sparkles,
-  Server,
   Filter,
   CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Luggage,
-  Home,
-  LogOut,
-  Smartphone,
   Columns,
   LayoutGrid,
-  ChevronLeft,
-  ChevronRight
 } from 'lucide-react';
 
 function HousekeepingAppContent() {
@@ -458,3 +448,4 @@ export default function Page() {
     </ThemeProvider>
   );
 }
+

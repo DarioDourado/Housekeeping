@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import type { TurndownViewProps } from '../../../types/components/turndown-view.types';
 import { Room, RoomStatus } from '../../../types/housekeeping.types';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import {
   Moon,
   Check,
@@ -18,10 +19,6 @@ import {
   Info,
   GripVertical
 } from 'lucide-react';
-
-interface TurndownViewProps {
-  onOpenDetail: (room: Room) => void;
-}
 
 export const TurndownView = ({ onOpenDetail }: TurndownViewProps) => {
   const { user } = useAuth();
@@ -293,3 +290,4 @@ export const TurndownView = ({ onOpenDetail }: TurndownViewProps) => {
     </div>
   );
 };
+

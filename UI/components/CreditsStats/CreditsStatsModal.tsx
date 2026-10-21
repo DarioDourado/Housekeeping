@@ -1,7 +1,8 @@
 'use client';
 
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
 import { RoomTypology, ServiceType } from '../../../types/housekeeping.types';
+import type { CreditsStatsModalProps } from '../../../types/components/credits-stats-modal.types';
 import {
   X,
   Award,
@@ -11,10 +12,6 @@ import {
   CheckCircle2,
   Users
 } from 'lucide-react';
-
-interface CreditsStatsModalProps {
-  onClose: () => void;
-}
 
 export const CreditsStatsModal = ({ onClose }: CreditsStatsModalProps) => {
   const { rooms, events } = useHousekeeping();
@@ -188,3 +185,4 @@ export const CreditsStatsModal = ({ onClose }: CreditsStatsModalProps) => {
     </div>
   );
 };
+

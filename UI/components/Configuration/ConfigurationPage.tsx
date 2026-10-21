@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { User, UserRole } from '../../../types/auth.types';
+import type { ConfigurationPageProps } from '../../../types/components/configuration-page.types';
 import { Room, RoomTypology, RoomStatus, ServiceType, BlockTeam } from '../../../types/housekeeping.types';
 import { getTeamColorPalette, AVAILABLE_TEAM_COLORS } from '../TeamManager/teamColorUtils';
 import {
@@ -33,10 +34,6 @@ import {
   Settings,
   UserPlus
 } from 'lucide-react';
-
-interface ConfigurationPageProps {
-  onBackToBoard: () => void;
-}
 
 export const ConfigurationPage = ({ onBackToBoard }: ConfigurationPageProps) => {
   const { users, addUser, updateUser, deleteUser, switchUser } = useAuth();
@@ -1537,3 +1534,4 @@ export const ConfigurationPage = ({ onBackToBoard }: ConfigurationPageProps) => 
     </div>
   );
 };
+

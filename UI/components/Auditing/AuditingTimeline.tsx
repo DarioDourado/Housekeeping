@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
 import { RoomEvent } from '../../../types/housekeeping.types';
 import {
   Clock,
@@ -170,3 +170,4 @@ export const AuditingTimeline = () => {
     </div>
   );
 };
+

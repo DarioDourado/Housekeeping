@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import type { ChatDrawerProps } from '../../../types/components/chat-drawer.types';
 import { ChatChannel, ChatMessage } from '../../../types/chat.types';
 import { chatTransporter, INITIAL_CHANNELS } from '../../../services/transporters/chat/chatTransporter';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import {
   X,
   Send,
@@ -13,10 +14,6 @@ import {
   Paperclip,
   CheckCheck
 } from 'lucide-react';
-
-interface ChatDrawerProps {
-  onClose: () => void;
-}
 
 export const ChatDrawer = ({ onClose }: ChatDrawerProps) => {
   const { user } = useAuth();
@@ -220,3 +217,4 @@ export const ChatDrawer = ({ onClose }: ChatDrawerProps) => {
     </div>
   );
 };
+

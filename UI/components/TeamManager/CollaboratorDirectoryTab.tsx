@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import type { CollaboratorDirectoryTabProps } from '../../../types/components/collaborator-directory-tab.types';
 import { User, UserRole } from '../../../types/auth.types';
 import { BlockTeam, TaskSheet, Room } from '../../../types/housekeeping.types';
 import { getTeamColorPalette } from './teamColorUtils';
@@ -26,17 +27,6 @@ import {
   HelpCircle,
   LogIn
 } from 'lucide-react';
-
-interface CollaboratorDirectoryTabProps {
-  users: User[];
-  blockTeams: BlockTeam[];
-  taskSheets: TaskSheet[];
-  rooms: Room[];
-  onAddUser: (newUser: Omit<User, 'id'>) => Promise<void>;
-  onUpdateUser: (updatedUser: User) => Promise<void>;
-  onDeleteUser: (userId: string) => Promise<void>;
-  onSwitchUser: (userId: string) => Promise<void>;
-}
 
 // Helpers para normalizar o bloco do utilizador
 const getStaffBlock = (u: User): string => {

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import type { RoomDetailModalProps } from '../../../types/components/room-detail-modal.types';
 import { Room, RoomStatus, ServiceType, RoomTypology } from '../../../types/housekeeping.types';
 import { UserRole } from '../../../types/auth.types';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import {
   X,
   Star,
@@ -26,12 +27,6 @@ import {
   Calendar,
   HeartHandshake
 } from 'lucide-react';
-
-interface RoomDetailModalProps {
-  room: Room;
-  onClose: () => void;
-  onOpenReproval: (room: Room) => void;
-}
 
 export const RoomDetailModal = ({
   room,
@@ -376,3 +371,4 @@ export const RoomDetailModal = ({
     </div>
   );
 };
+

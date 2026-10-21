@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import type { MobileViewProps } from '../../../types/components/mobile-view.types';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { Room, RoomStatus, ServiceType } from '../../../types/housekeeping.types';
 import { UserRole } from '../../../types/auth.types';
 import { RoomCard } from '../RoomCard/RoomCard';
@@ -24,12 +25,6 @@ import {
   ChevronRight,
   Info
 } from 'lucide-react';
-
-interface MobileViewProps {
-  onOpenDetail: (room: Room) => void;
-  onOpenReproval: (room: Room) => void;
-  onOpenChat: () => void;
-}
 
 export const MobileView = ({
   onOpenDetail,
@@ -327,3 +322,4 @@ export const MobileView = ({
     </div>
   );
 };
+

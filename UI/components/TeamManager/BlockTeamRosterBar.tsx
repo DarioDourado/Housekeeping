@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '../../../services/hooks/auth/useAuth';
+import type { BlockTeamRosterBarProps } from '../../../types/components/block-team-roster-bar.types';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { useHousekeeping } from '../../../context/HousekeepingContext';
 import { User, UserRole } from '../../../types/auth.types';
 import {
@@ -18,10 +19,6 @@ import {
 } from 'lucide-react';
 import { housekeepingTransporter } from '../../../services/transporters/housekeeping/housekeepingTransporter';
 import { getTeamColorPalette } from './teamColorUtils';
-
-interface BlockTeamRosterBarProps {
-  onOpenTeamManager: () => void;
-}
 
 export const BlockTeamRosterBar = ({ onOpenTeamManager }: BlockTeamRosterBarProps) => {
   const { users } = useAuth();
@@ -222,3 +219,4 @@ export const BlockTeamRosterBar = ({ onOpenTeamManager }: BlockTeamRosterBarProp
     </div>
   );
 };
+

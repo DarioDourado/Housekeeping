@@ -1,14 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import type { InspectionReprovalModalProps } from '../../../types/components/inspection-reproval-modal.types';
 import { Room } from '../../../types/housekeeping.types';
-import { useHousekeeping } from '../../../services/hooks/housekeeping/useHousekeeping';
+import { useHousekeeping } from '../../../hooks/housekeeping/useHousekeeping';
 import { AlertTriangle, X, Check } from 'lucide-react';
-
-interface InspectionReprovalModalProps {
-  room: Room;
-  onClose: () => void;
-}
 
 export const InspectionReprovalModal = ({
   room,
@@ -124,3 +120,4 @@ export const InspectionReprovalModal = ({
     </div>
   );
 };
+

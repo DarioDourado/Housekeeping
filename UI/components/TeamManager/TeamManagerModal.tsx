@@ -58,8 +58,7 @@ export const TeamManagerModal = ({ onClose, initialTab = 'BOARD' }: { onClose: (
       title={t('team.title')}
       subtitle={tab === 'BOARD' ? t('team.subtitleBoard') : t('team.subtitleDirectory')}
       icon={<Users className="w-6 h-6" />}
-      maxWidth="max-w-[96vw] xl:max-w-7xl"
-      tall
+      fullscreen
       headerExtra={header}
       onClose={onClose}
       footer={

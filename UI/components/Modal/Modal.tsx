@@ -9,6 +9,7 @@ interface ModalProps {
   icon?: ReactNode;
   maxWidth?: string;
   tall?: boolean;
+  fullscreen?: boolean;
   headerExtra?: ReactNode;
   onClose: () => void;
   footer?: ReactNode;
@@ -16,13 +17,13 @@ interface ModalProps {
 }
 
 // - Casca comum dos modais: diálogo acessível (foco preso, Esc/clique fora fecham) com cabeçalho e rodapé opcional
-export const Modal = ({ title, subtitle, icon, maxWidth = 'max-w-2xl', tall = false, headerExtra, onClose, footer, children }: ModalProps) => {
+export const Modal = ({ title, subtitle, icon, maxWidth = 'max-w-2xl', tall = false, fullscreen = false, headerExtra, onClose, footer, children }: ModalProps) => {
   const { t } = useTranslation();
   const dialogRef = useFocusTrap<HTMLDivElement>(true);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs ${fullscreen ? '' : 'p-4'}`}
       onClick={onClose}
       onKeyDown={event => event.key === 'Escape' && onClose()}
     >
@@ -33,7 +34,7 @@ export const Modal = ({ title, subtitle, icon, maxWidth = 'max-w-2xl', tall = fa
         aria-modal="true"
         aria-label={title}
         onClick={event => event.stopPropagation()}
-        className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full ${maxWidth} ${tall ? 'h-[92vh] max-h-[92vh]' : 'max-h-[85vh]'} flex flex-col shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150`}
+        className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full ${fullscreen ? 'h-full rounded-none' : `rounded-2xl ${maxWidth} ${tall ? 'h-[92vh] max-h-[92vh]' : 'max-h-[85vh]'}`} flex flex-col shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150`}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
           <div className="flex items-center gap-3">

@@ -34,6 +34,7 @@ export const StaffManagerModal = ({ onClose }: { onClose: () => void }) => {
       title={t('staff.title')}
       subtitle={t('staff.subtitle')}
       icon={<Users className="w-5 h-5" />}
+      fullscreen
       onClose={onClose}
       footer={
         <div className="flex justify-end">
@@ -41,7 +42,7 @@ export const StaffManagerModal = ({ onClose }: { onClose: () => void }) => {
         </div>
       }
     >
-      <div className="p-6 space-y-4 text-xs">
+      <div className="p-6 space-y-4 text-xs w-full max-w-5xl mx-auto">
         {canManage && (showForm ? (
           <StaffForm onCancel={() => setShowForm(false)} onSubmit={async user => { await addUser(user); setShowForm(false); }} />
         ) : (

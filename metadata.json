@@ -1,6 +1,0 @@
-{
-  "name": "Vila Vita Parc — Housekeeping OS",
-  "description": "Sistema integrado de Housekeeping para o resort Vila Vita Parc: gestão operacional de task sheets de manhã e turndown, sincronização com Opera Cloud, auditoria de tempos e chat interno.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

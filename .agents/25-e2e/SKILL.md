@@ -8,7 +8,7 @@ metadata:
   scope: "testing"
   requires: "[]"
   related: "[16-tests, 20-rules, 23-accessibility, 24-ci-quality]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # E2E - Testes End-to-End (Playwright)
 
@@ -174,8 +174,8 @@ for (const path of ['/login', '/dashboard', '/users']) {
     runs-on: ubuntu-latest
     needs: [quality]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '22.12.x', cache: 'npm' }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
@@ -184,7 +184,7 @@ for (const path of ['/login', '/dashboard', '/users']) {
           E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
           E2E_USER: ${{ secrets.E2E_USER }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with: { name: playwright-traces, path: test-results/ }
 ```

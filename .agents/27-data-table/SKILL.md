@@ -18,9 +18,26 @@ A tabela é o componente central de qualquer back-office e o sítio onde mais pa
 
 ## Ordenação e paginação na URL (extensão direta de `07`)
 
-O tipo ContactFilters deve declarar sort e dir com enums validados, alem de page.
+`ContactFilters` segue o mesmo molde de `14-types` §Filtros / `07-react-query` §parseUserFilters:
+schema com enums `sort`/`dir`, coerção e defaults — nunca interface manual e nunca leitura
+direta de `searchParams` sem schema. Diferença por domínio: apenas os identificadores de escopo
+(aqui, `sort: z.enum(['name', 'email'])`).
 
 **Regra:** `sort`, `dir` e `page` vivem na query string, como qualquer filtro — voltar atrás, refrescar e partilhar link preservam a vista.
+
+```typescript
+// types/contacts/contact.types.ts — mesmo molde de 14-types §Filtros e 99-example;
+// aqui a única diferença por domínio é o enum de colunas de ordenação permitidas.
+export const contactFiltersSchema = z.object({
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().catch(1),
+  limit: z.coerce.number().int().positive().max(100).catch(25),
+  sort: z.enum(['name', 'email']).catch('name'),
+  dir: z.enum(['asc', 'desc']).catch('asc'),
+});
+
+export type ContactFilters = z.infer<typeof contactFiltersSchema>;
+```
 
 ```typescript
 // pages/Contacts/Contacts.tsx (excerto — mesmo updateFilter de 07-react-query)

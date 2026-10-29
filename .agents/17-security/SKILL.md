@@ -8,11 +8,11 @@ metadata:
   scope: "security"
   requires: "[]"
   related: "[04-stack]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # PROMPT MASTER — AGENTE AUDITOR DE SEGURANÇA DE SOFTWARE
 > Versão 2.0 | Compatível com Claude Code, GitHub Copilot, Cursor
-> Referência: OWASP Top 10 2021 · CWE/SANS Top 25 · NIST SP 800-115 · CVSS v3.1
+> Referência: OWASP Top 10 2025 · OWASP ASVS 5.0 · CWE/SANS Top 25 · NIST SP 800-115 · CVSS v3.1
 
 ---
 
@@ -155,7 +155,7 @@ CORREÇÕES ESPERADAS:
   // CSP Header
   Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{random}';
 
-REFERÊNCIAS: CWE-79 | OWASP A03:2021
+REFERÊNCIAS: CWE-79 | OWASP A05:2025 (Injection)
 ```
 
 ---
@@ -204,7 +204,7 @@ CORREÇÕES ESPERADAS:
           pass
       return False
 
-REFERÊNCIAS: CWE-918 | OWASP A10:2021
+REFERÊNCIAS: CWE-918 | OWASP A01:2025 (SSRF consolidado em Broken Access Control na edição 2025)
 ```
 
 ---
@@ -254,7 +254,7 @@ CORREÇÕES ESPERADAS:
   // Política recomendada: UUID v4 em vez de IDs sequenciais
   // Implementar RBAC com bibliotecas: Casbin, Laravel Gates/Policies, Spring Security
 
-REFERÊNCIAS: CWE-639, CWE-284 | OWASP A01:2021
+REFERÊNCIAS: CWE-639, CWE-284 | OWASP A01:2025 (Broken Access Control)
 ```
 
 ---
@@ -306,7 +306,7 @@ CORREÇÕES ESPERADAS:
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   Set-Cookie: session=xxx; Secure; HttpOnly; SameSite=Strict
 
-REFERÊNCIAS: CWE-327, CWE-798 | OWASP A02:2021
+REFERÊNCIAS: CWE-327, CWE-798 | OWASP A04:2025 (Cryptographic Failures); ASVS 5.0 §6
 ```
 
 ---
@@ -357,7 +357,7 @@ CORREÇÕES ESPERADAS:
   # Verificação com ferramentas
   # securityheaders.com | observatory.mozilla.org | SSL Labs
 
-REFERÊNCIAS: CWE-16, CWE-209 | OWASP A05:2021
+REFERÊNCIAS: CWE-16, CWE-209 | OWASP A02:2025 (Security Misconfiguration); ASVS 5.0 §14
 ```
 
 ---
@@ -411,7 +411,7 @@ AUTOMAÇÃO RECOMENDADA:
         interval: "weekly"
       open-pull-requests-limit: 10
 
-REFERÊNCIAS: CWE-1035 | OWASP A06:2021 | CVSS variável por CVE
+REFERÊNCIAS: CWE-1035 | OWASP A03:2025 (Software Supply Chain Failures) | CVSS variável por CVE
 ```
 
 ---
@@ -462,7 +462,7 @@ CORREÇÕES ESPERADAS:
   # SBOM com: syft, cyclonedx-cli
   # Assinatura com: cosign (Sigstore)
 
-REFERÊNCIAS: CWE-494, CWE-502 | OWASP A08:2021
+REFERÊNCIAS: CWE-494, CWE-502 | OWASP A08:2025 (Software or Data Integrity Failures)
 ```
 
 ---
@@ -507,26 +507,26 @@ EXEMPLO PIPELINE CI/CD COMPLETO (GitHub Actions):
     sast:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         - name: Semgrep SAST
-          uses: semgrep/semgrep-action@v1
+          uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
           with:
             config: "p/owasp-top-ten p/php p/javascript"
 
     secrets:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
           with: { fetch-depth: 0 }
         - name: GitLeaks
-          uses: gitleaks/gitleaks-action@v2
+          uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
 
     deps:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         - name: OWASP Dependency-Check
-          uses: dependency-check/Dependency-Check_Action@main
+          uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c # main pin 2026-10-25
           with:
             project: 'MyApp'
             path: '.'
@@ -538,7 +538,7 @@ EXEMPLO PIPELINE CI/CD COMPLETO (GitHub Actions):
       needs: [sast]
       steps:
         - name: ZAP Baseline Scan
-          uses: zaproxy/action-baseline@v0.12.0
+          uses: zaproxy/action-baseline@66042c8e7e24680119199a017e5b0e8603bf4dae # v0.12.0
           with:
             target: 'https://staging.empresa.com'
             rules_file_name: '.zap/rules.tsv'

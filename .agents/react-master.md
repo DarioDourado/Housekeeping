@@ -1,6 +1,6 @@
 # React Enterprise System v2
 
-Gerado deterministicamente de 36 modulos. Referencia completa; preferir react-core.md e skills por tarefa.
+Gerado deterministicamente de 35 modulos. Referencia completa; preferir react-core.md e skills por tarefa.
 As instrucoes especializadas aplicam-se apenas ao respetivo ambito. Recursos relativos requerem os modulos distribuidos ao lado deste ficheiro.
 
 - [00-meta](#00-meta)
@@ -37,7 +37,6 @@ As instrucoes especializadas aplicam-se apenas ao respetivo ambito. Recursos rel
 - [31-code-review](#31-code-review)
 - [32-ci-cd](#32-ci-cd)
 - [33-orchestration](#33-orchestration)
-- [34-backend-fastapi](#34-backend-fastapi)
 - [99-example](#99-example)
 
 ---
@@ -327,10 +326,10 @@ Este sistema assume **SPA client-side rendering** com Vite. Implicações a conh
 
 | Lib | Versão | Propósito |
 |-----|--------|-----------|
-| React | 19+ | UI |
-| TypeScript | 5+ | Types (strict mode) |
-| Vite | 6+ | Build |
-| React Router DOM | 7+ | Routing |
+| React | 19 | UI |
+| TypeScript | 7 | Types (strict mode) |
+| Vite | 8 | Build |
+| React Router DOM | 7 | Routing |
 
 ## Estado e Data
 
@@ -1439,6 +1438,12 @@ export default i18n;
     "retry": "Tentar novamente",
     "uploading": "A enviar...",
     "learnMore": "Saber mais",
+    "skipToContent": "Saltar para o conteúdo principal",
+    "bulkSelected": "{{count}} selecionado(s)",
+    "deleteSelected": "Eliminar selecionados",
+    "deleteSelectedTitle": "Eliminar selecionados",
+    "deleteSelectedMessage": "Eliminar {{count}} utilizador(es)? Esta ação não pode ser revertida.",
+    "bulkPartialError": "Não foi possível eliminar {{count}} item(ns)",
     "close": "Fechar",
     "bulkActions": "Acoes em lote",
     "deletePermanently": "Elimina permanentemente este registo",
@@ -1472,6 +1477,7 @@ export default i18n;
     "fileType": "Tipo de ficheiro não suportado"
   },
   "errors": {
+    "appFallback": "Algo correu mal",
     "generic": "Ocorreu um erro. Tente novamente.",
     "network": "Erro de ligação. Verifique a internet e tente novamente.",
     "offline": "Sem ligação à internet. As alterações não serão guardadas.",
@@ -1619,14 +1625,18 @@ const LanguageSwitcher = () => {
 // types/users/user.types.ts
 import { z } from 'zod';
 
+// Limites partilhados schema ↔ UI: a mensagem de maxLength interpola este valor,
+// nunca um literal no componente ({ count: 2 } num campo max(100) renderiza
+// "Máximo 2 caracteres").
+export const NAME_MIN_LENGTH = 2;
+export const NAME_MAX_LENGTH = 100;
+
 // Schema com mensagens i18n
 export const createUserSchema = z.object({
   name: z.string()
-    .min(2, 'validation.minLength')
-    .max(100, 'validation.maxLength'),
-  email: z.string()
-    .min(1, 'validation.required')
-    .email('validation.email'),
+    .min(NAME_MIN_LENGTH, 'validation.minLength')
+    .max(NAME_MAX_LENGTH, 'validation.maxLength'),
+  email: z.email('validation.email'),
   role: z.string()
     .min(1, 'validation.required'),
 });
@@ -1645,7 +1655,7 @@ export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { createUserSchema, CreateUserDTO } from '@/types/users';
+import { createUserSchema, CreateUserDTO, NAME_MAX_LENGTH } from '@/types/users';
 import { Button } from '@/UI/components/Button';
 import { Input } from '@/UI/components/Input';
 
@@ -1671,7 +1681,7 @@ export const UserForm = ({ onSubmit, isLoading, defaultValues }: UserFormProps) 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Input
         label={t('users.form.name')}
-        error={errors.name?.message && t(errors.name.message, { count: 2 })}
+        error={errors.name?.message && t(errors.name.message, { count: NAME_MAX_LENGTH })}
         {...register('name')}
       />
       
@@ -1965,19 +1975,22 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Fallback padrão — cores via design tokens (04-stack)
-const DefaultErrorFallback = ({ onReset }: { onReset: () => void }) => (
-  <div className="p-6 text-center">
-    <h2 className="text-xl font-bold text-danger">Algo correu mal</h2>
-    <p className="mt-2 text-gray-600">Ocorreu um erro inesperado.</p>
-    <button
-      onClick={onReset}
-      className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary-hover"
-    >
-      Tentar novamente
-    </button>
-  </div>
-);
+// Fallback padrão — cores via design tokens (04-stack); texto via i18n (20-rules ❌4)
+const DefaultErrorFallback = ({ onReset }: { onReset: () => void }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="p-6 text-center">
+      <h2 className="text-xl font-bold text-danger">{t('errors.appFallback')}</h2>
+      <p className="mt-2 text-gray-600">{t('errors.generic')}</p>
+      <button
+        onClick={onReset}
+        className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary-hover"
+      >
+        {t('common.retry')}
+      </button>
+    </div>
+  );
+};
 ```
 
 ## Uso do ErrorBoundary
@@ -2359,6 +2372,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState = ({ message, action, helpHref, helpLabel }: EmptyStateProps) => {
+  const { t } = useTranslation();
   return (
     <div className="p-8 text-center">
       <div className="text-gray-400 mb-4">
@@ -2376,7 +2390,7 @@ export const EmptyState = ({ message, action, helpHref, helpLabel }: EmptyStateP
       )}
       {helpHref && (
         <a href={helpHref} target="_blank" rel="noreferrer" className="mt-2 block text-sm text-primary hover:underline">
-          {helpLabel ?? 'Saber mais'}
+          {helpLabel ?? t('common.learnMore')}
         </a>
       )}
     </div>
@@ -2738,7 +2752,7 @@ export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 export const userSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   role: z.string(),
   avatar: z.string().optional(),
   createdAt: z.string(),
@@ -2843,13 +2857,13 @@ export const passwordSchema = z.string()
 // Login NÃO valida força (min 1): passwords antigas podem não cumprir a regra atual —
 // rejeitar no login bloquearia o utilizador; a força só se exige onde a password é criada.
 export const loginSchema = z.object({
-  email: z.string().email('validation.email'),
+  email: z.email('validation.email'),
   password: z.string().min(1, 'validation.required'),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2, 'validation.minLength'),
-  email: z.string().email('validation.email'),
+  email: z.email('validation.email'),
   password: passwordSchema,
   passwordConfirm: z.string(),
 }).refine((d) => d.password === d.passwordConfirm, {
@@ -3330,7 +3344,7 @@ export * from '@testing-library/react';
 
 # PROMPT MASTER — AGENTE AUDITOR DE SEGURANÇA DE SOFTWARE
 > Versão 2.0 | Compatível com Claude Code, GitHub Copilot, Cursor
-> Referência: OWASP Top 10 2021 · CWE/SANS Top 25 · NIST SP 800-115 · CVSS v3.1
+> Referência: OWASP Top 10 2025 · OWASP ASVS 5.0 · CWE/SANS Top 25 · NIST SP 800-115 · CVSS v3.1
 
 ---
 
@@ -3473,7 +3487,7 @@ CORREÇÕES ESPERADAS:
   // CSP Header
   Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{random}';
 
-REFERÊNCIAS: CWE-79 | OWASP A03:2021
+REFERÊNCIAS: CWE-79 | OWASP A05:2025 (Injection)
 ```
 
 ---
@@ -3522,7 +3536,7 @@ CORREÇÕES ESPERADAS:
           pass
       return False
 
-REFERÊNCIAS: CWE-918 | OWASP A10:2021
+REFERÊNCIAS: CWE-918 | OWASP A01:2025 (SSRF consolidado em Broken Access Control na edição 2025)
 ```
 
 ---
@@ -3572,7 +3586,7 @@ CORREÇÕES ESPERADAS:
   // Política recomendada: UUID v4 em vez de IDs sequenciais
   // Implementar RBAC com bibliotecas: Casbin, Laravel Gates/Policies, Spring Security
 
-REFERÊNCIAS: CWE-639, CWE-284 | OWASP A01:2021
+REFERÊNCIAS: CWE-639, CWE-284 | OWASP A01:2025 (Broken Access Control)
 ```
 
 ---
@@ -3624,7 +3638,7 @@ CORREÇÕES ESPERADAS:
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   Set-Cookie: session=xxx; Secure; HttpOnly; SameSite=Strict
 
-REFERÊNCIAS: CWE-327, CWE-798 | OWASP A02:2021
+REFERÊNCIAS: CWE-327, CWE-798 | OWASP A04:2025 (Cryptographic Failures); ASVS 5.0 §6
 ```
 
 ---
@@ -3675,7 +3689,7 @@ CORREÇÕES ESPERADAS:
   # Verificação com ferramentas
   # securityheaders.com | observatory.mozilla.org | SSL Labs
 
-REFERÊNCIAS: CWE-16, CWE-209 | OWASP A05:2021
+REFERÊNCIAS: CWE-16, CWE-209 | OWASP A02:2025 (Security Misconfiguration); ASVS 5.0 §14
 ```
 
 ---
@@ -3729,7 +3743,7 @@ AUTOMAÇÃO RECOMENDADA:
         interval: "weekly"
       open-pull-requests-limit: 10
 
-REFERÊNCIAS: CWE-1035 | OWASP A06:2021 | CVSS variável por CVE
+REFERÊNCIAS: CWE-1035 | OWASP A03:2025 (Software Supply Chain Failures) | CVSS variável por CVE
 ```
 
 ---
@@ -3780,7 +3794,7 @@ CORREÇÕES ESPERADAS:
   # SBOM com: syft, cyclonedx-cli
   # Assinatura com: cosign (Sigstore)
 
-REFERÊNCIAS: CWE-494, CWE-502 | OWASP A08:2021
+REFERÊNCIAS: CWE-494, CWE-502 | OWASP A08:2025 (Software or Data Integrity Failures)
 ```
 
 ---
@@ -3825,26 +3839,26 @@ EXEMPLO PIPELINE CI/CD COMPLETO (GitHub Actions):
     sast:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         - name: Semgrep SAST
-          uses: semgrep/semgrep-action@v1
+          uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
           with:
             config: "p/owasp-top-ten p/php p/javascript"
 
     secrets:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
           with: { fetch-depth: 0 }
         - name: GitLeaks
-          uses: gitleaks/gitleaks-action@v2
+          uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
 
     deps:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         - name: OWASP Dependency-Check
-          uses: dependency-check/Dependency-Check_Action@main
+          uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c # main pin 2026-10-25
           with:
             project: 'MyApp'
             path: '.'
@@ -3856,7 +3870,7 @@ EXEMPLO PIPELINE CI/CD COMPLETO (GitHub Actions):
       needs: [sast]
       steps:
         - name: ZAP Baseline Scan
-          uses: zaproxy/action-baseline@v0.12.0
+          uses: zaproxy/action-baseline@66042c8e7e24680119199a017e5b0e8603bf4dae # v0.12.0
           with:
             target: 'https://staging.empresa.com'
             rules_file_name: '.zap/rules.tsv'
@@ -4265,7 +4279,7 @@ vi.mock('@/services/transporters/users', () => ({
 | 6 | Tratar 4 estados: loading, error, empty, success |
 | 7 | Validar forms **e respostas de API** com Zod (`schema.parse` no transporter — ver `06-patterns`/`14-types`) |
 | 8 | Access token em memória (não localStorage) |
-| 9 | `withCredentials: true` no Axios |
+| 9 | `withCredentials: true` no Axios **só** para origens autorizadas (baseURL fixa no transporte; cookies/credenciais nunca devem poder ir para um host arbitrário — ver `17-security` §CORS) |
 | 10 | `index.ts` em cada pasta |
 | 11 | 1 hook = 1 ficheiro |
 | 12 | 1 domínio = estrutura espelhada (hooks/transporters/types) |
@@ -4273,7 +4287,6 @@ vi.mock('@/services/transporters/users', () => ({
 | 14 | Invalidar queries após mutations |
 | 15 | ErrorBoundary no root |
 | 16 | Confirmar ações destrutivas (delete) com `ConfirmDialog` antes de disparar a mutation |
-| 17 | Alterar `types/`, transporters ou `config/constants.ts` ⇒ atualizar o contrato em `34-backend-fastapi` (domain-contract.md) no mesmo trabalho |
 
 ## ❌ NUNCA
 
@@ -4739,23 +4752,26 @@ Nunca confiar só na cor para transmitir estado (erro/sucesso) — combinar semp
 
 ```tsx
 // UI/containers/Layout/Layout.tsx — skip link como primeiro elemento focável
-export const Layout = () => (
-  <div className="flex h-screen">
-    <a
-      href="#main-content"
-      className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-2"
-    >
-      Saltar para o conteúdo principal
-    </a>
-    <Sidebar />
-    <div className="flex-1 flex flex-col">
-      <Header />
-      <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-6">
-        <Outlet />
-      </main>
+export const Layout = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-2"
+      >
+        {t('common.skipToContent')}
+      </a>
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 ```
 
 ### Focus trap em modais/drawers
@@ -4915,8 +4931,18 @@ const toggleSelect = (id: string) => {
 };
 
 const handleBulkDelete = async () => {
-  await Promise.all([...selectedIds].map((id) => deleteUser.mutateAsync(id)));
-  setSelectedIds(new Set());
+  // Promise.allSettled: em falha parcial, remove só os eliminados e notifica os
+  // falhados. Promise.all aqui ia produzir unhandledRejection e manter a
+  // seleção inconsistente sem feedback.
+  const results = await Promise.allSettled(
+    [...selectedIds].map((id) => deleteUser.mutateAsync(id)),
+  );
+  const ok = new Set(
+    [...selectedIds].filter((_, i) => results[i]?.status === 'fulfilled'),
+  );
+  const failed = results.filter((r) => r.status === 'rejected').length;
+  setSelectedIds((prev) => new Set([...prev].filter((id) => !ok.has(id))));
+  if (failed > 0) toast.error(t('common.bulkPartialError', { count: failed }));
   setBulkDeleteOpen(false);
 };
 
@@ -4924,17 +4950,17 @@ return (
   <>
     {selectedIds.size > 0 && (
       <div role="toolbar" aria-label={t('common.bulkActions')} className="flex items-center gap-2 p-2">
-        <span>{selectedIds.size} selecionado(s)</span>
+        <span>{t('common.bulkSelected', { count: selectedIds.size })}</span>
         <Button variant="danger" onClick={() => setBulkDeleteOpen(true)}>
-          Eliminar selecionados
+          {t('common.deleteSelected')}
         </Button>
       </div>
     )}
     {/* cada linha da lista tem um <input type="checkbox" onChange={() => toggleSelect(user.id)} /> */}
     <ConfirmDialog
       isOpen={bulkDeleteOpen}
-      title="Eliminar utilizadores selecionados"
-      message={`Tens a certeza que queres eliminar ${selectedIds.size} utilizador(es)? Esta ação não pode ser revertida.`}
+      title={t('common.deleteSelectedTitle')}
+      message={t('common.deleteSelectedMessage', { count: selectedIds.size })}
       isDangerous
       isLoading={deleteUser.isPending}
       onConfirm={handleBulkDelete}
@@ -5103,8 +5129,8 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '22.12.x', cache: 'npm' }
       - run: npm ci
       - run: npm run lint
@@ -5116,8 +5142,8 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '22.12.x', cache: 'npm' }
       - run: npm ci
       - name: SCA de produção
@@ -5125,7 +5151,7 @@ jobs:
       - name: SCA incluindo dependências de desenvolvimento
         run: npm run audit:all
       - name: Secrets scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
 ```
 
 O pipeline usa Node.js 22.12+ e um limiar explícito `high`. A auditoria de produção usa
@@ -5390,8 +5416,8 @@ for (const path of ['/login', '/dashboard', '/users']) {
     runs-on: ubuntu-latest
     needs: [quality]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '22.12.x', cache: 'npm' }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
@@ -5400,7 +5426,7 @@ for (const path of ['/login', '/dashboard', '/users']) {
           E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
           E2E_USER: ${{ secrets.E2E_USER }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with: { name: playwright-traces, path: test-results/ }
 ```
@@ -5455,9 +5481,17 @@ export interface ConsentState {
 
 const STORAGE_KEY = 'consent'; // a preferência de consentimento é, ela própria, essencial
 
+const FALLBACK_CONSENT: ConsentState = { analytics: false, marketing: false, decidedAt: null };
+
 const readConsent = (): ConsentState => {
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : { analytics: false, marketing: false, decidedAt: null };
+  if (!raw) return FALLBACK_CONSENT;
+  try {
+    return { ...FALLBACK_CONSENT, ...JSON.parse(raw) };
+  } catch {
+    // fail-closed: storage corrompido regista "recusado", nunca crasha a app no arranque
+    return FALLBACK_CONSENT;
+  }
 };
 
 interface ConsentContextType {
@@ -5732,7 +5766,7 @@ export function exportCsv<T extends Record<string, unknown>>(
 ## Como usar
 
 Alguns vetores são de **build** (analisar o `dist/`), outros de **runtime** (Playwright contra o
-staging — compõe com `web-e2e`). Todos entram no gate de CI como bloqueantes.
+staging — compõe com `25-e2e`). Todos entram no gate de CI como bloqueantes.
 
 ## Os vetores do cliente
 
@@ -5870,8 +5904,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: "22.12.x", cache: "npm" }
       - run: npm ci
       - run: npm run build
@@ -6348,8 +6382,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 22, cache: 'npm' }
       - run: npm ci
       - run: npm run lint
@@ -6360,7 +6394,7 @@ jobs:
       - run: npx sentry-cli sourcemaps upload dist/ --release "${{ github.sha }}"
       - run: find dist -name '*.map' -delete
       # Artefacto imutável, versionado pelo SHA
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: app-${{ github.sha }}
           path: dist/
@@ -6391,12 +6425,12 @@ Só promover quando **todos** passam:
     environment: staging
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 22, cache: 'npm' }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: app-${{ github.sha }}, path: dist }
       - name: Deploy para staging
         run: ./scripts/deploy.sh staging dist
@@ -6541,133 +6575,6 @@ menos tokens. Usar os cenarios e formato em tests/evaluations no repositorio fon
 
 ---
 
-<a id="34-backend-fastapi"></a>
-
-<!-- MÓDULO: 34-backend-fastapi -->
-
-# Backend FastAPI e contrato FE-BE
-
-O FE React (ver [arquitetura](01-architecture/SKILL.md)) consome uma API FastAPI.
-O contrato de dominio vive em [domain-contract.md](34-backend-fastapi/references/domain-contract.md) e e
-a unica fonte de verdade: FE (Zod) e BE (Pydantic) espelham-no.
-
-## Regra de manutencao (obrigatoria)
-
-Alterar qualquer um destes no FE obriga a atualizar `domain-contract.md` (e o
-changelog no fim) no mesmo trabalho, antes de dar a tarefa por concluida:
-
-- `types/**`, `services/transporters/**`, `config/constants.ts`
-- regras de negocio de estados, permissoes ou sincronizacao com o Opera
-- decisoes fechadas da reuniao (marcar `PENDENTE` como `DECIDIDO` com data)
-
-Ao iniciar o BE: comparar `last-verified` com o historico git destes caminhos e
-reconciliar primeiro. Contrato desatualizado = tarefa bloqueada.
-
-## Stack
-
-| Peca | Escolha |
-|---|---|
-| Linguagem | Python 3.12+, tipado (mypy strict, ruff) |
-| API | FastAPI + Pydantic v2 (DTOs), uvicorn |
-| Dados | SQLAlchemy 2 (async) + Alembic, PostgreSQL |
-| Config | pydantic-settings, segredos so por ambiente |
-| Auth | PyJWT + hash argon2 |
-| Testes | pytest, pytest-asyncio, httpx.AsyncClient |
-
-Versoes fixadas em `pyproject.toml` e verificadas na altura da instalacao; nao
-copiar versoes desta skill.
-
-## Camadas (espelham Pages → Hooks → Transporters)
-
-| Camada | Faz | Nao faz |
-|---|---|---|
-| Router (`api/v1/routers`) | HTTP, validacao Pydantic, dependencia de permissao | Logica de negocio, SQL |
-| Service (`services`) | Regras, maquina de estados, eventos, transacoes | HTTP, ORM direto fora de repositories |
-| Repository (`repositories`) | Queries SQLAlchemy | Regras de negocio |
-| Integration (`integrations/opera`) | Falar com Opera atras de um `Protocol` | Regras de planeamento |
-
-```
-backend/
-├── app/
-│   ├── api/v1/routers/{domain}.py     # 1 router por dominio, nomes iguais aos do FE
-│   ├── schemas/{domain}.py            # DTOs Pydantic (camelCase no fio)
-│   ├── models/{domain}.py             # ORM
-│   ├── services/{domain}_service.py
-│   ├── repositories/{domain}_repository.py
-│   ├── integrations/opera/            # OperaClient (Protocol), FakeOperaClient, OhipClient
-│   ├── core/                          # config, security, deps, errors, permissions
-│   └── main.py
-├── migrations/                        # Alembic
-└── tests/                             # espelha app/
-```
-
-Dominios (mesmo nome em FE `hooks/`, `transporters/`, `types/` e BE): `auth`, `staff`,
-`rooms`, `sections`, `plans`, `tasks`, `events`, `opera`, `messages`.
-
-## Convencoes do contrato
-
-- Base `/api/v1`; JSON `camelCase` (`alias_generator=to_camel`, `populate_by_name=True`).
-- IDs UUID em string; datas e horas ISO-8601 UTC com fuso (o FE formata para exibir).
-- Enums com os mesmos valores que os enums TS do FE; alterar um obriga a alterar o outro.
-- Erros em `application/problem+json`: `{ type, title, status, detail, code }`; `code` estavel para i18n no FE.
-- Listas paginadas: `{ items, total, page, pageSize }`.
-- Concorrencia otimista: recursos mutaveis tem `version`; `PATCH` envia `If-Match`; conflito = 409.
-- Acoes idempotentes: o cliente envia `clientEventId` (fila offline); repetir nao duplica o evento.
-- Cliente FE gerado a partir do OpenAPI (orval) ou tipos Zod escritos a mao, sempre com `schema.parse` no transporter.
-
-```python
-class CamelModel(BaseModel):
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
-
-@router.post("/tasks/{task_id}/start", response_model=TaskOut)
-async def start_task(task_id: UUID, body: StartTaskIn, user: User = Depends(require("task.startFinish"))):
-    return await task_service.start(task_id, body, actor=user)
-```
-
-## Auth e permissoes
-
-Espelha [08-auth](08-auth/SKILL.md): access token curto no corpo (o FE guarda em memoria),
-refresh em cookie `httpOnly; Secure; SameSite=Strict` com rotacao e deteccao de reutilizacao,
-CORS com origens explicitas e `allow_credentials`, limite de tentativas no login.
-Autorizacao e do servidor: dependencia `require(permission)` com a matriz do contrato
-(espelho de `ROLE_PERMISSIONS` em `config/constants.ts`) mais escopo (governanta = a sua
-area; empregada = tarefas atribuidas). O FE esconde, o BE decide.
-
-Telemoveis partilhados: sessao por utilizador, mas cada evento guarda quem **registou**
-(`registeredById`), o dispositivo e, quando conhecido, quem **executou** (`executorIds`).
-
-## Regras de negocio nao negociaveis
-
-- Servico diurno, turndown e refresh sao `ServiceTask` distintas do mesmo quarto; nunca se substituem.
-- Estado Opera (Dirty/Clean/Inspected) nao e estado de tarefa; turndown nunca o altera.
-- DND e Refuse Service sao `NOT_PERFORMED` com motivo; nunca contam como limpo.
-- Eventos sao append-only; estatisticas reconstroem-se dos eventos.
-- Nunca sobrescrever um estado Opera mais recente com uma escrita antiga: criar `OperaSyncJob` em `CONFLICT`.
-- O dia operacional fecha em `OPERA_DAY_CLOSE_HOUR`, nao as 00h00.
-- Configuracao base (secoes) e distribuicao do dia (plano) sao independentes.
-
-## Seguranca, privacidade e testes
-
-Validar tudo em Pydantic na fronteira; SQL apenas via ORM parametrizado; logs sem PII
-(ver [26-privacy](26-privacy/SKILL.md) e [17-security](17-security/SKILL.md)); dados de
-hospedes minimizados e com retencao definida (PENDENTE no contrato).
-
-Testes: pytest por service e por router; cenarios CT-01 a CT-20 do requisito como testes de
-aceitacao; teste de contrato que falha se o `openapi.json` divergir do snapshot versionado.
-
-## Checklist: novo dominio no BE
-
-```
-□ Entrada no domain-contract.md (entidade, enums, estados, endpoints)
-□ schemas + models + repository + service + router, nomes iguais ao dominio FE
-□ Migracao Alembic revista (nunca editar uma ja aplicada)
-□ Permissao em core/permissions e em config/constants.ts
-□ Testes de service, router e contrato
-□ Changelog do contrato atualizado e last-verified revisto
-```
-
----
-
 <a id="99-example"></a>
 
 <!-- MÓDULO: 99-example -->
@@ -6706,7 +6613,7 @@ export type UpdateContactDTO = z.infer<typeof updateContactSchema>;
 export const contactSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   phone: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),

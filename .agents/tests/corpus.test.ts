@@ -13,8 +13,8 @@ function workspace() {
 afterEach(() => temporary.splice(0).forEach((dir) => fs.rmSync(dir, { recursive: true, force: true })));
 
 it('discovers all modules and verifies generated artifacts', () => {
-  expect(inventory()).toHaveLength(36);
-  expect(check()).toBe(36);
+  expect(inventory()).toHaveLength(35);
+  expect(check()).toBe(35);
   expect(outputs(inventory())['react-core.md'].split('\n').length).toBeLessThan(120);
 });
 
@@ -45,7 +45,7 @@ it('rejects broken resources and unknown module references', () => {
 it('packages all resources without overwriting an existing installation', () => {
   const target = path.join(workspace(), 'skills');
   packageSkills(target);
-  expect(inventory(target)).toHaveLength(36);
+  expect(inventory(target)).toHaveLength(35);
   expect(fs.existsSync(path.join(target, '08-auth/references/auth-client.ts'))).toBe(true);
   expect(() => packageSkills(target)).toThrow('refusing to overwrite');
 });

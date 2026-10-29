@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-const schema = z.object({ email: z.string().email(), password: z.string().min(1) });
+const schema = z.object({ email: z.email(), password: z.string().min(1) });
 export type LoginInput = z.infer<typeof schema>;
 type Props = { login: (input: LoginInput) => Promise<void>; t: (key: string) => string };
 

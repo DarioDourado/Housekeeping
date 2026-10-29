@@ -8,7 +8,7 @@ metadata:
   scope: "security"
   requires: "[]"
   related: "[06-patterns, 08-auth, 10-forms, 11-error-handling, 15-env, 20-rules]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # PRIVACY - RGPD e Privacidade
 
@@ -41,9 +41,17 @@ export interface ConsentState {
 
 const STORAGE_KEY = 'consent'; // a preferência de consentimento é, ela própria, essencial
 
+const FALLBACK_CONSENT: ConsentState = { analytics: false, marketing: false, decidedAt: null };
+
 const readConsent = (): ConsentState => {
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : { analytics: false, marketing: false, decidedAt: null };
+  if (!raw) return FALLBACK_CONSENT;
+  try {
+    return { ...FALLBACK_CONSENT, ...JSON.parse(raw) };
+  } catch {
+    // fail-closed: storage corrompido regista "recusado", nunca crasha a app no arranque
+    return FALLBACK_CONSENT;
+  }
 };
 
 interface ConsentContextType {

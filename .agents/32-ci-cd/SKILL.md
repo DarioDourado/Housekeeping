@@ -10,9 +10,9 @@ description: >
 metadata:
   stack: "react-web"
   scope: "devops"
-  requires: "[24-ci-quality, web-e2e, 15-env]"
-  related: "[24-ci-quality, web-e2e, 15-env, 28-security-verification, 22-performance, 11-error-handling]"
-  last-verified: "2026-09-02"
+  requires: "[24-ci-quality, 25-e2e, 15-env]"
+  related: "[24-ci-quality, 25-e2e, 15-env, 28-security-verification, 22-performance, 11-error-handling]"
+  last-verified: "2026-10-25"
 ---
 # CI/CD — Continuous Delivery e Deploy
 
@@ -58,8 +58,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 22, cache: 'npm' }
       - run: npm ci
       - run: npm run lint
@@ -70,7 +70,7 @@ jobs:
       - run: npx sentry-cli sourcemaps upload dist/ --release "${{ github.sha }}"
       - run: find dist -name '*.map' -delete
       # Artefacto imutável, versionado pelo SHA
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: app-${{ github.sha }}
           path: dist/
@@ -101,12 +101,12 @@ Só promover quando **todos** passam:
     environment: staging
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 22, cache: 'npm' }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: app-${{ github.sha }}, path: dist }
       - name: Deploy para staging
         run: ./scripts/deploy.sh staging dist

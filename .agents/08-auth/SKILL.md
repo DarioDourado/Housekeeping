@@ -8,7 +8,7 @@ metadata:
   scope: "security"
   requires: "[]"
   related: "[11-error-handling, 21-react-auth-page]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # Autenticacao e ciclo de sessao
 

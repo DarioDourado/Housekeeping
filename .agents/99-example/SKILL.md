@@ -8,7 +8,7 @@ metadata:
   scope: "architecture"
   requires: "[]"
   related: "[03-domain-structure, 06-patterns, 07-react-query, 08-auth, 12-loading-states, 14-types, 16-tests, 20-rules, 27-data-table]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # EXAMPLE - Domínio Completo `contacts` (validado empiricamente)
 
@@ -44,7 +44,7 @@ export type UpdateContactDTO = z.infer<typeof updateContactSchema>;
 export const contactSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   phone: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -56,11 +56,17 @@ export const contactListSchema = z.array(contactSchema);
 // Validado: interface manual com opcionais NÃO compila com exactOptionalPropertyTypes.
 export type Contact = z.infer<typeof contactSchema>;
 
-export interface ContactFilters {
-  search?: string;
-  page?: number;
-  limit?: number;
-}
+// FILTROS — mesmo molde de `14-types` §Filtros: schema com enums sort/dir,
+// coerção e defaults; nunca interface manual.
+export const contactFiltersSchema = z.object({
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().catch(1),
+  limit: z.coerce.number().int().positive().max(100).catch(25),
+  sort: z.enum(['name', 'email', 'createdAt']).catch('name'),
+  dir: z.enum(['asc', 'desc']).catch('asc'),
+});
+
+export type ContactFilters = z.infer<typeof contactFiltersSchema>;
 ```
 
 ```typescript
@@ -157,22 +163,36 @@ export const useCreateContact = () => {
 ## 5. Page — filtros na URL + 4 estados (`07`/`12`)
 
 ```typescript
+// utils/parseContactFilters.ts — mesmo padrão de `07-react-query` §parseUserFilters:
+// o schema vive em types/contacts; o parser só mapeia os params da URL.
+import { contactFiltersSchema, type ContactFilters } from '@/types/contacts';
+
+export const parseContactFilters = (params: URLSearchParams): ContactFilters =>
+  contactFiltersSchema.parse({
+    search: params.get('search') || undefined,
+    page: params.get('page') ?? undefined,
+    limit: params.get('limit') ?? undefined,
+    sort: params.get('sort') ?? undefined,
+    dir: params.get('dir') ?? undefined,
+  });
+```
+
+```typescript
 // pages/Contacts/Contacts.tsx
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageWrapper } from '@/UI/containers/PageWrapper';
 import { useGetContacts } from '@/hooks/contacts';
-import type { ContactFilters } from '@/types/contacts';
+import { parseContactFilters } from '@/utils/parseContactFilters';
 import { ContactsList } from './components/ContactsList';
 
 export const Contacts = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const filters: ContactFilters = {
-    search: searchParams.get('search') ?? undefined,
-    page: Number(searchParams.get('page') ?? '1'),
-  };
+  // A URL é fronteira de confiança — parsing schematizado (mesmo padrão de
+  // `07-react-query`; NUNCA `Number(searchParams.get('page'))` direto).
+  const filters = parseContactFilters(searchParams);
 
   const { data: contacts, isLoading, error, refetch } = useGetContacts(filters);
 

@@ -8,7 +8,7 @@ metadata:
   scope: "ux"
   requires: "[]"
   related: "[06-patterns, 10-forms, 11-error-handling, 13-routes, 20-rules]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # ACCESSIBILITY - WCAG 2.2 AA
 
@@ -59,23 +59,26 @@ Nunca confiar só na cor para transmitir estado (erro/sucesso) — combinar semp
 
 ```tsx
 // UI/containers/Layout/Layout.tsx — skip link como primeiro elemento focável
-export const Layout = () => (
-  <div className="flex h-screen">
-    <a
-      href="#main-content"
-      className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-2"
-    >
-      Saltar para o conteúdo principal
-    </a>
-    <Sidebar />
-    <div className="flex-1 flex flex-col">
-      <Header />
-      <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-6">
-        <Outlet />
-      </main>
+export const Layout = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-2"
+      >
+        {t('common.skipToContent')}
+      </a>
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 ```
 
 ### Focus trap em modais/drawers
@@ -235,8 +238,18 @@ const toggleSelect = (id: string) => {
 };
 
 const handleBulkDelete = async () => {
-  await Promise.all([...selectedIds].map((id) => deleteUser.mutateAsync(id)));
-  setSelectedIds(new Set());
+  // Promise.allSettled: em falha parcial, remove só os eliminados e notifica os
+  // falhados. Promise.all aqui ia produzir unhandledRejection e manter a
+  // seleção inconsistente sem feedback.
+  const results = await Promise.allSettled(
+    [...selectedIds].map((id) => deleteUser.mutateAsync(id)),
+  );
+  const ok = new Set(
+    [...selectedIds].filter((_, i) => results[i]?.status === 'fulfilled'),
+  );
+  const failed = results.filter((r) => r.status === 'rejected').length;
+  setSelectedIds((prev) => new Set([...prev].filter((id) => !ok.has(id))));
+  if (failed > 0) toast.error(t('common.bulkPartialError', { count: failed }));
   setBulkDeleteOpen(false);
 };
 
@@ -244,17 +257,17 @@ return (
   <>
     {selectedIds.size > 0 && (
       <div role="toolbar" aria-label={t('common.bulkActions')} className="flex items-center gap-2 p-2">
-        <span>{selectedIds.size} selecionado(s)</span>
+        <span>{t('common.bulkSelected', { count: selectedIds.size })}</span>
         <Button variant="danger" onClick={() => setBulkDeleteOpen(true)}>
-          Eliminar selecionados
+          {t('common.deleteSelected')}
         </Button>
       </div>
     )}
     {/* cada linha da lista tem um <input type="checkbox" onChange={() => toggleSelect(user.id)} /> */}
     <ConfirmDialog
       isOpen={bulkDeleteOpen}
-      title="Eliminar utilizadores selecionados"
-      message={`Tens a certeza que queres eliminar ${selectedIds.size} utilizador(es)? Esta ação não pode ser revertida.`}
+      title={t('common.deleteSelectedTitle')}
+      message={t('common.deleteSelectedMessage', { count: selectedIds.size })}
       isDangerous
       isLoading={deleteUser.isPending}
       onConfirm={handleBulkDelete}

@@ -17,7 +17,6 @@ especificos e nao estao validados por esta distribuicao.
 - Todos os textos de UI via i18n; tratar loading, erro, vazio e sucesso; teclado, labels e foco verificaveis.
 - Operacoes destrutivas de UI exigem confirmacao. Nao carregar analytics antes do consentimento; respeitar revogacao.
 - Named exports para codigo de aplicacao; default permitido quando o framework/configuracao o exige.
-- Contrato FE-BE (FastAPI): alterar types, transporters ou config/constants.ts exige atualizar 34-backend-fastapi no mesmo trabalho.
 - Confirmar conclusao com testes proporcionais. Distinguir testes executados, analise documental e limitacoes.
 
 ## Orquestracao e custo

@@ -12,8 +12,8 @@ metadata:
   stack: "react-web"
   scope: "security"
   requires: "[]"
-  related: "[17-security, 26-privacy, 08-auth, 24-ci-quality, web-e2e]"
-  last-verified: "2026-08-15"
+  related: "[17-security, 26-privacy, 08-auth, 24-ci-quality, 25-e2e]"
+  last-verified: "2026-10-25"
 ---
 # SECURITY VERIFICATION — React web (build + E2E)
 
@@ -26,7 +26,7 @@ metadata:
 ## Como usar
 
 Alguns vetores são de **build** (analisar o `dist/`), outros de **runtime** (Playwright contra o
-staging — compõe com `web-e2e`). Todos entram no gate de CI como bloqueantes.
+staging — compõe com `25-e2e`). Todos entram no gate de CI como bloqueantes.
 
 ## Os vetores do cliente
 
@@ -164,8 +164,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: "22.12.x", cache: "npm" }
       - run: npm ci
       - run: npm run build

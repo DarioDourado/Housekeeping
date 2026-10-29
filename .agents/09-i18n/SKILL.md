@@ -8,7 +8,7 @@ metadata:
   scope: "ux"
   requires: "[]"
   related: "[02-folder-structure]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # I18N - Internacionalização
 
@@ -63,6 +63,12 @@ export default i18n;
     "retry": "Tentar novamente",
     "uploading": "A enviar...",
     "learnMore": "Saber mais",
+    "skipToContent": "Saltar para o conteúdo principal",
+    "bulkSelected": "{{count}} selecionado(s)",
+    "deleteSelected": "Eliminar selecionados",
+    "deleteSelectedTitle": "Eliminar selecionados",
+    "deleteSelectedMessage": "Eliminar {{count}} utilizador(es)? Esta ação não pode ser revertida.",
+    "bulkPartialError": "Não foi possível eliminar {{count}} item(ns)",
     "close": "Fechar",
     "bulkActions": "Acoes em lote",
     "deletePermanently": "Elimina permanentemente este registo",
@@ -96,6 +102,7 @@ export default i18n;
     "fileType": "Tipo de ficheiro não suportado"
   },
   "errors": {
+    "appFallback": "Algo correu mal",
     "generic": "Ocorreu um erro. Tente novamente.",
     "network": "Erro de ligação. Verifique a internet e tente novamente.",
     "offline": "Sem ligação à internet. As alterações não serão guardadas.",

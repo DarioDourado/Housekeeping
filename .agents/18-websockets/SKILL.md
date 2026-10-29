@@ -8,7 +8,7 @@ metadata:
   scope: "platform"
   requires: "[]"
   related: "[02-folder-structure, 07-react-query, 08-auth, 15-env, 20-rules]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # WebSocket ligado a sessao
 

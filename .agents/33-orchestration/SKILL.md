@@ -4,6 +4,7 @@ description: Distribui tarefas delimitadas entre planeamento, implementacao e re
 metadata:
   stack: react-web
   scope: orchestration
+  last-verified: "2026-10-25"
 ---
 # Orquestracao e eficiencia
 

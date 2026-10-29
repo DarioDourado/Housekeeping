@@ -8,7 +8,7 @@ metadata:
   scope: "quality"
   requires: "[]"
   related: "[05-conventions, 08-auth, 11-error-handling, 15-env, 16-tests, 17-security, 22-performance, 20-rules]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # CI/QUALITY - Qualidade e Segurança do Pipeline
 
@@ -133,8 +133,8 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '22.12.x', cache: 'npm' }
       - run: npm ci
       - run: npm run lint
@@ -146,8 +146,8 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '22.12.x', cache: 'npm' }
       - run: npm ci
       - name: SCA de produção
@@ -155,7 +155,7 @@ jobs:
       - name: SCA incluindo dependências de desenvolvimento
         run: npm run audit:all
       - name: Secrets scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
 ```
 
 O pipeline usa Node.js 22.12+ e um limiar explícito `high`. A auditoria de produção usa

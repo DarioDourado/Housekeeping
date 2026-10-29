@@ -9,6 +9,12 @@
 - **Projeto:** [nome]
 - **Propósito:** [1–2 frases — o que a app faz e para quem]
 - **Backend:** [Laravel x.x / FastAPI x.x] em [URL base por ambiente]
+- **Contrato de API:** o contrato canónico dos endpoints é o `openapi.json` emitido pelo próprio backend (`/docs`/Swagger) — **não criar documento paralelo de endpoints** (decisão 2026‑10‑25: redundante e propenso a divergir). Abaixo registam-se apenas os endpoints que a SPA consome, por domínio, com o schema Zod que valida cada resposta (`14-types`/`06-patterns`).
+
+| Endpoint (consumido) | Método | Domínio | Etapa de fluxo (schema Zod) |
+|---|---|---|---|
+| `[ex.: /api/v1/auth/login]` | `POST` | `[auth]` | `[loginSchema]` |
+| `[ex.: /api/v1/contacts]` | `GET` | `[contacts]` | `[contactSchema]` |
 - **Utilizadores-alvo:** [perfil, nível técnico, contexto de uso — ex.: rececionistas de hotel, uso diário intensivo em desktop]
 
 ## 2. Domínios

@@ -17,7 +17,6 @@ especificos e nao estao validados por esta distribuicao.
 - Todos os textos de UI via i18n; tratar loading, erro, vazio e sucesso; teclado, labels e foco verificaveis.
 - Operacoes destrutivas de UI exigem confirmacao. Nao carregar analytics antes do consentimento; respeitar revogacao.
 - Named exports para codigo de aplicacao; default permitido quando o framework/configuracao o exige.
-- Contrato FE-BE (FastAPI): alterar types, transporters ou config/constants.ts exige atualizar 34-backend-fastapi no mesmo trabalho.
 - Confirmar conclusao com testes proporcionais. Distinguir testes executados, analise documental e limitacoes.
 
 ## Orquestracao e custo
@@ -74,5 +73,4 @@ Caminhos relativos a .github/copilot-instructions.md na distribuicao Copilot.
 - [31-code-review](skills/31-code-review/SKILL.md)
 - [32-ci-cd](skills/32-ci-cd/SKILL.md)
 - [33-orchestration](skills/33-orchestration/SKILL.md)
-- [34-backend-fastapi](skills/34-backend-fastapi/SKILL.md)
 - [99-example](skills/99-example/SKILL.md)

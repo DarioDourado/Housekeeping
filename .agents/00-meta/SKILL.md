@@ -4,6 +4,7 @@ description: Orienta a instalacao, precedencia de regras e selecao de modulos Re
 metadata:
   stack: react-web
   scope: architecture
+  last-verified: "2026-10-25"
 ---
 # React Enterprise Modular v2
 

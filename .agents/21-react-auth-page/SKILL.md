@@ -6,7 +6,7 @@ metadata:
   scope: "ux"
   requires: "[]"
   related: "[02-folder-structure, 03-domain-structure, 04-stack, 06-patterns, 08-auth, 13-routes, 14-types, 22-performance]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 
 # Pagina de autenticacao

@@ -8,7 +8,7 @@ metadata:
   scope: "ux"
   requires: "[]"
   related: "[04-stack, 06-patterns, 20-rules, 24-ci-quality, 26-privacy]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # ERROR HANDLING - Tratamento de Erros
 
@@ -93,19 +93,22 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Fallback padrão — cores via design tokens (04-stack)
-const DefaultErrorFallback = ({ onReset }: { onReset: () => void }) => (
-  <div className="p-6 text-center">
-    <h2 className="text-xl font-bold text-danger">Algo correu mal</h2>
-    <p className="mt-2 text-gray-600">Ocorreu um erro inesperado.</p>
-    <button
-      onClick={onReset}
-      className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary-hover"
-    >
-      Tentar novamente
-    </button>
-  </div>
-);
+// Fallback padrão — cores via design tokens (04-stack); texto via i18n (20-rules ❌4)
+const DefaultErrorFallback = ({ onReset }: { onReset: () => void }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="p-6 text-center">
+      <h2 className="text-xl font-bold text-danger">{t('errors.appFallback')}</h2>
+      <p className="mt-2 text-gray-600">{t('errors.generic')}</p>
+      <button
+        onClick={onReset}
+        className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary-hover"
+      >
+        {t('common.retry')}
+      </button>
+    </div>
+  );
+};
 ```
 
 ## Uso do ErrorBoundary

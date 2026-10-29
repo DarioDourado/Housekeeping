@@ -8,7 +8,7 @@ metadata:
   scope: "architecture"
   requires: "[]"
   related: "[06-patterns, 14-types, 17-security, 26-privacy]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # RULES - Regras Absolutas
 
@@ -24,7 +24,7 @@ metadata:
 | 6 | Tratar 4 estados: loading, error, empty, success |
 | 7 | Validar forms **e respostas de API** com Zod (`schema.parse` no transporter — ver `06-patterns`/`14-types`) |
 | 8 | Access token em memória (não localStorage) |
-| 9 | `withCredentials: true` no Axios |
+| 9 | `withCredentials: true` no Axios **só** para origens autorizadas (baseURL fixa no transporte; cookies/credenciais nunca devem poder ir para um host arbitrário — ver `17-security` §CORS) |
 | 10 | `index.ts` em cada pasta |
 | 11 | 1 hook = 1 ficheiro |
 | 12 | 1 domínio = estrutura espelhada (hooks/transporters/types) |
@@ -32,7 +32,6 @@ metadata:
 | 14 | Invalidar queries após mutations |
 | 15 | ErrorBoundary no root |
 | 16 | Confirmar ações destrutivas (delete) com `ConfirmDialog` antes de disparar a mutation |
-| 17 | Alterar `types/`, transporters ou `config/constants.ts` ⇒ atualizar o contrato em `34-backend-fastapi` (domain-contract.md) no mesmo trabalho |
 
 ## ❌ NUNCA
 

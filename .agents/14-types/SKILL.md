@@ -8,7 +8,7 @@ metadata:
   scope: "architecture"
   requires: "[]"
   related: "[04-stack, 06-patterns, 21-react-auth-page]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # TYPES - Tipagem TypeScript
 
@@ -99,7 +99,7 @@ export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 export const userSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   role: z.string(),
   avatar: z.string().optional(),
   createdAt: z.string(),
@@ -119,14 +119,22 @@ export const userListSchema = z.array(userSchema);
 export type User = z.infer<typeof userSchema>;
 
 // ==================
-// FILTROS
+// FILTROS — DERIVADOS de schema (mesma regra da entidade)
 // ==================
-export interface UserFilters {
-  search?: string;
-  role?: string;
-  page?: number;
-  limit?: number;
-}
+// A URL é fronteira de confiança: chega como string e valida-se (`20-rules` ✅7).
+// `sort`/`dir` com enums, coerção e defaults `.catch()` — o mesmo schema serve
+// hooks, transporters e parsing de URL (`07-react-query` §Filtros na URL;
+// `27-data-table` §Ordenação). Um domínio = um filtersSchema; never interface manual.
+export const userFiltersSchema = z.object({
+  search: z.string().optional(),
+  role: z.string().optional(),
+  page: z.coerce.number().int().positive().catch(1),
+  limit: z.coerce.number().int().positive().max(100).catch(25),
+  sort: z.enum(['name', 'email', 'createdAt']).catch('name'),
+  dir: z.enum(['asc', 'desc']).catch('asc'),
+});
+
+export type UserFilters = z.infer<typeof userFiltersSchema>;
 ```
 
 ## Types Comuns
@@ -204,13 +212,13 @@ export const passwordSchema = z.string()
 // Login NÃO valida força (min 1): passwords antigas podem não cumprir a regra atual —
 // rejeitar no login bloquearia o utilizador; a força só se exige onde a password é criada.
 export const loginSchema = z.object({
-  email: z.string().email('validation.email'),
+  email: z.email('validation.email'),
   password: z.string().min(1, 'validation.required'),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2, 'validation.minLength'),
-  email: z.string().email('validation.email'),
+  email: z.email('validation.email'),
   password: passwordSchema,
   passwordConfirm: z.string(),
 }).refine((d) => d.password === d.passwordConfirm, {
@@ -254,7 +262,7 @@ Regra prática: schemas Zod escritos à mão só para validação de formulário
 | Zod para DTOs (input) | Schema → `z.infer` |
 | **Zod para entidade (output)** | `userSchema` é a fonte de verdade — usado pelo Transporter para validar a resposta da API em runtime |
 | Mensagens i18n | `'validation.minLength'` |
-| Filtros tipados | `interface UserFilters {}` |
+| Filtros tipados | `userFiltersSchema` → `z.infer` (nunca interface manual; ver §Filtros) |
 | Sem `any` | NUNCA usar |
 | `tsconfig` com flags strict explícitas | `strict` + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` (ver topo) |
 | `@ts-ignore` proibido | `@ts-expect-error` só com justificação na mesma linha |

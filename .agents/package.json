@@ -9,7 +9,7 @@
   "scripts": {
     "generate": "node scripts/corpus.mjs generate",
     "check": "node scripts/corpus.mjs check",
-    "test": "vitest run --environment jsdom",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "build": "vite build --config tests/fixture/vite.config.ts",
     "validate": "npm run check && npm run typecheck && npm test && npm run build"

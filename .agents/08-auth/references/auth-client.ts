@@ -1,7 +1,7 @@
 import axios, { AxiosHeaders, type AxiosAdapter, type InternalAxiosRequestConfig } from 'axios';
 import { z } from 'zod';
 
-const userSchema = z.object({ id: z.string(), name: z.string(), email: z.string().email(), role: z.string() });
+const userSchema = z.object({ id: z.string(), name: z.string(), email: z.email(), role: z.string() });
 const sessionSchema = z.object({ accessToken: z.string().min(1), user: userSchema });
 const tokenSchema = z.object({ accessToken: z.string().min(1) });
 export type AuthUser = z.infer<typeof userSchema>;

@@ -8,7 +8,7 @@ metadata:
   scope: "architecture"
   requires: "[]"
   related: "[06-patterns, 13-routes, 17-security, 22-performance, 23-accessibility]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # STACK - Stack Tecnológica
 
@@ -20,10 +20,10 @@ Este sistema assume **SPA client-side rendering** com Vite. Implicações a conh
 
 | Lib | Versão | Propósito |
 |-----|--------|-----------|
-| React | 19+ | UI |
-| TypeScript | 5+ | Types (strict mode) |
-| Vite | 6+ | Build |
-| React Router DOM | 7+ | Routing |
+| React | 19 | UI |
+| TypeScript | 7 | Types (strict mode) |
+| Vite | 8 | Build |
+| React Router DOM | 7 | Routing |
 
 ## Estado e Data
 

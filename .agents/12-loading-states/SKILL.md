@@ -8,7 +8,7 @@ metadata:
   scope: "ux"
   requires: "[]"
   related: "[06-patterns]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # LOADING STATES - Estados de Loading
 
@@ -148,6 +148,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState = ({ message, action, helpHref, helpLabel }: EmptyStateProps) => {
+  const { t } = useTranslation();
   return (
     <div className="p-8 text-center">
       <div className="text-gray-400 mb-4">
@@ -165,7 +166,7 @@ export const EmptyState = ({ message, action, helpHref, helpLabel }: EmptyStateP
       )}
       {helpHref && (
         <a href={helpHref} target="_blank" rel="noreferrer" className="mt-2 block text-sm text-primary hover:underline">
-          {helpLabel ?? 'Saber mais'}
+          {helpLabel ?? t('common.learnMore')}
         </a>
       )}
     </div>

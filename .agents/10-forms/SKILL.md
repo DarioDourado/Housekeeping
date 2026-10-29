@@ -8,7 +8,7 @@ metadata:
   scope: "ux"
   requires: "[]"
   related: "[06-patterns, 08-auth, 11-error-handling, 20-rules, 23-accessibility]"
-  last-verified: "2026-07-25"
+  last-verified: "2026-10-25"
 ---
 # FORMS - Formulários
 
@@ -22,14 +22,18 @@ metadata:
 // types/users/user.types.ts
 import { z } from 'zod';
 
+// Limites partilhados schema ↔ UI: a mensagem de maxLength interpola este valor,
+// nunca um literal no componente ({ count: 2 } num campo max(100) renderiza
+// "Máximo 2 caracteres").
+export const NAME_MIN_LENGTH = 2;
+export const NAME_MAX_LENGTH = 100;
+
 // Schema com mensagens i18n
 export const createUserSchema = z.object({
   name: z.string()
-    .min(2, 'validation.minLength')
-    .max(100, 'validation.maxLength'),
-  email: z.string()
-    .min(1, 'validation.required')
-    .email('validation.email'),
+    .min(NAME_MIN_LENGTH, 'validation.minLength')
+    .max(NAME_MAX_LENGTH, 'validation.maxLength'),
+  email: z.email('validation.email'),
   role: z.string()
     .min(1, 'validation.required'),
 });
@@ -48,7 +52,7 @@ export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { createUserSchema, CreateUserDTO } from '@/types/users';
+import { createUserSchema, CreateUserDTO, NAME_MAX_LENGTH } from '@/types/users';
 import { Button } from '@/UI/components/Button';
 import { Input } from '@/UI/components/Input';
 
@@ -74,7 +78,7 @@ export const UserForm = ({ onSubmit, isLoading, defaultValues }: UserFormProps) 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Input
         label={t('users.form.name')}
-        error={errors.name?.message && t(errors.name.message, { count: 2 })}
+        error={errors.name?.message && t(errors.name.message, { count: NAME_MAX_LENGTH })}
         {...register('name')}
       />
       

@@ -24,7 +24,17 @@ export class WebSocketClient {
   }
 
   private open() {
-    if (this.stopped || !this.options.getToken()) return;
+    if (this.stopped) return;
+    if (!this.options.getToken()) {
+      // Fail-closed: sem token não há handshake de autenticação. Emitir erro e
+      // parar — retry é para falhas de rede, a ausência de token exige novo login.
+      this.socket = null;
+      this.authenticated = false;
+      this.stopped = true;
+      this.emit('disconnected', null);
+      this.emit('error', new Error('Socket connect aborted: no auth token'));
+      return;
+    }
     const socket = this.options.createSocket?.(this.options.url) ?? new WebSocket(this.options.url);
     this.socket = socket;
     socket.onopen = () => {

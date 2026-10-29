@@ -258,24 +258,18 @@ export const Users = () => {
 ```
 
 The URL parser and the transporter must agree on the same paginated contract. Keep
-`page`, `limit`, `sort` and `dir` typed in `UserFilters`; use a schema at the router
-boundary rather than trusting `URLSearchParams` strings:
+`page`, `limit`, `sort` and `dir` typed in `UserFilters`; use the **same schema from
+`14-types`** (`userFiltersSchema`) at the router boundary rather than trusting
+`URLSearchParams` strings — definir o schema uma única vez evita duas fontes de verdade:
 
 ```typescript
-import { z } from 'zod';
-import type { UserFilters } from '@/types/users';
+// utils/parseUserFilters.ts
+import { userFiltersSchema, type UserFilters } from '@/types/users';
 
-const userFiltersFromUrlSchema = z.object({
-  search: z.string().optional(),
-  role: z.string().optional(),
-  page: z.coerce.number().int().positive().catch(1),
-  limit: z.coerce.number().int().positive().max(100).catch(25),
-  sort: z.enum(['name', 'email', 'createdAt']).catch('name'),
-  dir: z.enum(['asc', 'desc']).catch('asc'),
-});
-
+// userFiltersSchema já inclui search/role/page/limit/sort/dir com coerção e
+// defaults `.catch()` — o parser só mapeia os params; NADA é definido aqui.
 export const parseUserFilters = (params: URLSearchParams): UserFilters =>
-  userFiltersFromUrlSchema.parse({
+  userFiltersSchema.parse({
     search: params.get('search') || undefined,
     role: params.get('role') || undefined,
     page: params.get('page') ?? undefined,

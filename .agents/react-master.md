@@ -1277,24 +1277,18 @@ export const Users = () => {
 ```
 
 The URL parser and the transporter must agree on the same paginated contract. Keep
-`page`, `limit`, `sort` and `dir` typed in `UserFilters`; use a schema at the router
-boundary rather than trusting `URLSearchParams` strings:
+`page`, `limit`, `sort` and `dir` typed in `UserFilters`; use the **same schema from
+`14-types`** (`userFiltersSchema`) at the router boundary rather than trusting
+`URLSearchParams` strings — definir o schema uma única vez evita duas fontes de verdade:
 
 ```typescript
-import { z } from 'zod';
-import type { UserFilters } from '@/types/users';
+// utils/parseUserFilters.ts
+import { userFiltersSchema, type UserFilters } from '@/types/users';
 
-const userFiltersFromUrlSchema = z.object({
-  search: z.string().optional(),
-  role: z.string().optional(),
-  page: z.coerce.number().int().positive().catch(1),
-  limit: z.coerce.number().int().positive().max(100).catch(25),
-  sort: z.enum(['name', 'email', 'createdAt']).catch('name'),
-  dir: z.enum(['asc', 'desc']).catch('asc'),
-});
-
+// userFiltersSchema já inclui search/role/page/limit/sort/dir com coerção e
+// defaults `.catch()` — o parser só mapeia os params; NADA é definido aqui.
 export const parseUserFilters = (params: URLSearchParams): UserFilters =>
-  userFiltersFromUrlSchema.parse({
+  userFiltersSchema.parse({
     search: params.get('search') || undefined,
     role: params.get('role') || undefined,
     page: params.get('page') ?? undefined,
@@ -2772,14 +2766,22 @@ export const userListSchema = z.array(userSchema);
 export type User = z.infer<typeof userSchema>;
 
 // ==================
-// FILTROS
+// FILTROS — DERIVADOS de schema (mesma regra da entidade)
 // ==================
-export interface UserFilters {
-  search?: string;
-  role?: string;
-  page?: number;
-  limit?: number;
-}
+// A URL é fronteira de confiança: chega como string e valida-se (`20-rules` ✅7).
+// `sort`/`dir` com enums, coerção e defaults `.catch()` — o mesmo schema serve
+// hooks, transporters e parsing de URL (`07-react-query` §Filtros na URL;
+// `27-data-table` §Ordenação). Um domínio = um filtersSchema; never interface manual.
+export const userFiltersSchema = z.object({
+  search: z.string().optional(),
+  role: z.string().optional(),
+  page: z.coerce.number().int().positive().catch(1),
+  limit: z.coerce.number().int().positive().max(100).catch(25),
+  sort: z.enum(['name', 'email', 'createdAt']).catch('name'),
+  dir: z.enum(['asc', 'desc']).catch('asc'),
+});
+
+export type UserFilters = z.infer<typeof userFiltersSchema>;
 ```
 
 ## Types Comuns
@@ -2907,7 +2909,7 @@ Regra prática: schemas Zod escritos à mão só para validação de formulário
 | Zod para DTOs (input) | Schema → `z.infer` |
 | **Zod para entidade (output)** | `userSchema` é a fonte de verdade — usado pelo Transporter para validar a resposta da API em runtime |
 | Mensagens i18n | `'validation.minLength'` |
-| Filtros tipados | `interface UserFilters {}` |
+| Filtros tipados | `userFiltersSchema` → `z.infer` (nunca interface manual; ver §Filtros) |
 | Sem `any` | NUNCA usar |
 | `tsconfig` com flags strict explícitas | `strict` + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` (ver topo) |
 | `@ts-ignore` proibido | `@ts-expect-error` só com justificação na mesma linha |
@@ -5632,9 +5634,26 @@ A tabela é o componente central de qualquer back-office e o sítio onde mais pa
 
 ## Ordenação e paginação na URL (extensão direta de `07`)
 
-O tipo ContactFilters deve declarar sort e dir com enums validados, alem de page.
+`ContactFilters` segue o mesmo molde de `14-types` §Filtros / `07-react-query` §parseUserFilters:
+schema com enums `sort`/`dir`, coerção e defaults — nunca interface manual e nunca leitura
+direta de `searchParams` sem schema. Diferença por domínio: apenas os identificadores de escopo
+(aqui, `sort: z.enum(['name', 'email'])`).
 
 **Regra:** `sort`, `dir` e `page` vivem na query string, como qualquer filtro — voltar atrás, refrescar e partilhar link preservam a vista.
+
+```typescript
+// types/contacts/contact.types.ts — mesmo molde de 14-types §Filtros e 99-example;
+// aqui a única diferença por domínio é o enum de colunas de ordenação permitidas.
+export const contactFiltersSchema = z.object({
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().catch(1),
+  limit: z.coerce.number().int().positive().max(100).catch(25),
+  sort: z.enum(['name', 'email']).catch('name'),
+  dir: z.enum(['asc', 'desc']).catch('asc'),
+});
+
+export type ContactFilters = z.infer<typeof contactFiltersSchema>;
+```
 
 ```typescript
 // pages/Contacts/Contacts.tsx (excerto — mesmo updateFilter de 07-react-query)
@@ -6625,11 +6644,17 @@ export const contactListSchema = z.array(contactSchema);
 // Validado: interface manual com opcionais NÃO compila com exactOptionalPropertyTypes.
 export type Contact = z.infer<typeof contactSchema>;
 
-export interface ContactFilters {
-  search?: string;
-  page?: number;
-  limit?: number;
-}
+// FILTROS — mesmo molde de `14-types` §Filtros: schema com enums sort/dir,
+// coerção e defaults; nunca interface manual.
+export const contactFiltersSchema = z.object({
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().catch(1),
+  limit: z.coerce.number().int().positive().max(100).catch(25),
+  sort: z.enum(['name', 'email', 'createdAt']).catch('name'),
+  dir: z.enum(['asc', 'desc']).catch('asc'),
+});
+
+export type ContactFilters = z.infer<typeof contactFiltersSchema>;
 ```
 
 ```typescript
@@ -6726,22 +6751,36 @@ export const useCreateContact = () => {
 ## 5. Page — filtros na URL + 4 estados (`07`/`12`)
 
 ```typescript
+// utils/parseContactFilters.ts — mesmo padrão de `07-react-query` §parseUserFilters:
+// o schema vive em types/contacts; o parser só mapeia os params da URL.
+import { contactFiltersSchema, type ContactFilters } from '@/types/contacts';
+
+export const parseContactFilters = (params: URLSearchParams): ContactFilters =>
+  contactFiltersSchema.parse({
+    search: params.get('search') || undefined,
+    page: params.get('page') ?? undefined,
+    limit: params.get('limit') ?? undefined,
+    sort: params.get('sort') ?? undefined,
+    dir: params.get('dir') ?? undefined,
+  });
+```
+
+```typescript
 // pages/Contacts/Contacts.tsx
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageWrapper } from '@/UI/containers/PageWrapper';
 import { useGetContacts } from '@/hooks/contacts';
-import type { ContactFilters } from '@/types/contacts';
+import { parseContactFilters } from '@/utils/parseContactFilters';
 import { ContactsList } from './components/ContactsList';
 
 export const Contacts = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const filters: ContactFilters = {
-    search: searchParams.get('search') ?? undefined,
-    page: Number(searchParams.get('page') ?? '1'),
-  };
+  // A URL é fronteira de confiança — parsing schematizado (mesmo padrão de
+  // `07-react-query`; NUNCA `Number(searchParams.get('page'))` direto).
+  const filters = parseContactFilters(searchParams);
 
   const { data: contacts, isLoading, error, refetch } = useGetContacts(filters);
 

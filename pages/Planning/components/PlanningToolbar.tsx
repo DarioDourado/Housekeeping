@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { Columns, Filter, Layers, LayoutGrid } from 'lucide-react';
+import { ArrowLeftRight, Columns, Filter, Layers, LayoutGrid, Search } from 'lucide-react';
 import { BLOCK } from '@/config/constants';
+import type { MovementFilter } from '@/lib/boardFilter';
+import { Movement } from '@/types/housekeeping.types';
 
-export type LayoutMode = 'EXPANDED' | 'AUTO_FIT' | 'COMPACT';
+export type LayoutMode = 'EXPANDED' | 'AUTO_FIT' | 'COMPACT' | 'SCROLL';
 
 interface PlanningToolbarProps {
   blockFilter: string;
@@ -11,28 +13,48 @@ interface PlanningToolbarProps {
   parkingRange: string;
   layout: LayoutMode;
   onLayout: (value: LayoutMode) => void;
+  movementFilter: MovementFilter;
+  onMovementFilter: (value: MovementFilter) => void;
+  query: string;
+  onQuery: (value: string) => void;
 }
+
+// - filtros por tipo de movimento; clicar no ativo volta a mostrar todos
+const MOVEMENT_FILTERS = [
+  [Movement.DEPARTURE_ARRIVAL, 'typeDepartureArrival'],
+  [Movement.VACANT, 'typeArrivalOnly'],
+  [Movement.DEPARTURE_ONLY, 'typeDepartureOnly'],
+  [Movement.STAYOVER, 'typeStayover']
+] as const;
+
+const chipClass = (active: boolean) =>
+  `px-3 py-1.5 rounded-lg font-medium whitespace-nowrap shrink-0 ${
+    active ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+  }`;
 
 const LAYOUTS = [
   ['EXPANDED', 'layoutFull', LayoutGrid],
   ['AUTO_FIT', 'layoutAutoFit', Columns],
-  ['COMPACT', 'layoutCompact', Layers]
+  ['COMPACT', 'layoutCompact', Layers],
+  ['SCROLL', 'layoutScroll', ArrowLeftRight]
 ] as const;
 
-export const PlanningToolbar = ({ blockFilter, onBlockFilter, sheetCount, parkingRange, layout, onLayout }: PlanningToolbarProps) => {
+export const PlanningToolbar = ({ blockFilter, onBlockFilter, sheetCount, parkingRange, layout, onLayout, movementFilter, onMovementFilter, query, onQuery }: PlanningToolbarProps) => {
   const { t } = useTranslation();
   const filters = [
     { id: 'ALL', label: t('planning.filterAll', { count: sheetCount }) },
     { id: BLOCK.A, label: BLOCK.A },
     { id: BLOCK.B, label: BLOCK.B },
     { id: BLOCK.C, label: BLOCK.C },
+    { id: BLOCK.D, label: BLOCK.D },
     { id: 'Oasis', label: BLOCK.OASIS },
     { id: 'Villas', label: BLOCK.VILLAS },
     { id: 'PARKING', label: t('planning.filterParking', { numbers: parkingRange }) }
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 text-xs w-full bg-white/70 dark:bg-slate-900/70 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+    <div className="space-y-2.5 text-xs w-full bg-white/70 dark:bg-slate-900/70 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
       <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 lg:pb-0">
         <span className="text-slate-400 font-medium mr-1 flex items-center gap-1 shrink-0"><Filter className="w-3.5 h-3.5" />{t('planning.areaLabel')}</span>
         {filters.map(filter => (
@@ -40,9 +62,7 @@ export const PlanningToolbar = ({ blockFilter, onBlockFilter, sheetCount, parkin
             key={filter.id}
             onClick={() => onBlockFilter(filter.id)}
             aria-pressed={blockFilter === filter.id}
-            className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap shrink-0 ${
-              blockFilter === filter.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-            }`}
+            className={chipClass(blockFilter === filter.id)}
           >
             {filter.label}
           </button>
@@ -68,6 +88,35 @@ export const PlanningToolbar = ({ blockFilter, onBlockFilter, sheetCount, parkin
           ))}
         </div>
       </div>
+    </div>
+
+    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3">
+      <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 lg:pb-0">
+        <span className="text-slate-400 font-medium mr-1 shrink-0">{t('planning.typeLabel')}</span>
+        {MOVEMENT_FILTERS.map(([movement, key]) => (
+          <button
+            key={movement}
+            onClick={() => onMovementFilter(movementFilter === movement ? 'ALL' : movement)}
+            aria-pressed={movementFilter === movement}
+            className={chipClass(movementFilter === movement)}
+          >
+            {t(`planning.${key}`)}
+          </button>
+        ))}
+      </div>
+
+      <label className="relative w-full lg:max-w-sm lg:ml-auto">
+        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden />
+        <input
+          type="search"
+          value={query}
+          onChange={event => onQuery(event.target.value)}
+          placeholder={t('planning.searchPlaceholder')}
+          aria-label={t('planning.searchLabel')}
+          className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+        />
+      </label>
+    </div>
     </div>
   );
 };

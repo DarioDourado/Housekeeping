@@ -1,4 +1,5 @@
 import { BLOCK } from './constants';
+import { buildVolumeData, withTimeline } from './hotelDataVolume';
 import { todayAt } from '@/lib/clock';
 import { operationalDate } from '@/lib/operationalDate';
 import { UserRole, type User } from '@/types/auth.types';
@@ -34,6 +35,12 @@ import {
 // =====================================================================================
 
 const TODAY = operationalDate();
+
+export const DAY_PLAN_ID = 'plan-day';
+export const NIGHT_PLAN_ID = 'plan-night';
+
+// - secções 2, 5 e 10-24 (quartos, estadias, equipa, tarefas) geradas à parte: ver hotelDataVolume.ts
+const VOLUME = buildVolumeData(DAY_PLAN_ID);
 
 export const INITIAL_STAFF: User[] = [
   {
@@ -158,7 +165,8 @@ export const INITIAL_STAFF: User[] = [
     defaultBlock: BLOCK.SUPPORT,
     isOnDuty: true,
     shift: 'Geral'
-  }
+  },
+  ...VOLUME.staff
 ];
 
 export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
@@ -243,12 +251,12 @@ export const INITIAL_ROOMS: Room[] = [
   room('room-501', '501', BLOCK.OASIS, 1, RoomTypology.SUITE, RoomStatus.DIRTY, '08:00', false),
   room('room-502', '502', BLOCK.OASIS, 1, RoomTypology.SUITE, RoomStatus.CLEAN, '04:00', false),
   room('room-601', 'Vila Atlântico', BLOCK.VILLAS, 1, RoomTypology.VILLA, RoomStatus.DIRTY, '08:00', true),
-  room('room-602', 'Vila Praia', BLOCK.VILLAS, 1, RoomTypology.VILLA, RoomStatus.DIRTY, '08:00', false)
+  room('room-602', 'Vila Praia', BLOCK.VILLAS, 1, RoomTypology.VILLA, RoomStatus.DIRTY, '08:00', false),
+  ...VOLUME.rooms
 ];
 
-const stay = (roomId: string, movement: Movement, rest: Partial<RoomStay> & { adults: number; children: number }): RoomStay => ({
-  roomId, date: TODAY, movement, childAges: [], isLinenChangeDue: false, traces: [], specials: [], ...rest
-});
+const stay = (roomId: string, movement: Movement, rest: Partial<RoomStay> & { adults: number; children: number }): RoomStay =>
+  withTimeline({ roomId, date: TODAY, movement, childAges: [], isLinenChangeDue: false, traces: [], specials: [], ...rest }, Number(roomId.replace(/\D/g, '')));
 
 export const INITIAL_STAYS: RoomStay[] = [
   stay('room-101', Movement.DEPARTURE_ARRIVAL, {
@@ -312,7 +320,8 @@ export const INITIAL_STAYS: RoomStay[] = [
   stay('room-602', Movement.DEPARTURE_ARRIVAL, {
     guestName: 'Dra. Sofia Carvalheiro', vipType: 'VIP 1', adults: 2, children: 0, arrivalEta: '15:00', departureEta: '11:00',
     isLinenChangeDue: true, instructions: 'Preparação completa para casamento amanhã.'
-  })
+  }),
+  ...VOLUME.stays
 ];
 
 // ---------- Configuração base (secções) ----------
@@ -324,13 +333,10 @@ export const INITIAL_SECTIONS: Section[] = [
   { id: 'sec-6', name: 'Secção 06 · Bloco C Pisos 1-2', block: BLOCK.C, defaultRoomIds: ['room-301', 'room-302'], defaultStaffIds: ['user-adriana'] },
   { id: 'sec-7', name: 'Secção 07 · Bloco B Piso 2', block: BLOCK.B, defaultRoomIds: ['room-201', 'room-202', 'room-203'], defaultStaffIds: ['user-patricia'] },
   { id: 'sec-8', name: 'Secção 08 · Bloco B Piso 1', block: BLOCK.B, defaultRoomIds: [], defaultStaffIds: [] },
-  { id: 'sec-9', name: 'Secção 09 · Bloco D Ala Norte', block: BLOCK.D, defaultRoomIds: [], defaultStaffIds: [] }
+  ...VOLUME.sections
 ];
 
 // ---------- Distribuição de hoje: plano diurno e noturno (independentes) ----------
-
-export const DAY_PLAN_ID = 'plan-day';
-export const NIGHT_PLAN_ID = 'plan-night';
 
 export const INITIAL_PLANS: ServicePlan[] = [
   { id: DAY_PLAN_ID, operationalDate: TODAY, kind: PlanKind.DAY, status: PlanStatus.ACTIVE },
@@ -353,13 +359,7 @@ export const INITIAL_TASK_SHEETS: TaskSheet[] = [
   sheet('sheet-7', DAY_PLAN_ID, 7, 'Secção 07 · Bloco B Piso 2', BLOCK.B, { sectionId: 'sec-7', assignments: [lead('user-patricia')] }),
   // - Sheets vazias têm de continuar visíveis (reunião §6.4)
   sheet('sheet-8', DAY_PLAN_ID, 8, 'Secção 08 · Bloco B Piso 1', BLOCK.B, { sectionId: 'sec-8' }),
-  sheet('sheet-9', DAY_PLAN_ID, 9, 'Secção 09 · Bloco D Ala Norte', BLOCK.D, { sectionId: 'sec-9' }),
-  sheet('sheet-21', DAY_PLAN_ID, 21, 'Secção 21 [Estacionamento] · Saídas p/ Amanhã', BLOCK.PARKING, {
-    isReserve: true, notes: 'Quartos de saída sem chegada previstos para limpeza no dia seguinte.'
-  }),
-  sheet('sheet-22', DAY_PLAN_ID, 22, 'Secção 22 [Estacionamento] · Refreshes Pendentes', BLOCK.PARKING, {
-    isReserve: true, notes: 'Quartos limpos que só serão inspecionados se houver antecipação de chegada.'
-  }),
+  ...VOLUME.sheets,
   sheet('td-1', NIGHT_PLAN_ID, 101, 'Turndown Zona 1 · Bloco A & B (Hotel)', 'Blocos A & B', {
     assignments: [lead('user-celia')], notes: 'Serviço das 18h00 às 21h30. Não comunica com o Opera.'
   }),
@@ -410,7 +410,7 @@ export const INITIAL_TASKS: ServiceTask[] = [
   task('room-101', 'sheet-1', 0, TaskKind.CLEANING, priority(PriorityOrigin.RECEPTION, 'Chegada antecipada VIP 11:30')),
   task('room-102', 'sheet-1', 1, TaskKind.CLEANING),
   task('room-103', 'sheet-1', 2, TaskKind.REFRESH),
-  task('room-104', 'sheet-21', 0, TaskKind.CLEANING),
+  task('room-104', 'sheet-25', 0, TaskKind.CLEANING),
   task('room-201', 'sheet-7', 0, TaskKind.CLEANING, priority(PriorityOrigin.HOUSEKEEPING, 'Chegada às 13:00')),
   task('room-202', 'sheet-7', 1, TaskKind.CLEANING),
   task('room-203', 'sheet-7', 2, TaskKind.CLEANING, completed('user-patricia', '08:30', '09:10', 2400)),
@@ -423,7 +423,8 @@ export const INITIAL_TASKS: ServiceTask[] = [
   // Plano noturno (turndown): tarefas próprias dos mesmos quartos
   ...Object.entries(NIGHT_ROOMS).flatMap(([sheetId, roomIds]) =>
     roomIds.map((roomId, index) => task(roomId, sheetId, index, TaskKind.TURNDOWN))
-  )
+  ),
+  ...VOLUME.tasks
 ];
 
 // ---------- Histórico, Opera e alertas ----------

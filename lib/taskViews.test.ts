@@ -42,9 +42,9 @@ describe('buildTaskViews', () => {
 
 describe('buildColumns', () => {
   it('uma coluna por sheet do plano, ordenadas por número, incluindo as vazias e as de reserva', () => {
-    expect(columns.map(c => c.sheet.number)).toEqual([1, 3, 4, 6, 7, 8, 9, 21, 22]);
+    expect(columns.map(c => c.sheet.number)).toEqual(Array.from({ length: 26 }, (_, i) => i + 1));
     expect(columns.find(c => c.sheet.id === 'sheet-8')?.views).toEqual([]);
-    expect(columns.find(c => c.sheet.id === 'sheet-21')?.sheet.isReserve).toBe(true);
+    expect(columns.find(c => c.sheet.id === 'sheet-25')?.sheet.isReserve).toBe(true);
   });
 
   it('dentro da coluna, as tarefas prioritárias vêm primeiro e depois a ordem escolhida', () => {

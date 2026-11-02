@@ -13,6 +13,8 @@ export const EVENT_LABEL_KEY: Record<TaskEventType, string> = {
   PRIORITY_TOGGLED: 'priority',
   MOVED_TASK_SHEET: 'moved',
   ROOM_REOPENED: 'reopened',
+  ROOM_STATUS_CHANGED: 'statusChanged',
+  ROOM_INSTRUCTIONS_UPDATED: 'instructionsUpdated',
   TURNDOWN_UPDATED: 'turndown',
   STAFF_MOVED: 'staffMoved',
   PLAN_OPENED: 'planOpened',

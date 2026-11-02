@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowRightLeft, Check, CheckCheck, Info, Play, Sparkles 
 import { usePermission } from '@/hooks/auth/usePermission';
 import {
   useCompleteCorrection,
+  useConfirmStatusChange,
   useFinishTask,
   useInspectTask,
   useRecordRefresh,
@@ -30,6 +31,7 @@ export const RoomCardActions = ({ view }: { view: TaskView }) => {
   const startTask = useStartTask();
   const finishTask = useFinishTask();
   const inspectTask = useInspectTask();
+  const confirmStatusChange = useConfirmStatusChange();
   const completeCorrection = useCompleteCorrection();
   const recordRefresh = useRecordRefresh();
   const togglePriority = useTogglePriority();
@@ -38,6 +40,11 @@ export const RoomCardActions = ({ view }: { view: TaskView }) => {
   const isCleaning = task.kind === TaskKind.CLEANING;
   const waiting = task.status === TaskStatus.PENDING || task.status === TaskStatus.NOT_PERFORMED;
   const awaitingInspection = task.status === TaskStatus.COMPLETED && task.inspectionStatus === InspectionStatus.PENDING;
+
+  // - passar a Inspected pede sempre confirmação (envia o estado ao Opera)
+  const approve = async () => {
+    if (await confirmStatusChange(room.number, room.operaStatus, RoomStatus.INSPECTED)) await inspectTask(task.id);
+  };
 
   return (
     <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-1.5">
@@ -71,7 +78,7 @@ export const RoomCardActions = ({ view }: { view: TaskView }) => {
         )}
 
         {canInspect && awaitingInspection && (
-          <button onClick={() => inspectTask(task.id)} className={`${BUTTON} text-white bg-emerald-600 hover:bg-emerald-700`} title={t('room.approveTitle')}>
+          <button onClick={() => void approve()} className={`${BUTTON} text-white bg-emerald-600 hover:bg-emerald-700`} title={t('room.approveTitle')}>
             <CheckCheck className="w-3.5 h-3.5" />
             <span>{t('room.approve')}</span>
           </button>

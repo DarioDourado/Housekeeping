@@ -1,7 +1,7 @@
 import { acknowledgeAlert, sendTraceAlert } from './alertCommands';
-import { finishTask, recordNotPerformed, reopenRoom, reopenTask, startTask } from './executionCommands';
+import { finishTask, recordNotPerformed, reopenRoom, reopenTask, setRoomStatus, startTask } from './executionCommands';
 import { completeCorrection, inspectTask, requestCorrection } from './inspectionCommands';
-import { recordRefresh, togglePriority } from './interventionCommands';
+import { recordRefresh, togglePriority, updateRoomInstructions } from './interventionCommands';
 import { receiveOperaStatus, retryOperaJob, syncWithOpera, triggerNightAudit } from './operaCommands';
 import { assignStaffToSheet, mergeSheets, moveTask, openPlan } from './planningCommands';
 import {
@@ -30,6 +30,8 @@ export const commands = {
   requestCorrection,
   completeCorrection,
   reopenRoom,
+  setRoomStatus,
+  updateRoomInstructions,
   reopenTask,
   recordRefresh,
   togglePriority,

@@ -4,9 +4,9 @@ import { ToastHost } from '@/UI/containers/ToastHost';
 import { Navbar } from './Navbar';
 
 export const AppLayout = () => (
-  <div className="min-h-screen bg-canvas text-content">
+  <div className="h-dvh flex flex-col bg-canvas text-content">
     <Navbar />
-    <main className="px-3 sm:px-4 lg:px-5 py-4">
+    <main className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 lg:px-5 py-4">
       <Outlet />
     </main>
     <Overlays />

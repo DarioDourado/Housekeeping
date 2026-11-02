@@ -94,3 +94,26 @@ export const togglePriority: Command<TaskArgs & { reason?: string | undefined }>
 
   return { state: withEvent(toggled, ctx, { type: 'PRIORITY_TOGGLED', roomId: room.id, roomNumber: room.number, taskId, detail }) };
 };
+
+// - A governanta/admin edita as instruções do quarto (Daily Information) da estadia do dia; fica no histórico
+export const updateRoomInstructions: Command<{ roomId: string; instructions: string }> = (state, { roomId, instructions }, ctx) => {
+  const room = findRoom(state, roomId);
+  const plan = activePlan(state, PlanKind.DAY);
+  const stay = state.stays.find(s => s.roomId === roomId && s.date === plan?.operationalDate);
+  const text = instructions.trim();
+  if (!room || !stay || text === (stay.instructions ?? '')) return { state };
+
+  return {
+    state: withEvent(
+      { ...state, stays: state.stays.map(s => (s === stay ? { ...s, instructions: text || undefined } : s)) },
+      ctx,
+      {
+        type: 'ROOM_INSTRUCTIONS_UPDATED',
+        roomId,
+        roomNumber: room.number,
+        supervisorId: ctx.actor.id,
+        detail: { key: 'events.roomInstructionsUpdated', params: { name: ctx.actor.name } }
+      }
+    )
+  };
+};

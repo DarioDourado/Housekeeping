@@ -4,7 +4,7 @@ import { Layers, Merge, Sparkles } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useAssignStaffToSheet, useMergeSheets, useMoveTask } from '@/hooks/housekeeping';
 import { calculateCounters } from '@/lib/counters';
-import type { SheetColumn } from '@/lib/taskViews';
+import type { SheetColumn, TaskView } from '@/lib/taskViews';
 import { useUiStore } from '@/store/uiStore';
 import { SheetRole } from '@/types/housekeeping.types';
 import { RoomCard } from '@/UI/components/RoomCard/RoomCard';
@@ -17,6 +17,8 @@ interface TaskSheetColumnProps {
   column: SheetColumn;
   otherSheets: { id: string; title: string }[];
   layout: ColumnLayout;
+  // - cartões a mostrar quando há filtros ativos; os contadores usam sempre todos os da sheet
+  cards?: TaskView[] | undefined;
 }
 
 const COUNTERS = [
@@ -27,7 +29,7 @@ const COUNTERS = [
 ] as const;
 
 // - Uma task sheet do dia: pessoas atribuídas, contadores automáticos (§6.6) e os cartões das suas tarefas
-export const TaskSheetColumn = ({ column, otherSheets, layout }: TaskSheetColumnProps) => {
+export const TaskSheetColumn = ({ column, otherSheets, layout, cards }: TaskSheetColumnProps) => {
   const { t } = useTranslation();
   const { sheet, views, assignees } = column;
   const canDistribute = usePermission('sheets.distribute');
@@ -129,7 +131,7 @@ export const TaskSheetColumn = ({ column, otherSheets, layout }: TaskSheetColumn
         </div>
       </div>
 
-      <div className="p-2.5 sm:p-3 space-y-2.5 overflow-y-auto max-h-[calc(100vh-215px)] min-h-[170px]">
+      <div className="p-2.5 sm:p-3 space-y-2.5 min-h-[170px]">
         {isDragOver && (
           <div className="p-3 rounded-xl border-2 border-dashed border-blue-500 bg-blue-100/90 dark:bg-blue-900/60 text-blue-900 dark:text-blue-100 text-xs font-bold text-center flex items-center justify-center gap-2 animate-pulse">
             <Sparkles className="w-4 h-4" />
@@ -137,8 +139,8 @@ export const TaskSheetColumn = ({ column, otherSheets, layout }: TaskSheetColumn
           </div>
         )}
 
-        {views.length > 0 ? (
-          views.map((view, index) => <RoomCard key={view.task.id} view={view} index={index} />)
+        {(cards ?? views).length > 0 ? (
+          (cards ?? views).map((view, index) => <RoomCard key={view.task.id} view={view} index={index} />)
         ) : (
           <div className="h-32 border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center p-4 text-center bg-slate-50/50 dark:bg-slate-900/40">
             <Layers className="w-5 h-5 text-slate-400 mb-1" />

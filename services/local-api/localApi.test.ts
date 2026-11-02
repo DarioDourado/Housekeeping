@@ -284,7 +284,7 @@ describe('distribuição (task sheets)', () => {
   it('CT-15: uma sheet esvaziada continua a existir (área de reserva)', () => {
     let state = seed();
     for (const taskId of ['task-101-cleaning', 'task-102-cleaning', 'task-103-refresh']) {
-      state = next(state, 'moveTask', { taskId, targetSheetId: 'sheet-22' });
+      state = next(state, 'moveTask', { taskId, targetSheetId: 'sheet-26' });
     }
     expect(state.tasks.filter(t => t.sheetId === 'sheet-1')).toEqual([]);
     expect(state.sheets.find(s => s.id === 'sheet-1')).toBeDefined();
@@ -477,6 +477,39 @@ describe('pessoal, equipas e secções', () => {
     expect(result.sections.find(s => s.id === 'sec-8')?.defaultRoomIds).toEqual(['room-101']);
     expect(result.tasks).toEqual(before.tasks);
     expect(result.sheets).toEqual(before.sheets);
+  });
+});
+
+describe('edição manual pela governanta/admin', () => {
+  it('reverte um quarto Inspected para Clean: a limpeza volta a esperar inspeção e o Opera é atualizado', () => {
+    const reverted = run(seed(), 'setRoomStatus', { roomId: 'room-302', status: RoomStatus.CLEAN }).state;
+
+    expect(room(reverted, 'room-302').operaStatus).toBe(RoomStatus.CLEAN);
+    expect(task(reverted, 'task-302-cleaning')).toMatchObject({ status: TaskStatus.COMPLETED, inspectionStatus: InspectionStatus.PENDING });
+    expect(reverted.syncJobs[0]).toMatchObject({ previousStatus: RoomStatus.INSPECTED, targetStatus: RoomStatus.CLEAN });
+    expect(reverted.events[0]).toMatchObject({ type: 'ROOM_STATUS_CHANGED', roomId: 'room-302' });
+  });
+
+  it('passar a Inspected aprova a limpeza; passar a Dirty reabre-a; o mesmo estado não faz nada', () => {
+    const inspected = run(seed(), 'setRoomStatus', { roomId: 'room-203', status: RoomStatus.INSPECTED }).state;
+    expect(task(inspected, 'task-203-cleaning').inspectionStatus).toBe(InspectionStatus.APPROVED);
+
+    const dirty = run(seed(), 'setRoomStatus', { roomId: 'room-302', status: RoomStatus.DIRTY }).state;
+    expect(task(dirty, 'task-302-cleaning').status).toBe(TaskStatus.PENDING);
+    expect(dirty.events[0]!.type).toBe('ROOM_REOPENED');
+
+    const before = seed();
+    expect(run(before, 'setRoomStatus', { roomId: 'room-302', status: RoomStatus.INSPECTED }).state).toBe(before);
+  });
+
+  it('edita as instruções do quarto e regista no histórico; texto igual não faz nada', () => {
+    const edited = run(seed(), 'updateRoomInstructions', { roomId: 'room-102', instructions: '  Limpar só depois das 11:00  ' }).state;
+    expect(edited.stays.find(s => s.roomId === 'room-102')?.instructions).toBe('Limpar só depois das 11:00');
+    expect(edited.events[0]).toMatchObject({ type: 'ROOM_INSTRUCTIONS_UPDATED', roomId: 'room-102' });
+
+    const before = seed();
+    const same = before.stays.find(s => s.roomId === 'room-102')!.instructions!;
+    expect(run(before, 'updateRoomInstructions', { roomId: 'room-102', instructions: same }).state).toBe(before);
   });
 });
 

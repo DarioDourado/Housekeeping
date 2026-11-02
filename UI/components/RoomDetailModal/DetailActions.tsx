@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { BellOff, Check, CheckCheck, Play, RotateCcw, Sparkles, UserX } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
 import {
+  useConfirmStatusChange,
   useFinishTask,
   useInspectTask,
   useRecordNotPerformed,
@@ -28,6 +29,7 @@ export const DetailActions = ({ view, onClose }: { view: TaskView; onClose: () =
   const startTask = useStartTask();
   const finishTask = useFinishTask();
   const inspectTask = useInspectTask();
+  const confirmStatusChange = useConfirmStatusChange();
   const recordNotPerformed = useRecordNotPerformed();
   const recordRefresh = useRecordRefresh();
   const reopenRoom = useReopenRoom();
@@ -36,6 +38,13 @@ export const DetailActions = ({ view, onClose }: { view: TaskView; onClose: () =
   const isTurndown = task.kind === TaskKind.TURNDOWN;
   const awaitingInspection = task.status === TaskStatus.COMPLETED && task.inspectionStatus === InspectionStatus.PENDING;
   const blocked = (reason: NotPerformedReason) => task.notPerformedReason === reason;
+
+  // - passar a Inspected pede sempre confirmação (envia o estado ao Opera); cancelar mantém a ficha aberta
+  const approve = async () => {
+    if (!(await confirmStatusChange(room.number, room.operaStatus, RoomStatus.INSPECTED))) return;
+    await inspectTask(task.id);
+    onClose();
+  };
 
   return (
     <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-wrap items-center justify-between gap-2">
@@ -90,7 +99,7 @@ export const DetailActions = ({ view, onClose }: { view: TaskView; onClose: () =
         )}
 
         {canInspect && awaitingInspection && (
-          <button onClick={() => { void inspectTask(task.id); onClose(); }} className={`${PRIMARY} bg-emerald-600 hover:bg-emerald-700`}>
+          <button onClick={() => void approve()} className={`${PRIMARY} bg-emerald-600 hover:bg-emerald-700`}>
             <CheckCheck className="w-4 h-4" />
             <span>{t('room.detail.approveInspection')}</span>
           </button>

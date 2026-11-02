@@ -14,3 +14,11 @@ export const formatTimeWithSeconds = (iso: string, locale: string = i18n.languag
     ? iso
     : new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(date);
 };
+
+// - Data + hora (ex.: "02/11, 14:00"); withYear para o detalhe completo
+export const formatDateTime = (iso: string, withYear = false, locale: string = i18n.language): string => {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime())
+    ? iso
+    : new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', ...(withYear && { year: 'numeric' }), hour: '2-digit', minute: '2-digit' }).format(date);
+};

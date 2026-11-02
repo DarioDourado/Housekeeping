@@ -167,3 +167,34 @@ export const reopenRoom: Command<{ roomId: string; reason?: string | undefined; 
 
   return { state: writeOperaStatus(logged, ctx, { room, target: RoomStatus.DIRTY, occurredAt, source: { key: 'opera.source.reopened' } }) };
 };
+
+// - Edição manual do estado do quarto pela governanta/admin (ex.: reverter um Inspected). Dirty reutiliza a reabertura;
+//   Clean e Inspected alinham a limpeza do dia com o novo estado e escrevem no Opera.
+export const setRoomStatus: Command<{ roomId: string; status: RoomStatus; occurredAt?: string | undefined }> = (state, { roomId, status, occurredAt }, ctx) => {
+  const room = findRoom(state, roomId);
+  if (!room || room.operaStatus === status) return { state };
+  if (status === RoomStatus.DIRTY) return reopenRoom(state, { roomId, occurredAt }, ctx);
+
+  const plan = activePlan(state, PlanKind.DAY);
+  const cleaning = state.tasks.find(t => t.planId === plan?.id && t.roomId === roomId && t.kind === TaskKind.CLEANING);
+  const aligned = cleaning
+    ? updateTaskIn(state, cleaning.id, t => ({
+        ...t,
+        status: TaskStatus.COMPLETED,
+        finishedAt: t.finishedAt ?? ctx.now.toISOString(),
+        inspectionStatus: status === RoomStatus.INSPECTED ? InspectionStatus.APPROVED : InspectionStatus.PENDING,
+        inspectionNote: undefined
+      }))
+    : state;
+
+  const logged = withEvent(aligned, ctx, {
+    type: 'ROOM_STATUS_CHANGED',
+    roomId,
+    roomNumber: room.number,
+    taskId: cleaning?.id,
+    supervisorId: ctx.actor.id,
+    detail: { key: 'events.roomStatusChanged', params: { name: ctx.actor.name, from: room.operaStatus, to: status } }
+  });
+
+  return { state: writeOperaStatus(logged, ctx, { room, target: status, occurredAt, source: { key: 'opera.source.statusEdited' } }) };
+};

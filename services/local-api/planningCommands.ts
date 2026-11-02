@@ -1,4 +1,4 @@
-import { ALL_ROOMS, BLOCK } from '@/config/constants';
+import { ALL_ROOMS, BLOCK, DEFAULT_PARKING_SHEET_COUNT } from '@/config/constants';
 import { operationalDate } from '@/lib/operationalDate';
 import {
   InspectionStatus,
@@ -124,7 +124,7 @@ export const openPlan: Command<{ kind: PlanKind; date?: string | undefined }> = 
       });
     });
     const lastNumber = Math.max(0, ...sheets.map(sheet => sheet.number));
-    const reserve = [1, 2].map(offset => ({
+    const reserve = Array.from({ length: DEFAULT_PARKING_SHEET_COUNT }, (_, i) => i + 1).map(offset => ({
       id: ctx.newId('sheet'), planId, number: lastNumber + offset, title: BLOCK.PARKING, block: BLOCK.PARKING, isReserve: true, assignments: []
     }));
     sheets.push(...reserve);

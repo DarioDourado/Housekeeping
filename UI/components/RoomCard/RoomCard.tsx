@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Baby, BellOff, GripVertical, Home, Luggage, LogOut, RotateCw, Sparkles, Star, UserX } from 'lucide-react';
+import { AlertTriangle, Baby, BellOff, ClipboardList, GripVertical, Home, Luggage, LogIn, LogOut, RotateCw, Sparkles, Star, UserX } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useTaskDrag } from '@/hooks/housekeeping/useTaskDrag';
-import { formatTime } from '@/lib/datetime';
-import { serviceLabelKey, type ServiceLabelKey } from '@/lib/taskLabels';
+import { formatDateTime, formatTime } from '@/lib/datetime';
+import { formatChildAges, serviceLabelKey, type ServiceLabelKey } from '@/lib/taskLabels';
 import type { TaskView } from '@/lib/taskViews';
 import { useOverlayStore } from '@/store/overlayStore';
 import { CommercialBlock, InspectionStatus, NotPerformedReason, RoomTypology, TaskKind, TaskStatus } from '@/types/housekeeping.types';
@@ -31,7 +31,10 @@ const TYPOLOGY_KEY: Record<RoomTypology, string | null> = {
   [RoomTypology.VILLA]: 'villa'
 };
 
-const CHIP = 'inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded border';
+// - o ETA/ETD do Opera pode trazer notas a seguir à hora ("11:30 (Transfer Privado…)"): no cartão só a hora
+const etaTime = (eta: string) => eta.split(' ')[0];
+
+const CHIP ='inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded border';
 
 // - Um cartão = uma tarefa (limpeza ou refresh) de um quarto, na sua task sheet
 export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
@@ -52,7 +55,10 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
     <div
       data-room={view.room.number}
       {...draggableProps}
-      className={`relative group bg-white dark:bg-slate-900 border rounded-xl transition-all duration-150 select-none ${canDistribute ? 'cursor-grab active:cursor-grabbing' : ''} ${
+      // - clicar em qualquer ponto do cartão abre a ficha completa; os botões (ações, nº do quarto) mantêm o seu comportamento
+      onClick={event => { if (!(event.target as HTMLElement).closest('button, a, input, select, textarea')) openDetail(task.id); }}
+      title={t('room.openTitle')}
+      className={`relative group bg-white dark:bg-slate-900 border rounded-xl transition-all duration-150 select-none ${canDistribute ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${
         isDragging
           ? 'opacity-35 scale-[0.98] ring-2 ring-blue-500 shadow-xl'
           : task.isPriority
@@ -111,8 +117,32 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
       <div className="mb-3 space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[190px]">{stay?.guestName ?? '—'}</span>
-          {stay?.arrivalEta && <span className="text-slate-500 tabular-nums text-[11px]">{t('room.eta', { time: stay.arrivalEta.split(' ')[0] })}</span>}
+          {stay?.arrivalEta && !stay.arrivingGuestName && <span className="text-slate-500 tabular-nums text-[11px]">{t('room.eta', { time: etaTime(stay.arrivalEta) })}</span>}
         </div>
+        {(stay?.checkInAt || stay?.checkOutAt) && (
+          <div className="space-y-0.5 text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
+            {stay.checkInAt && <div className="flex items-center gap-1"><LogIn className="w-3 h-3 shrink-0" />{t('room.checkIn')} {formatDateTime(stay.checkInAt)}</div>}
+            {/* - justify-between: o ETD fica em frente ao check-out, à direita, por cima do ETA da linha "Entra" */}
+            {stay.checkOutAt && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1"><LogOut className="w-3 h-3 shrink-0" />{t('room.checkOut')} {formatDateTime(stay.checkOutAt)}</span>
+                {stay.departureEta && <span className="shrink-0">{t('room.etd', { time: etaTime(stay.departureEta) })}</span>}
+              </div>
+            )}
+          </div>
+        )}
+        {stay?.arrivingGuestName && (
+          <div className="flex items-baseline justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+            <span className="truncate"><span className="font-semibold text-rose-600 dark:text-rose-400">{t('room.guestIn')}:</span> {stay.arrivingGuestName}</span>
+            {stay.arrivalEta && <span className="shrink-0 text-slate-500 tabular-nums">{t('room.eta', { time: etaTime(stay.arrivalEta) })}</span>}
+          </div>
+        )}
+        {stay?.instructions && (
+          <p className="flex items-start gap-1 text-[11px] leading-snug text-amber-800 dark:text-amber-300 line-clamp-2" title={stay.instructions}>
+            <ClipboardList className="w-3 h-3 shrink-0 mt-0.5" aria-label={t('room.instructionsLabel')} />
+            <span>{stay.instructions}</span>
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-1 pt-1">
           {stay?.vipType && (
             <span className={`${CHIP} font-semibold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800`}>
@@ -120,10 +150,13 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
               {stay.vipType}
             </span>
           )}
-          {!!stay?.childAges.length && (
+          {!!stay?.children && (
             <span className={`${CHIP} text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800`}>
               <Baby className="w-3 h-3" />
-              <span>{t('room.cotChild')}</span>
+              <span>
+                {t('room.detail.children', { count: stay.children })}
+                {!!stay.childAges.length && ` (${formatChildAges(stay.childAges, t('room.detail.ageUnknown'))})`}
+              </span>
             </span>
           )}
           {stay?.isLinenChangeDue && task.kind === TaskKind.CLEANING && (

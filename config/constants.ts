@@ -49,8 +49,8 @@ export const WORK_SHIFT_HOURS = {
 // - Fecho do dia operacional ~02h ou mais tarde (§8.4): nunca usar 00h00 para mudar de dia
 export const OPERA_DAY_CLOSE_HOUR = 2;
 
-// - 20 secções + 2 de estacionamento são exemplos da reunião (§6.4), não limites
-export const DEFAULT_TASK_SHEET_COUNT = 20;
+// - 20 secções + 2 de estacionamento são exemplos da reunião (§6.4), não limites; o mock de teste usa 24 + 2 = 26
+export const DEFAULT_TASK_SHEET_COUNT = 24;
 export const DEFAULT_PARKING_SHEET_COUNT = 2;
 
 // - Créditos por tipologia e serviço (§15): valores ilustrativos, tabela oficial por aprovar
@@ -77,6 +77,7 @@ export type Permission =
   | 'room.markClean'
   | 'room.markInspected'
   | 'room.markDirty'
+  | 'room.editDetails'
   | 'correction.request'
   | 'stats.teamTimes'
   | 'stats.supervisors'
@@ -88,12 +89,12 @@ export type Permission =
 export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
   [UserRole.ADMIN]: [
     'rooms.viewAll', 'sheets.distribute', 'staff.assign', 'priority.reorder',
-    'room.markInspected', 'correction.request', 'stats.teamTimes', 'stats.supervisors',
+    'room.markInspected', 'room.editDetails', 'correction.request', 'stats.teamTimes', 'stats.supervisors',
     'guest.view', 'messages.send', 'config.zones',
   ],
   [UserRole.SUPERVISOR]: [
     'rooms.viewArea', 'priority.reorder', 'room.markClean', 'room.markInspected',
-    'room.markDirty', 'correction.request', 'guest.view', 'messages.send',
+    'room.markDirty', 'room.editDetails', 'correction.request', 'guest.view', 'messages.send',
   ],
   [UserRole.HOUSEKEEPER]: [
     'rooms.viewAssigned', 'task.startFinish', 'room.markClean', 'guest.view', 'messages.send',

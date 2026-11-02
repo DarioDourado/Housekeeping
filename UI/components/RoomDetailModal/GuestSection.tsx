@@ -1,8 +1,18 @@
 import { useTranslation } from 'react-i18next';
 import { RotateCw, Star } from 'lucide-react';
-import { formatTime } from '@/lib/datetime';
+import { formatDateTime, formatTime } from '@/lib/datetime';
 import { formatChildAges } from '@/lib/taskLabels';
 import type { TaskView } from '@/lib/taskViews';
+import type { RoomStay } from '@/types/housekeeping.types';
+import { RoomInstructions } from './RoomInstructions';
+
+// - [campo da estadia, chave i18n, é data/hora ISO]: só aparecem os que o Opera preencheu
+const DETAIL_STAY_FIELDS: [Extract<keyof RoomStay, 'checkInAt' | 'checkOutAt' | 'departingGuestName' | 'arrivingGuestName'>, string, boolean][] = [
+  ['checkInAt', 'checkIn', true],
+  ['checkOutAt', 'checkOut', true],
+  ['departingGuestName', 'departingGuest', false],
+  ['arrivingGuestName', 'arrivingGuest', false]
+];
 
 // - Reserva do dia e informação especial do quarto (vem do Opera; mostrar só o necessário por perfil)
 export const GuestSection = ({ view }: { view: TaskView }) => {
@@ -25,12 +35,20 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
               )}
             </h3>
           </div>
-          {stay?.arrivalEta && (
-            <div className="text-right">
-              <span className="text-xs text-slate-400 block font-medium">{t('room.detail.etaLabel')}</span>
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 tabular-nums">{stay.arrivalEta}</span>
-            </div>
-          )}
+          <div className="text-right space-y-1">
+            {stay?.arrivalEta && (
+              <div>
+                <span className="text-xs text-slate-400 block font-medium">{t('room.detail.etaLabel')}</span>
+                <span className="text-xs font-bold text-rose-600 dark:text-rose-400 tabular-nums">{stay.arrivalEta}</span>
+              </div>
+            )}
+            {stay?.departureEta && (
+              <div>
+                <span className="text-xs text-slate-400 block font-medium">{t('room.detail.etdLabel')}</span>
+                <span className="text-xs font-bold text-stone-600 dark:text-stone-300 tabular-nums">{stay.departureEta}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-700/60 text-xs">
@@ -48,6 +66,17 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
           </div>
         </div>
       </div>
+
+      {DETAIL_STAY_FIELDS.some(([field]) => stay?.[field]) && (
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          {DETAIL_STAY_FIELDS.map(([field, labelKey, isDate]) => stay?.[field] && (
+            <div key={field} className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <span className="text-slate-400 block mb-0.5">{t(`room.detail.${labelKey}`)}</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 tabular-nums">{isDate ? formatDateTime(stay[field]!, true) : stay[field]}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -69,12 +98,7 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
       </div>
 
       <div className="space-y-3 text-xs">
-        {stay?.instructions && (
-          <div className="p-3.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900">
-            <span className="font-bold text-amber-900 dark:text-amber-300 block mb-1">{t('room.detail.dailyInfo')}</span>
-            <p className="text-amber-800 dark:text-amber-200 leading-relaxed">{stay.instructions}</p>
-          </div>
-        )}
+        {stay && <RoomInstructions roomId={room.id} instructions={stay.instructions} />}
         {!!stay?.traces.length && (
           <div className="p-3.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/20 border border-indigo-200/80 dark:border-indigo-900">
             <span className="font-bold text-indigo-900 dark:text-indigo-300 block mb-1">{t('room.detail.traces')}</span>

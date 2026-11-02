@@ -2,9 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { useTaskView } from '@/hooks/housekeeping/useTaskView';
 import { useFocusTrap } from '@/hooks/common/useFocusTrap';
-import { OperaStatusBadge, TaskStatusChip } from '@/UI/components/StatusBadges';
+import { TaskStatusChip } from '@/UI/components/StatusBadges';
 import { DetailActions } from './DetailActions';
 import { GuestSection } from './GuestSection';
+import { RoomStatusEditor } from './RoomStatusEditor';
 import { TaskHistory } from './TaskHistory';
 import { TraceForm } from './TraceForm';
 
@@ -40,7 +41,7 @@ export const RoomDetailModal = ({ taskId, onClose }: RoomDetailModalProps) => {
             <span className="text-xs text-slate-500 font-medium px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700">
               {t('room.detail.location', { block: room.block, floor: room.floor })}
             </span>
-            <OperaStatusBadge status={room.operaStatus} />
+            <RoomStatusEditor room={room} />
             <TaskStatusChip task={view.task} />
           </div>
           <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label={t('actions.close')}>

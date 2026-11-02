@@ -52,6 +52,10 @@ export const roomStaySchema = z.object({
   childAges: z.array(z.number().nullable()),
   arrivalEta: z.string().optional(),
   departureEta: z.string().optional(),
+  checkInAt: z.string().optional(),        // ISO-8601: check-in do hóspede principal (data + hora)
+  checkOutAt: z.string().optional(),       // ISO-8601: check-out do hóspede principal (data + hora)
+  departingGuestName: z.string().optional(),
+  arrivingGuestName: z.string().optional(),
   isLinenChangeDue: z.boolean(),
   instructions: z.string().optional(),
   traces: z.array(z.string()),
@@ -124,6 +128,8 @@ export const TASK_EVENT_TYPES = [
   'PRIORITY_TOGGLED',
   'MOVED_TASK_SHEET',
   'ROOM_REOPENED',
+  'ROOM_STATUS_CHANGED',
+  'ROOM_INSTRUCTIONS_UPDATED',
   'TURNDOWN_UPDATED',
   'STAFF_MOVED',
   'PLAN_OPENED',

@@ -40,7 +40,7 @@ export const DAY_PLAN_ID = 'plan-day';
 export const NIGHT_PLAN_ID = 'plan-night';
 
 // - secções 2, 5 e 10-24 (quartos, estadias, equipa, tarefas) geradas à parte: ver hotelDataVolume.ts
-const VOLUME = buildVolumeData(DAY_PLAN_ID);
+const VOLUME = buildVolumeData(DAY_PLAN_ID, NIGHT_PLAN_ID);
 
 export const INITIAL_STAFF: User[] = [
   {
@@ -326,13 +326,13 @@ export const INITIAL_STAYS: RoomStay[] = [
 
 // ---------- Configuração base (secções) ----------
 
-export const INITIAL_SECTIONS: Section[] = [
-  { id: 'sec-1', name: 'Secção 01 · Bloco A Piso 1', block: BLOCK.A, defaultRoomIds: ['room-101', 'room-102', 'room-103', 'room-104'], defaultStaffIds: ['user-maria'] },
-  { id: 'sec-3', name: 'Secção 03 · Master Villas', block: BLOCK.VILLAS, defaultRoomIds: ['room-601', 'room-602'], defaultStaffIds: ['user-celia'] },
-  { id: 'sec-4', name: 'Secção 04 · Oasis Parc Suites', block: BLOCK.OASIS, defaultRoomIds: ['room-501', 'room-502'], defaultStaffIds: ['user-sandra'] },
-  { id: 'sec-6', name: 'Secção 06 · Bloco C Pisos 1-2', block: BLOCK.C, defaultRoomIds: ['room-301', 'room-302'], defaultStaffIds: ['user-adriana'] },
-  { id: 'sec-7', name: 'Secção 07 · Bloco B Piso 2', block: BLOCK.B, defaultRoomIds: ['room-201', 'room-202', 'room-203'], defaultStaffIds: ['user-patricia'] },
-  { id: 'sec-8', name: 'Secção 08 · Bloco B Piso 1', block: BLOCK.B, defaultRoomIds: [], defaultStaffIds: [] },
+const DAY_SECTIONS: Section[] = [
+  { id: 'sec-1', name: 'Secção 01 · Bloco A Piso 1', kind: PlanKind.DAY, block: BLOCK.A, defaultRoomIds: ['room-101', 'room-102', 'room-103', 'room-104'], defaultStaffIds: ['user-maria'] },
+  { id: 'sec-3', name: 'Secção 03 · Master Villas', kind: PlanKind.DAY, block: BLOCK.VILLAS, defaultRoomIds: ['room-601', 'room-602'], defaultStaffIds: ['user-celia'] },
+  { id: 'sec-4', name: 'Secção 04 · Oasis Parc Suites', kind: PlanKind.DAY, block: BLOCK.OASIS, defaultRoomIds: ['room-501', 'room-502'], defaultStaffIds: ['user-sandra'] },
+  { id: 'sec-6', name: 'Secção 06 · Bloco C Pisos 1-2', kind: PlanKind.DAY, block: BLOCK.C, defaultRoomIds: ['room-301', 'room-302'], defaultStaffIds: ['user-adriana'] },
+  { id: 'sec-7', name: 'Secção 07 · Bloco B Piso 2', kind: PlanKind.DAY, block: BLOCK.B, defaultRoomIds: ['room-201', 'room-202', 'room-203'], defaultStaffIds: ['user-patricia'] },
+  { id: 'sec-8', name: 'Secção 08 · Bloco B Piso 1', kind: PlanKind.DAY, block: BLOCK.B, defaultRoomIds: [], defaultStaffIds: [] },
   ...VOLUME.sections
 ];
 
@@ -351,7 +351,7 @@ const sheet = (
   extra: Partial<TaskSheet> = {}
 ): TaskSheet => ({ id, planId, number, title, block, isReserve: false, assignments: [], ...extra });
 
-export const INITIAL_TASK_SHEETS: TaskSheet[] = [
+const BASE_TASK_SHEETS: TaskSheet[] = [
   sheet('sheet-1', DAY_PLAN_ID, 1, 'Secção 01 · Bloco A Piso 1', BLOCK.A, { sectionId: 'sec-1', assignments: [lead('user-maria')] }),
   sheet('sheet-3', DAY_PLAN_ID, 3, 'Secção 03 · Master Villas', BLOCK.VILLAS, { sectionId: 'sec-3', assignments: [lead('user-extra-1'), member('user-celia')] }),
   sheet('sheet-4', DAY_PLAN_ID, 4, 'Secção 04 · Oasis Parc Suites', BLOCK.OASIS, { sectionId: 'sec-4', assignments: [lead('user-sandra')] }),
@@ -360,13 +360,13 @@ export const INITIAL_TASK_SHEETS: TaskSheet[] = [
   // - Sheets vazias têm de continuar visíveis (reunião §6.4)
   sheet('sheet-8', DAY_PLAN_ID, 8, 'Secção 08 · Bloco B Piso 1', BLOCK.B, { sectionId: 'sec-8' }),
   ...VOLUME.sheets,
-  sheet('td-1', NIGHT_PLAN_ID, 101, 'Turndown Zona 1 · Bloco A & B (Hotel)', 'Blocos A & B', {
+  sheet('td-1', NIGHT_PLAN_ID, 101, 'Turndown Zona 1 · Bloco A & B (Hotel)', `${BLOCK.A} & ${BLOCK.B}`, {
     assignments: [lead('user-celia')], notes: 'Serviço das 18h00 às 21h30. Não comunica com o Opera.'
   }),
-  sheet('td-2', NIGHT_PLAN_ID, 102, 'Turndown Zona 2 · Bloco C & D', 'Blocos C & D', {
-    assignments: [lead('user-extra-2')], notes: 'Preparação noturna com chocolates e água mineral de cabeceira.'
+  sheet('td-2', NIGHT_PLAN_ID, 102, 'Turndown Zona 2 · Bloco C & D', `${BLOCK.C} & ${BLOCK.D}`, {
+    assignments: [lead('user-ana')], notes: 'Preparação noturna com chocolates e água mineral de cabeceira.'
   }),
-  sheet('td-3', NIGHT_PLAN_ID, 103, 'Turndown Zona 3 · Oasis Suites & Vilas', 'Oasis & Vilas', {
+  sheet('td-3', NIGHT_PLAN_ID, 103, 'Turndown Zona 3 · Oasis Suites & Vilas', `${BLOCK.OASIS} & ${BLOCK.VILLAS}`, {
     assignments: [lead('user-sandra')], notes: 'Vilas e suites com recolha de cortinas e velas aromáticas exteriores.'
   })
 ];
@@ -485,3 +485,16 @@ export const INITIAL_ALERTS: RoomAlert[] = [
   }
 ];
 
+
+// - Cada zona de turndown do arranque tem a sua secção base (kind NIGHT): é o default que as Definições editam e que
+//   o plano da noite copia ao abrir. Quartos e equipa vêm da distribuição de arranque.
+export const INITIAL_TASK_SHEETS: TaskSheet[] = BASE_TASK_SHEETS.map(sheet => (sheet.planId === NIGHT_PLAN_ID ? { ...sheet, sectionId: `tsec-${sheet.id}` } : sheet));
+
+export const INITIAL_SECTIONS: Section[] = [
+  ...DAY_SECTIONS,
+  ...INITIAL_TASK_SHEETS.filter(sheet => sheet.planId === NIGHT_PLAN_ID).map((sheet): Section => ({
+    id: sheet.sectionId ?? sheet.id, name: sheet.title, kind: PlanKind.NIGHT, block: sheet.block,
+    defaultRoomIds: INITIAL_TASKS.filter(t => t.sheetId === sheet.id).map(t => t.roomId),
+    defaultStaffIds: sheet.assignments.map(a => a.staffId)
+  }))
+];

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePermission } from '@/hooks/auth/usePermission';
+import { PlanKind } from '@/types/housekeeping.types';
 import { PageEmpty } from '@/UI/components/feedback/PageStates';
 import { PeopleTab } from './components/PeopleTab';
 import { RoomsTab } from './components/RoomsTab';
 import { SectionsTab } from './components/SectionsTab';
 
-const TABS = ['sections', 'rooms', 'people'] as const;
+const TABS = ['sections', 'turndown', 'rooms', 'people'] as const;
 type Tab = (typeof TABS)[number];
 
 // - Configuração base (permanente). Alterações aqui não mexem em planos já abertos (§6.1).
@@ -41,7 +42,8 @@ export const SettingsPage = () => {
       </div>
 
       <div role="tabpanel" id={`settings-panel-${tab}`} aria-labelledby={`settings-tab-${tab}`}>
-        {tab === 'sections' && <SectionsTab />}
+        {tab === 'sections' && <SectionsTab kind={PlanKind.DAY} />}
+        {tab === 'turndown' && <SectionsTab kind={PlanKind.NIGHT} />}
         {tab === 'rooms' && <RoomsTab />}
         {tab === 'people' && <PeopleTab />}
       </div>

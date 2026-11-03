@@ -42,6 +42,8 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
       onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setIsOver(false); }}
       onDrop={event => {
         event.preventDefault();
+        // - não deixa o drop chegar ao quadro, que trata o largar "fora das equipas" como remover do bloco
+        event.stopPropagation();
         setIsOver(false);
         const staffId = event.dataTransfer.getData('application/staff-id') || draggingStaffId;
         if (staffId) { void moveStaffToBlock(staffId, team.block); setDraggingStaffId(null); }

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Palette, Search } from 'lucide-react';
-import { useBlockTeams, useBoard } from '@/hooks/housekeeping';
+import { Palette, Search, UserMinus } from 'lucide-react';
+import { useBlockTeams, useBoard, useRemoveStaffFromBlock } from '@/hooks/housekeeping';
 import { useBlockLoad } from '@/hooks/housekeeping/useBlockLoad';
 import { useStaff } from '@/hooks/staff';
-import { getStaffBlock } from '@/lib/staffBlock';
+import { teamMembers } from '@/lib/staffBlock';
+import { useUiStore } from '@/store/uiStore';
 import { UserRole } from '@/types/auth.types';
 import { PlanKind } from '@/types/housekeeping.types';
 import { TeamColumn } from './TeamColumn';
@@ -26,6 +27,10 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
   const { data: blockTeams = [] } = useBlockTeams();
   const { columns } = useBoard(PlanKind.DAY);
   const { byBlock, totalCredits } = useBlockLoad();
+  const removeFromBlock = useRemoveStaffFromBlock();
+  const draggingStaffId = useUiStore(state => state.draggingStaffId);
+  const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
+  const [overRemove, setOverRemove] = useState(false);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<(typeof FILTERS)[number]>('ALL');
 
@@ -48,6 +53,15 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
   const supervisors = users.filter(user => user.role === UserRole.SUPERVISOR).length;
   const average = activeStaff > 0 ? (totalCredits / activeStaff).toFixed(1) : '0.0';
   const sheetNumberOf = (userId: string) => columns.find(column => column.assignees.some(a => a.user.id === userId))?.sheet.number;
+
+  // - largar uma pessoa fora das colunas tira-a do bloco; as colunas tratam do seu drop e param a propagação
+  const dropRemove = (event: React.DragEvent) => {
+    event.preventDefault();
+    setOverRemove(false);
+    const staffId = event.dataTransfer.getData('application/staff-id') || draggingStaffId;
+    if (staffId) { void removeFromBlock(staffId); setDraggingStaffId(null); }
+  };
+  const allowRemoveDrop = (event: React.DragEvent) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; };
 
   const metric = (label: string, value: string | number, tone = 'text-slate-900 dark:text-slate-100') => (
     <div className="flex items-center gap-1.5">
@@ -97,7 +111,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
         <div className="flex flex-wrap items-center gap-1.5">
           {blockTeams.map(team => {
             const palette = getTeamColorPalette(team.color || team.block);
-            const count = users.filter(user => getStaffBlock(user) === team.block).length;
+            const count = teamMembers(users, team.block).length;
             return (
               <div
                 key={team.id}
@@ -114,13 +128,29 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-auto p-4 bg-slate-100/60 dark:bg-slate-950/40">
+      <div
+        onDragOver={event => { allowRemoveDrop(event); setOverRemove(true); }}
+        onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setOverRemove(false); }}
+        onDrop={dropRemove}
+        className={`mx-4 mt-3 py-2.5 px-3 rounded-xl border-2 border-dashed text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+          overRemove
+            ? 'border-rose-500 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200'
+            : draggingStaffId
+              ? 'border-rose-300 dark:border-rose-800 bg-rose-50/70 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300'
+              : 'border-slate-200 dark:border-slate-700 text-slate-400'
+        }`}
+      >
+        <UserMinus className="w-3.5 h-3.5" />
+        <span>{t('team.dropRemove')}</span>
+      </div>
+
+      <div onDragOver={allowRemoveDrop} onDrop={dropRemove} className="flex-1 overflow-x-auto p-4 bg-slate-100/60 dark:bg-slate-950/40">
         <div className="flex gap-4 min-h-full items-stretch">
           {blockTeams.map(team => (
             <TeamColumn
               key={team.id}
               team={team}
-              members={filtered.filter(user => getStaffBlock(user) === team.block)}
+              members={teamMembers(filtered, team.block)}
               load={byBlock.get(team.block) ?? { tasks: 0, credits: 0, departureArrivals: 0 }}
               blockTeams={blockTeams}
               sheetNumberOf={sheetNumberOf}

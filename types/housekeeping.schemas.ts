@@ -67,6 +67,8 @@ export const roomStaySchema = z.object({
 export const sectionSchema = z.object({
   id: z.string(),
   name: z.string(),
+  // - a configuração base é uma por serviço: manhã (sheets do dia) ou noite (zonas de turndown)
+  kind: z.enum(PlanKind).default(PlanKind.DAY),
   block: z.string(),
   defaultRoomIds: z.array(z.string()),
   defaultStaffIds: z.array(z.string())
@@ -132,6 +134,9 @@ export const TASK_EVENT_TYPES = [
   'ROOM_INSTRUCTIONS_UPDATED',
   'TURNDOWN_UPDATED',
   'STAFF_MOVED',
+  'STAFF_DUTY_CHANGED',
+  'STAFF_SHEET_CHANGED',
+  'SHEET_UPDATED',
   'PLAN_OPENED',
   'OPERA_SYNC_PUSH',
   'OPERA_SYNC_PULL',

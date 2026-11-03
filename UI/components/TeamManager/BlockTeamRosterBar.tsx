@@ -1,13 +1,20 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, GripVertical, Settings2, Users } from 'lucide-react';
 import { useBlockTeams, useMoveStaffToBlock } from '@/hooks/housekeeping';
 import { useStaff } from '@/hooks/staff';
-import { getStaffBlock } from '@/lib/staffBlock';
+import { teamMembers } from '@/lib/staffBlock';
 import { useOverlayStore } from '@/store/overlayStore';
 import { useUiStore } from '@/store/uiStore';
 import type { User } from '@/types/auth.types';
 import { getTeamColorPalette } from './teamColorUtils';
+
+// - nome e apelido (1ª e última palavra), para distinguir pessoas com o mesmo primeiro nome
+const shortName = (name: string) => {
+  const parts = name.trim().split(/s+/);
+  return parts.length > 2 ? `${parts[0]} ${parts[parts.length - 1]}` : name.trim();
+};
 
 // - Barra de equipas por bloco no topo do planeamento: arrastar pessoas entre blocos ou para uma task sheet
 export const BlockTeamRosterBar = () => {
@@ -30,6 +37,7 @@ export const BlockTeamRosterBar = () => {
 
   const drop = async (event: React.DragEvent, block: string) => {
     event.preventDefault();
+    event.stopPropagation();
     setDragOverBlock(null);
     const staffId = event.dataTransfer.getData('application/staff-id') || draggingStaffId;
     if (staffId) {
@@ -67,7 +75,8 @@ export const BlockTeamRosterBar = () => {
         <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
           {blockTeams.map(team => {
             const palette = getTeamColorPalette(team.color || team.block);
-            const members = users.filter(user => getStaffBlock(user) === team.block);
+            // - só aparecem as pessoas de serviço; quem está fora entra pela lista da sheet (com confirmação)
+            const members = teamMembers(users, team.block).filter(isOnDuty);
             const isOver = dragOverBlock === team.block;
 
             return (
@@ -93,7 +102,7 @@ export const BlockTeamRosterBar = () => {
                     <span className="text-[10px] text-slate-400 italic">{t('roster.noStaff')}</span>
                   ) : (
                     members.map(person => {
-                      const offDuty = person.isOnDuty === false;
+                      const offDuty = !isOnDuty(person);
                       return (
                         <div
                           key={person.id}
@@ -112,7 +121,7 @@ export const BlockTeamRosterBar = () => {
                           title={t('roster.memberTitle', { name: person.name, role: t(`roles.${person.role}`), block: team.block, status: offDuty ? t('roster.offDuty') : t('roster.onDuty') })}
                         >
                           <GripVertical className="w-2.5 h-2.5 text-slate-400 -ml-0.5 shrink-0" />
-                          <span className="truncate max-w-[80px]">{person.name.split(' ')[0]}</span>
+                          <span className="truncate max-w-[140px]" title={person.name}>{shortName(person.name)}</span>
                           {offDuty ? <span className="text-[8px] font-bold text-slate-400">{t('roster.offDutyMark')}</span> : person.isExtra ? <span className="text-[8px] font-bold text-amber-600">★</span> : null}
                         </div>
                       );

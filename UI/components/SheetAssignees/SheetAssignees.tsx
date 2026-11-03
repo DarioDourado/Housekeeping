@@ -1,10 +1,23 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Users } from 'lucide-react';
-import { useAssignStaffToSheet } from '@/hooks/housekeeping';
-import { useStaff } from '@/hooks/staff';
+import { useAssignStaffToSheet, useTaskSheets } from '@/hooks/housekeeping';
+import { useEnsureOnDuty, useStaff } from '@/hooks/staff';
+import { useUiStore } from '@/store/uiStore';
+import { isOnDuty } from '@/lib/staffDuty';
+import { duplicateColorIndex, duplicatedStaff } from '@/lib/staffSheets';
 import type { SheetColumn } from '@/lib/taskViews';
 import { SheetRole, type SheetAssignment } from '@/types/housekeeping.types';
+
+// - uma cor por pessoa repetida (classes literais para o Tailwind as encontrar; só famílias do tema; sem azul/ciano (chip normal), laranja/âmbar (extras) nem cinzento (fora de serviço))
+const DUPLICATE_COLORS = [
+  'bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-500 dark:border-rose-600',
+  'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-200 border-purple-500 dark:border-purple-600',
+  'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-500 dark:border-emerald-600',
+  'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 border-indigo-500 dark:border-indigo-600',
+  'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-200 border-red-500 dark:border-red-600',
+  'bg-green-100 dark:bg-green-950/60 text-green-900 dark:text-green-200 border-green-500 dark:border-green-600'
+] as const;
 
 interface SheetAssigneesProps {
   sheetId: string;
@@ -18,14 +31,25 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
   const { t } = useTranslation();
   const { data: staff = [] } = useStaff();
   const assignStaff = useAssignStaffToSheet();
+  const ensureOnDuty = useEnsureOnDuty();
+  const { data: sheets = [] } = useTaskSheets();
+  const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
   const [open, setOpen] = useState(false);
 
-  const toggle = (staffId: string) => {
-    const next = assignments.some(a => a.staffId === staffId)
-      ? assignments.filter(a => a.staffId !== staffId)
-      : [...assignments, { staffId, role: assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }];
-    void assignStaff(sheetId, next);
+  const toggle = async (staffId: string) => {
+    if (assignments.some(a => a.staffId === staffId)) {
+      await assignStaff(sheetId, assignments.filter(a => a.staffId !== staffId));
+      return;
+    }
+    // - quem está fora de serviço só entra depois de confirmar que se ativa
+    const person = staff.find(user => user.id === staffId);
+    if (person && !(await ensureOnDuty(person))) return;
+    await assignStaff(sheetId, [...assignments, { staffId, role: assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }]);
   };
+
+  // - quem está em mais do que uma sheet do mesmo plano fica assinalado (dia e noite são independentes)
+  const planId = sheets.find(sheet => sheet.id === sheetId)?.planId ?? '';
+  const duplicated = duplicatedStaff(sheets, planId);
 
   return (
     <div className="relative">
@@ -41,11 +65,35 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
 
       <div className="flex flex-wrap gap-1 mt-1.5 min-h-[24px]">
         {assignees.length > 0 ? (
-          assignees.map(({ user, role }) => (
-            <span key={user.id} className="inline-flex items-center gap-1 text-[11px] font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-900 px-2 py-0.5 rounded-full">
+          assignees.map(({ user, role }) => {
+            const others = (duplicated.get(user.id) ?? []).filter(sheet => sheet.id !== sheetId);
+            const off = !isOnDuty(user);
+            return (
+            <span
+              key={user.id}
+              title={others.length > 0 ? t('sheet.multiSheet', { sheets: others.map(sheet => sheet.title).join(', ') }) : off ? t('sheet.offDutyHint') : undefined}
+              draggable={canEdit}
+              // - arrastar o nome para outra sheet move a pessoa de grupo
+              onDragStart={event => {
+                event.dataTransfer.setData('application/staff-id', user.id);
+                event.dataTransfer.setData('application/from-sheet', sheetId);
+                event.dataTransfer.effectAllowed = 'move';
+                setDraggingStaffId(user.id);
+              }}
+              onDragEnd={() => setDraggingStaffId(null)}
+              className={`${canEdit ? 'cursor-grab active:cursor-grabbing ' : ''}inline-flex items-center gap-1 text-[11px] font-medium border px-2 py-0.5 rounded-full ${
+                others.length > 0
+                  ? DUPLICATE_COLORS[duplicateColorIndex(duplicated, user.id) % DUPLICATE_COLORS.length]
+                  : off
+                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-dashed border-slate-400 dark:border-slate-600'
+                    : 'bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-900'
+              }`}>
               {user.name}{user.isExtra ? t('sheet.extraSuffix') : ''}{role === SheetRole.LEAD && assignees.length > 1 ? ' ★' : ''}
+              {off && <span className="text-[10px] font-bold">· {t('sheet.offDuty')}</span>}
+              {others.length > 0 && <span className="text-[10px] font-bold">⚠ {others.length + 1}</span>}
             </span>
-          ))
+            );
+          })
         ) : (
           <span className="text-[11px] text-slate-400 italic">{t('sheet.noPerson')}</span>
         )}
@@ -60,8 +108,8 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
           <div className="max-h-48 overflow-y-auto space-y-1">
             {staff.map(person => (
               <label key={person.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer">
-                <input type="checkbox" checked={assignments.some(a => a.staffId === person.id)} onChange={() => toggle(person.id)} />
-                <span className="text-slate-800 dark:text-slate-200 font-medium truncate">{person.name}{person.isExtra ? t('sheet.extraGasSuffix') : ''}</span>
+                <input type="checkbox" checked={assignments.some(a => a.staffId === person.id)} onChange={() => void toggle(person.id)} />
+                <span className="text-slate-800 dark:text-slate-200 font-medium truncate">{person.name}{person.isExtra ? t('sheet.extraGasSuffix') : ''}{!isOnDuty(person) && <span className="ml-1 text-[10px] text-slate-400 font-normal">· {t('sheet.offDuty')}</span>}</span>
               </label>
             ))}
           </div>

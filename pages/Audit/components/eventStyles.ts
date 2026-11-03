@@ -11,7 +11,9 @@ import {
   Play,
   RotateCw,
   Server,
+  UserCheck,
   UserX,
+  Users,
   type LucideIcon
 } from 'lucide-react';
 import type { TaskEventType } from '@/types/housekeeping.types';
@@ -37,6 +39,9 @@ const STYLES: Record<TaskEventType, EventStyle> = {
   ROOM_INSTRUCTIONS_UPDATED: { icon: Pencil, color: 'text-slate-700 bg-slate-100 dark:bg-slate-800' },
   TURNDOWN_UPDATED: { icon: Moon, color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60' },
   STAFF_MOVED: { icon: ArrowRightLeft, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/60' },
+  STAFF_DUTY_CHANGED: { icon: UserCheck, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/60' },
+  STAFF_SHEET_CHANGED: { icon: Users, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/60' },
+  SHEET_UPDATED: { icon: Pencil, color: 'text-slate-700 bg-slate-100 dark:bg-slate-800' },
   PLAN_OPENED: { icon: FilePlus, color: 'text-slate-700 bg-slate-100 dark:bg-slate-800' },
   OPERA_SYNC_PUSH: { icon: Server, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/60' },
   OPERA_SYNC_PULL: { icon: Server, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/60' },

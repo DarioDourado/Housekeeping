@@ -1,3 +1,4 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Edit2, UserPlus } from 'lucide-react';
@@ -39,7 +40,7 @@ const initialState = (user?: User): FormState => {
     role: user?.role ?? UserRole.HOUSEKEEPER,
     defaultBlock,
     assignedArea: user?.assignedArea || defaultBlock,
-    isOnDuty: user ? user.isOnDuty !== false : true,
+    isOnDuty: user ? isOnDuty(user) : true,
     shift: user?.shift || SHIFT.MORNING,
     phoneDeviceId: user?.phoneDeviceId ?? '',
     isExtra: !!user?.isExtra,

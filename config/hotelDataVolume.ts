@@ -6,6 +6,8 @@ import {
   CommercialBlock,
   InspectionStatus,
   Movement,
+  NotPerformedReason,
+  PlanKind,
   PriorityOrigin,
   RoomStatus,
   RoomTypology,
@@ -66,6 +68,18 @@ const HOUSEKEEPER_COUNT = 50;
 const HOUSEKEEPERS = Array.from({ length: HOUSEKEEPER_COUNT }, (_, i) =>
   `${FIRST_NAMES[i % 20]} ${LAST_NAMES[(i * 7 + 3 + Math.floor(i / 20)) % 20]}`);
 
+// - informação de serviço da noite (turndown): preferências, traces e specials dos hóspedes
+const NIGHT_PREFERENCES = [
+  'Abrir a cama e deixar chinelos e roupão',
+  'Chocolates e água mineral de cabeceira',
+  'Cobertor extra e cortinas fechadas',
+  'Almofada extra; luzes de cabeceira acesas',
+  'Ar condicionado a 21°C antes das 21:00',
+  'Preparar cama de bebé e reforçar toalhas'
+];
+const NIGHT_TRACES = ['Prefere cama virada só de um lado', 'Não deixar chocolates (diabético)', 'Costuma pedir gelo à noite', 'Alérgico a frutos secos'];
+const NIGHT_SPECIALS = ['Aniversário', 'Lua de mel', 'Aniversário de casamento'];
+
 const GUESTS = [
   'Sr. Thomas Becker', 'Mme. Isabelle Laurent', 'Família Oliveira', 'Mr. & Mrs. Hughes', 'Sra. Marta Seixas',
   'Dr. Pieter Van Dijk', 'Família Rossi', 'Sr. Nuno Tavares', 'Ms. Emily Carter', 'Herr Jonas Keller'
@@ -108,7 +122,11 @@ const PARKING_SHEETS = [
   { number: 26, title: 'Secção 26 [Estacionamento] · Refreshes Pendentes', notes: 'Quartos limpos que só serão inspecionados se houver antecipação de chegada.' }
 ];
 
-export const buildVolumeData = (dayPlanId: string) => {
+// - hotelData.ts já traz td-1..td-3; o volume gera as restantes até 14 zonas de turndown
+const NIGHT_FIRST_SHEET = 4;
+const NIGHT_SHEET_COUNT = 11;
+
+export const buildVolumeData = (dayPlanId: string, nightPlanId: string) => {
   const staff: User[] = HOUSEKEEPERS.map((name, index) => ({
     id: `user-hk-${index + 1}`, name, email: `${name.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/\s+/g, '.')}@vilavitaparc.com`,
     role: UserRole.HOUSEKEEPER, isOnDuty: true, shift: 'Manhã', phoneDeviceId: `TEL-AREA-${String(index + 10).padStart(2, '0')}`
@@ -159,8 +177,8 @@ export const buildVolumeData = (dayPlanId: string) => {
         roomId, date: TODAY, movement, guestName, adults: movement === Movement.DEPARTURE_ONLY ? 0 : 2, children: g % 3 === 0 ? 1 + (g % 2) : 0,
         childAges: g % 3 === 0 ? [6, 3].slice(0, 1 + (g % 2)) : [], isLinenChangeDue: arrives || g % 3 === 0,
         arrivalEta: arrives || movement === Movement.VACANT ? `${13 + (g % 4)}:00` : undefined,
-        departureEta: arrives ? '11:00' : undefined, traces: [], specials: [],
-        instructions: INSTRUCTIONS[g % INSTRUCTIONS.length],
+        departureEta: arrives ? '11:00' : undefined, traces: g % 4 === 0 ? [NIGHT_TRACES[(g / 4) % NIGHT_TRACES.length]!] : [], specials: g % 5 === 0 ? [NIGHT_SPECIALS[(g / 5) % NIGHT_SPECIALS.length]!] : [],
+        instructions: INSTRUCTIONS[g % INSTRUCTIONS.length], preferences: NIGHT_PREFERENCES[g % NIGHT_PREFERENCES.length],
         ...(g % 7 === 0 && { vipType: 'VIP 1', preferences: 'Almofadas extra e água mineral fresca' })
       }, g));
 
@@ -170,7 +188,8 @@ export const buildVolumeData = (dayPlanId: string) => {
       tasks.push({
         id: `task-${number}-${kind.toLowerCase()}`, planId: dayPlanId, sheetId: onSheet, roomId, kind, movement,
         status: finished ? TaskStatus.COMPLETED : TaskStatus.PENDING, isPriority: false,
-        orderIndex: tasks.filter(t => t.sheetId === onSheet).length,
+        // - o room-104 (hotelData) já ocupa a posição 0 do primeiro estacionamento
+        orderIndex: tasks.filter(t => t.sheetId === onSheet).length + (onSheet === PARKING_SHEET_IDS[0] ? 1 : 0),
         inspectionStatus: kind === TaskKind.CLEANING ? InspectionStatus.PENDING : InspectionStatus.NOT_REQUIRED,
         executorIds: finished ? [staffId!] : [], onBehalfOfTeam: false,
         ...(finished && { startedAt: todayAt('08:20'), finishedAt: todayAt('08:50'), durationSeconds: 1800, startedById: staffId }),
@@ -178,7 +197,7 @@ export const buildVolumeData = (dayPlanId: string) => {
       });
     });
 
-    sections.push({ id: sectionId, name: title, block, defaultRoomIds: roomIds, defaultStaffIds: staffIds });
+    sections.push({ id: sectionId, name: title, kind: PlanKind.DAY, block, defaultRoomIds: roomIds, defaultStaffIds: staffIds });
     sheets.push({
       id: sheetId, planId: dayPlanId, number: n, title, block, sectionId, isReserve: false,
       assignments: assignments(staffIds)
@@ -191,6 +210,35 @@ export const buildVolumeData = (dayPlanId: string) => {
       assignments: assignments(assignTeam(number, BLOCK.PARKING))
     })
   );
+
+  // - Turndown: quartos ocupados esta noite (estadia ou chegada, como no plano gerado em planningCommands) repartidos
+  //   por NIGHT_SHEET_COUNT zonas contíguas; cada zona tem 2 pessoas (a 1ª lidera). Alguns estados de exemplo.
+  const occupied = stays.filter(stay => stay.movement === Movement.STAYOVER || stay.movement === Movement.DEPARTURE_ARRIVAL);
+  const nightStates: Partial<ServiceTask>[] = [
+    { status: TaskStatus.IN_PROGRESS, startedAt: todayAt('18:40') },
+    { status: TaskStatus.NOT_PERFORMED, notPerformedReason: NotPerformedReason.DND },
+    { status: TaskStatus.NOT_PERFORMED, notPerformedReason: NotPerformedReason.REFUSE_SERVICE },
+    { status: TaskStatus.NOT_PERFORMED, notPerformedReason: NotPerformedReason.ALREADY_DONE }
+  ];
+  Array.from({ length: NIGHT_SHEET_COUNT }, (_, zone) => {
+    const zoneStays = occupied.slice(Math.floor(zone * occupied.length / NIGHT_SHEET_COUNT), Math.floor((zone + 1) * occupied.length / NIGHT_SHEET_COUNT));
+    const crew = [staff[2 * zone]!, staff[2 * zone + 1]!];
+    const blocks = Array.from(new Set(zoneStays.map(stay => rooms.find(room => room.id === stay.roomId)!.block)));
+    const sheetId = `td-${NIGHT_FIRST_SHEET + zone}`;
+    sheets.push({
+      id: sheetId, planId: nightPlanId, number: 101 + NIGHT_FIRST_SHEET + zone - 1, title: `Turndown Zona ${NIGHT_FIRST_SHEET + zone} · ${blocks.join(' & ')}`,
+      block: blocks.join(' & '), isReserve: false, assignments: assignments(crew.map(user => user.id))
+    });
+    zoneStays.forEach((stay, index) => {
+      const sample = (zone + index) % 3 === 0 ? nightStates[(zone * 2 + index) % nightStates.length] : undefined;
+      tasks.push({
+        id: `task-${stay.roomId.replace('room-', '')}-turndown`, planId: nightPlanId, sheetId, roomId: stay.roomId, kind: TaskKind.TURNDOWN,
+        movement: stay.movement, status: TaskStatus.PENDING, isPriority: false, orderIndex: index, inspectionStatus: InspectionStatus.NOT_REQUIRED,
+        executorIds: [], onBehalfOfTeam: false,
+        ...(sample && { ...sample, startedById: crew[0]!.id, ...(sample.status !== TaskStatus.NOT_PERFORMED && { executorIds: [crew[0]!.id] }) })
+      });
+    });
+  });
 
   return { staff, rooms, stays, sections, sheets, tasks };
 };

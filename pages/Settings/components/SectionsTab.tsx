@@ -4,19 +4,25 @@ import { Plus, Trash2 } from 'lucide-react';
 import { OPERATIONAL_BLOCKS } from '@/config/constants';
 import { useConfirm } from '@/hooks/common/useConfirm';
 import { useAddSection, useDeleteSection, useRooms, useSections, useUpdateSection } from '@/hooks/housekeeping';
+import { useStaff } from '@/hooks/staff';
+import { isOnDuty } from '@/lib/staffDuty';
+import type { PlanKind } from '@/types/housekeeping.types';
 import { PageEmpty, PageError, PageLoading } from '@/UI/components/feedback/PageStates';
 
 const field = 'rounded-[12px] border border-line bg-surface px-3 py-2 text-sm text-content focus:outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary';
 
-export const SectionsTab = () => {
+// - Configuração base de um serviço (manhã ou turndown): o plano abre a copiar estas secções (§6.1)
+export const SectionsTab = ({ kind }: { kind: PlanKind }) => {
   const { t } = useTranslation();
   const confirm = useConfirm();
-  const { data: sections = [], isLoading, isError, refetch } = useSections();
+  const { data: allSections = [], isLoading, isError, refetch } = useSections();
+  const { data: staff = [] } = useStaff();
   const { data: rooms = [] } = useRooms();
   const addSection = useAddSection();
   const updateSection = useUpdateSection();
   const deleteSection = useDeleteSection();
   const [name, setName] = useState('');
+  const sections = allSections.filter(section => section.kind === kind);
   const [block, setBlock] = useState<string>(OPERATIONAL_BLOCKS[0] ?? '');
 
   if (isLoading) return <PageLoading />;
@@ -25,7 +31,7 @@ export const SectionsTab = () => {
   const create = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    await addSection({ name: trimmed, block, defaultRoomIds: [], defaultStaffIds: [] });
+    await addSection({ name: trimmed, kind, block, defaultRoomIds: [], defaultStaffIds: [] });
     setName('');
   };
 
@@ -80,11 +86,32 @@ export const SectionsTab = () => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-muted">
-                {section.block} · {t('settings.sections.roomCount', { count: section.defaultRoomIds.length })}
-              </p>
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <select
+                  value={section.block}
+                  aria-label={t('settings.sections.block')}
+                  onChange={event => void updateSection({ ...section, block: event.target.value })}
+                  className={`${field} py-1 text-xs`}
+                >
+                  {Array.from(new Set([...OPERATIONAL_BLOCKS, section.block])).map(item => <option key={item} value={item}>{item}</option>)}
+                </select>
+                <span>· {t('settings.sections.roomCount', { count: section.defaultRoomIds.length })}</span>
+              </div>
               <p className="text-xs text-content tabular-nums leading-relaxed">
                 {section.defaultRoomIds.map(id => rooms.find(room => room.id === id)?.number ?? id).join(' · ') || t('settings.sections.noRooms')}
+              </p>
+              <p className="flex flex-wrap gap-1 text-[11px]">
+                {section.defaultStaffIds.length === 0 && <span className="text-muted italic">{t('settings.sections.noStaff')}</span>}
+                {section.defaultStaffIds.map(id => {
+                  const person = staff.find(user => user.id === id);
+                  const off = !!person && !isOnDuty(person);
+                  // - quem está fora de serviço fica destacado: não entra no plano ao abrir
+                  return (
+                    <span key={id} title={off ? t('settings.sections.offDutyHint') : undefined} className={`rounded-full border px-2 py-0.5 ${off ? 'border-dashed border-line text-muted' : 'border-line text-content'}`}>
+                      {person?.name ?? id}{off ? ` · ${t('sheet.offDuty')}` : ''}
+                    </span>
+                  );
+                })}
               </p>
             </li>
           ))}

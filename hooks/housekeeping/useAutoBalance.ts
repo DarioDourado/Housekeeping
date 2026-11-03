@@ -1,3 +1,4 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useCallback } from 'react';
 import { BLOCK } from '@/config/constants';
 import { useStaff } from '@/hooks/staff';
@@ -17,9 +18,9 @@ export const useAutoBalance = () => {
   const showToast = useUiStore(state => state.showToast);
 
   return useCallback(async () => {
-    const available = users.filter(user => user.isExtra || getStaffBlock(user) === BLOCK.SUPPORT);
+    const available = users.filter(user => isOnDuty(user) && (user.isExtra || getStaffBlock(user) === BLOCK.SUPPORT));
     if (available.length === 0) {
-      showToast({ key: 'toasts.noExtras' });
+      showToast({ key: 'team.noExtras' });
       return;
     }
 

@@ -6,22 +6,12 @@ import { useBoard, useOpenPlan, useResetToDailyPreset } from '@/hooks/housekeepi
 import { filterColumnViews, type MovementFilter } from '@/lib/boardFilter';
 import { PlanKind } from '@/types/housekeeping.types';
 import { PageEmpty, PageError, PageLoading } from '@/UI/components/feedback/PageStates';
+import { SheetRemoveZone } from '@/UI/components/SheetAssignees';
 import { BlockTeamRosterBar } from '@/UI/components/TeamManager';
-import { PlanningToolbar, type LayoutMode } from './components/PlanningToolbar';
+import { BOARD_PAGE, LAYOUT_GRID, PlanningToolbar, SCROLL_ITEM, type LayoutMode } from './components/PlanningToolbar';
 import { SummaryStrip } from './components/SummaryStrip';
 import { TaskSheetColumn } from './components/TaskSheetColumn';
 
-const GRID: Record<LayoutMode, string> = {
-  AUTO_FIT: 'flex flex-wrap lg:flex-nowrap gap-3',
-  COMPACT: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5',
-  EXPANDED: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5',
-  // - todas numa só linha, 6 visíveis de cada vez e scroll horizontal para as restantes
-  SCROLL: 'flex gap-3'
-};
-// - ocupa a altura que o AppLayout dá ao <main> (responsivo, sem alturas fixas); min-h evita colapsar em janelas baixas
-const PAGE = 'flex flex-col gap-4 w-full h-full min-h-[32rem]';
-// - 6 colunas visíveis = (100% - 5 intervalos de gap-3) / 6; min-w evita colunas ilegíveis em ecrãs pequenos
-const SCROLL_ITEM = 'shrink-0 w-[calc((100%-5*0.75rem)/6)] min-w-[220px]';
 
 // - Distribuição do dia: totais, equipas por bloco e as task sheets lado a lado, onde se redistribui o trabalho
 export const PlanningPage = () => {
@@ -75,9 +65,9 @@ export const PlanningPage = () => {
     .filter(({ cards }) => !filtering || cards.length > 0);
 
   return (
-    <div className={PAGE}>
+    <SheetRemoveZone className={BOARD_PAGE}>
       <div className="space-y-4 shrink-0">
-        <SummaryStrip views={board.views} onReset={canDistribute ? handleReset : undefined} />
+        <SummaryStrip columns={board.columns} onReset={canDistribute ? handleReset : undefined} />
         {canDistribute && <BlockTeamRosterBar />}
         <PlanningToolbar
           blockFilter={blockFilter}
@@ -94,7 +84,7 @@ export const PlanningPage = () => {
       </div>
       {/* - wrapper das sheets: é aqui (e só aqui) que há scroll; o resto da página fica fixo */}
       <div className="flex-1 min-h-0 overflow-auto rounded-xl">
-      <div className={`${GRID[layout]} pb-2`}>
+      <div className={`${LAYOUT_GRID[layout]} pb-2`}>
         {filtering && visible.length === 0 && (
           <p className="col-span-full w-full py-10 text-center text-sm text-slate-500">{t('planning.noResults')}</p>
         )}
@@ -105,12 +95,11 @@ export const PlanningPage = () => {
               column={column}
               cards={filtering ? cards : undefined}
               layout={layout === 'AUTO_FIT' ? 'FULL_FIT' : 'GRID'}
-              otherSheets={board.columns.filter(other => other.sheet.id !== column.sheet.id).map(other => ({ id: other.sheet.id, title: other.sheet.title }))}
             />
           </div>
         ))}
       </div>
       </div>
-    </div>
+    </SheetRemoveZone>
   );
 };

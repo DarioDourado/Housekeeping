@@ -1,5 +1,6 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useTranslation } from 'react-i18next';
-import { ArrowRightLeft, Clock, Edit2, LogIn, Smartphone, Trash2 } from 'lucide-react';
+import { ArrowRightLeft, Edit2, LogIn, Trash2 } from 'lucide-react';
 import { SHIFT } from '@/config/constants';
 import { getDefaultBlock, getDisplayBlock } from '@/lib/staffBlock';
 import { UserRole, type User } from '@/types/auth.types';
@@ -16,26 +17,35 @@ const SHIFT_KEYS: Record<string, string> = {
 interface DirectoryRowProps {
   user: User;
   blockTeams: BlockTeam[];
-  sheetNumber?: number | undefined;
+  sheetId?: string | undefined;
+  sheets: { id: string; number: number }[];
+  devices: string[];
   canManage: boolean;
   onToggleDuty: (user: User) => void;
   onChangeDefaultBlock: (user: User, block: string) => void;
+  onChangeCurrentBlock: (user: User, block: string) => void;
+  onChangeShift: (user: User, shift: string) => void;
+  onChangeDevice: (user: User, device: string) => void;
+  onChangeSheet: (user: User, sheetId: string) => void;
   onRestoreDefault: (user: User) => void;
   onSwitchUser: (userId: string) => void;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
 }
 
+// - edição rápida na tabela: o <select> nativo guarda logo ao escolher
+const FAST = 'px-2 py-1 rounded-md text-[11px] font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-70 max-w-[9.5rem]';
+const SHIFTS = Object.entries(SHIFT_KEYS);
 const ACTION = 'p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors';
 
-export const DirectoryRow = ({ user, blockTeams, sheetNumber, canManage, onToggleDuty, onChangeDefaultBlock, onRestoreDefault, onSwitchUser, onEdit, onDelete }: DirectoryRowProps) => {
+export const DirectoryRow = ({ user, blockTeams, sheetId, sheets, devices, canManage, onToggleDuty, onChangeDefaultBlock, onChangeCurrentBlock, onChangeShift, onChangeDevice, onChangeSheet, onRestoreDefault, onSwitchUser, onEdit, onDelete }: DirectoryRowProps) => {
   const { t } = useTranslation();
   const defaultBlock = getDefaultBlock(user);
   const currentBlock = getDisplayBlock(user);
   const defaultPalette = getTeamColorPalette(defaultBlock);
   const currentPalette = getTeamColorPalette(currentBlock);
-  const onDuty = user.isOnDuty !== false;
-  const shiftKey = SHIFT_KEYS[user.shift || SHIFT.MORNING];
+  const onDuty = isOnDuty(user);
+  const shift = user.shift || SHIFT.MORNING;
 
   const avatar = user.isExtra
     ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-amber-300'
@@ -91,10 +101,16 @@ export const DirectoryRow = ({ user, blockTeams, sheetNumber, canManage, onToggl
 
       <td className="py-3 px-3">
         <div className="flex items-center gap-1.5">
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${currentPalette.badge}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${currentPalette.dot}`} />
-            <span>{currentBlock}</span>
-          </span>
+          <select
+            value={currentBlock}
+            disabled={!canManage}
+            onChange={event => onChangeCurrentBlock(user, event.target.value)}
+            aria-label={t('directory.fastEdit.currentBlock')}
+            title={t('directory.fastEdit.currentBlock')}
+            className={`px-2 py-1 rounded-md text-[11px] font-semibold border ${currentPalette.badge}`}
+          >
+            {blockTeams.map(team => <option key={team.id} value={team.block}>{team.block}</option>)}
+          </select>
           {currentBlock !== defaultBlock && canManage && (
             <button onClick={() => onRestoreDefault(user)} className="p-1 rounded text-amber-600 hover:bg-amber-100/60" title={t('directory.movedTitle', { block: defaultBlock })} aria-label={t('directory.movedTitle', { block: defaultBlock })}>
               <ArrowRightLeft className="w-3 h-3" />
@@ -104,29 +120,24 @@ export const DirectoryRow = ({ user, blockTeams, sheetNumber, canManage, onToggl
       </td>
 
       <td className="py-3 px-3">
-        <span className="inline-flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
-          <Clock className="w-3 h-3 text-slate-400" />
-          <span>{shiftKey ? t(`directory.shiftShort.${shiftKey}`) : user.shift}</span>
-        </span>
+        <select value={shift} disabled={!canManage} onChange={event => onChangeShift(user, event.target.value)} aria-label={t('directory.fastEdit.shift')} title={t('directory.fastEdit.shift')} className={FAST}>
+          {SHIFTS.map(([value, key]) => <option key={value} value={value}>{t(`directory.shiftShort.${key}`)}</option>)}
+          {!SHIFT_KEYS[shift] && <option value={shift}>{shift}</option>}
+        </select>
       </td>
 
       <td className="py-3 px-3">
-        {user.phoneDeviceId ? (
-          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-            <Smartphone className="w-3 h-3 text-slate-400" />
-            <span>{user.phoneDeviceId}</span>
-          </span>
-        ) : (
-          <span className="text-slate-400 italic text-[11px]">{t('directory.noDevice')}</span>
-        )}
+        <select value={user.phoneDeviceId ?? ''} disabled={!canManage} onChange={event => onChangeDevice(user, event.target.value)} aria-label={t('directory.fastEdit.device')} title={t('directory.fastEdit.device')} className={`${FAST} font-mono`}>
+          <option value="">{t('directory.noDevice')}</option>
+          {devices.map(device => <option key={device} value={device}>{device}</option>)}
+        </select>
       </td>
 
       <td className="py-3 px-3">
-        {sheetNumber !== undefined ? (
-          <span className="font-semibold text-blue-600 dark:text-blue-400 text-[11px]">{t('sheet.number', { number: sheetNumber })}</span>
-        ) : (
-          <span className="text-slate-400 italic text-[11px]">{t('directory.noSheet')}</span>
-        )}
+        <select value={sheetId ?? ''} disabled={!canManage} onChange={event => onChangeSheet(user, event.target.value)} aria-label={t('directory.fastEdit.sheet')} title={t('directory.fastEdit.sheet')} className={`${FAST} text-blue-600 dark:text-blue-400`}>
+          <option value="">{t('directory.noSheet')}</option>
+          {sheets.map(sheet => <option key={sheet.id} value={sheet.id}>{t('sheet.number', { number: sheet.number })}</option>)}
+        </select>
       </td>
 
       <td className="py-3 px-4 text-right">

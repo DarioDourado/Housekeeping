@@ -1,6 +1,7 @@
 import { selectActivePlan } from '@/lib/taskViews';
 import {
   InspectionStatus,
+  SheetRole,
   SyncState,
   TaskStatus,
   type LocalizedText,
@@ -10,6 +11,7 @@ import {
   type RoomStatus,
   type ServicePlan,
   type ServiceTask,
+  type SheetAssignment,
   type TaskEvent,
   type TaskSheet
 } from '@/types/housekeeping.types';
@@ -75,6 +77,12 @@ export const resetTask = (task: ServiceTask): ServiceTask => ({
   executorIds: [],
   onBehalfOfTeam: false
 });
+
+// - uma sheet com gente tem sempre uma responsável: se saiu a LEAD, a primeira que fica passa a LEAD
+export const withLead = (assignments: SheetAssignment[]): SheetAssignment[] =>
+  assignments.length > 0 && !assignments.some(a => a.role === SheetRole.LEAD)
+    ? assignments.map((a, i) => (i === 0 ? { ...a, role: SheetRole.LEAD } : a))
+    : assignments;
 
 // ---------- eventos (append-only) ----------
 

@@ -1,8 +1,5 @@
 {
   "app": {
-    "title": "Vila Vita Parc — Housekeeping OS",
-    "subtitle": "Gestão Operacional de Andares & Integração Opera Cloud",
-    "resort": "Vila Vita Parc Resort & Spa · Porches, Algarve",
     "hotelName": "Vila Vita Parc",
     "productName": "Housekeeping OS"
   },
@@ -17,10 +14,6 @@
     "turndownDistribution": "Turndown (Noite)",
     "realtimeOverview": "Quartos em Direto",
     "timeAudit": "Auditoria de Tempos",
-    "creditsAndStats": "Estatísticas & Créditos",
-    "chat": "Chat Interno",
-    "staffManager": "Gestor de Equipa",
-    "operaStatus": "Sincronização Opera",
     "main": "Navegação principal",
     "settings": "Configuração"
   },
@@ -28,12 +21,6 @@
     "dirty": "Sujo (Dirty)",
     "clean": "Limpo (Clean)",
     "inspected": "Inspecionado (Inspected)"
-  },
-  "serviceTypes": {
-    "departureArrival": "Saída com Chegada",
-    "stayover": "Estadia (In-house)",
-    "departureOnly": "Só Saída",
-    "refresh": "Refresh (Toque)"
   },
   "statusChange": {
     "inspectedTitle": "Confirmar estado Inspected",
@@ -44,23 +31,8 @@
     "changeConfirm": "Alterar estado"
   },
   "actions": {
-    "startRoom": "Iniciar Quarto",
-    "finishRoom": "Terminar Quarto",
-    "approveInspection": "Aprovar (Inspected)",
     "reproveInspection": "Reprovar c/ Nota",
-    "markRefresh": "Registar Refresh Feito",
-    "markDnd": "Não Incomodar (DND)",
-    "markRefused": "Recusou Serviço",
-    "togglePriority": "Prioridade Urgente",
-    "viewDetail": "Ver Ficha Completa",
-    "moveRoom": "Mover Secção",
-    "mergeSheets": "Juntar Secções",
-    "simulateNightAudit": "Simular Night Audit (03:00)",
-    "operaSync": "Sincronizar com Opera Cloud",
-    "sendPhoto": "Enviar Fotografia",
-    "sendMessage": "Enviar Mensagem",
     "acknowledgeAlert": "Confirmar Receção",
-    "confirm": "Confirmar",
     "cancel": "Cancelar",
     "close": "Fechar",
     "save": "Guardar Alterações",
@@ -68,25 +40,14 @@
   },
   "counters": {
     "stayovers": "Estadias",
-    "departuresWithArrival": "Saídas c/ Chegada",
     "departuresOnly": "Só Saídas",
-    "refreshes": "Refreshes",
-    "totalRooms": "Total Quartos",
-    "credits": "Créditos Est."
+    "refreshes": "Refreshes"
   },
   "badges": {
-    "vip": "VIP",
-    "babyCot": "Berço Bebé",
-    "linenChange": "Muda Lençóis",
-    "priority": "Urgente",
-    "parked": "Estacionado",
-    "inProgress": "Em Limpeza"
+    "linenChange": "Muda Lençóis"
   },
   "mobile": {
-    "myList": "A Minha Lista",
     "servicePhone": "Telemóvel de Serviço",
-    "shiftMorning": "Serviço da Manhã",
-    "shiftTurndown": "Serviço Turndown",
     "alerts": "Alertas e Pedidos",
     "brand": "VVP Mobile · {{device}}",
     "defaultDevice": "TEL-GERAL",
@@ -129,8 +90,6 @@
     "chatTitle": "Abrir Chat & Fotos",
     "theme": "Tema",
     "themeTitle": "Alternar Tema Claro / Escuro",
-    "switchUser": "Mudar Utilizador Atual",
-    "backToOffice": "Voltar ao Escritório",
     "logout": "Terminar sessão"
   },
   "moveRoom": {
@@ -164,7 +123,6 @@
     "nightAuditTitle": "Executa as regras do fecho do dia no Opera: Inspected revertem a Clean e No-shows revertem a Dirty",
     "recentTransactions": "Transações Recentes da API OHIP (Oracle Hospitality Integration Platform):",
     "room": "Quarto {{number}}",
-    "httpStatus": "HTTP {{status}}",
     "empty": "Sem eventos de sincronização registados.",
     "allRooms": "TODOS",
     "source": {
@@ -203,16 +161,7 @@
     "filterRoom": "Filtrar Quarto...",
     "filterType": "Filtrar por tipo de evento",
     "filters": {
-      "all": "Todos os Tipos",
-      "started": "Início de Quarto",
-      "finished": "Fim de Quarto (Clean)",
-      "approved": "Aprovação (Inspected)",
-      "reproved": "Reprovação c/ Nota",
-      "refresh": "Refresh",
-      "dnd": "DND / Não Incomodar",
-      "nightAudit": "Night Audit Opera",
-      "reopened": "Reabertura de Quarto",
-      "turndown": "Turndown (Noite)"
+      "all": "Todos os Tipos"
     },
     "events": {
       "started": "Início",
@@ -234,7 +183,10 @@
       "staffMoved": "Equipa",
       "correctionDone": "Correção feita",
       "planOpened": "Plano aberto",
-      "operaConflict": "Conflito Opera"
+      "operaConflict": "Conflito Opera",
+      "staffDuty": "Escala de serviço",
+      "staffSheet": "Equipa da sheet",
+      "sheetUpdated": "Sheet editada"
     },
     "columns": {
       "time": "Hora",
@@ -295,6 +247,26 @@
     "messagePlaceholder": "Escreva uma mensagem...",
     "send": "Enviar mensagem"
   },
+  "staffDuty": {
+    "title": "Colaborador fora de serviço",
+    "message": "{{name}} não está na escala de serviço. Deseja adicioná-lo à escala de serviço de hoje? Ao adicionar, passa a estar de serviço.",
+    "confirm": "Adicionar à escala"
+  },
+  "report": {
+    "progress": "{{done}} de {{total}} concluídos",
+    "pending": "Por começar",
+    "inProgress": "A decorrer",
+    "completed": "Concluídos",
+    "dnd": "DND",
+    "nq": "NQ / Recusa",
+    "ac": "AC",
+    "avgTime": "Tempo médio",
+    "minutes": "{{count}} min",
+    "people": "Pessoas",
+    "perPerson": "Quartos / pessoa",
+    "priority": "Prioridades",
+    "credits": "Créditos"
+  },
   "turndown": {
     "title": "Serviço de Turndown (Serviço da Noite)",
     "window": "{{start}} – {{end}}",
@@ -309,14 +281,22 @@
     "pending": "Pendente",
     "dnd": "DND",
     "refused": "Recusou",
-    "markDone": "Turndown Feito",
+    "filterLabel": "Estado",
+    "filterStarted": "A decorrer",
+    "filterFinished": "Concluídos",
+    "filterDND": "DND",
+    "filterNQ": "NQ",
+    "filterAC": "AC",
+    "start": "Começar",
+    "finish": "Concluir",
+    "toggleDND": "Não incomodar (DND)",
+    "toggleNQ": "Hóspede não quer o serviço (NQ)",
+    "toggleAC": "Quarto já arrumado (AC)",
     "reopen": "Reabrir",
-    "recordDnd": "Registar DND",
     "viewDetail": "Ver ficha",
     "noPlanTitle": "O plano da noite ainda não foi aberto",
     "noPlanHint": "Abra o plano para gerar os quartos de turndown.",
-    "openPlan": "Abrir plano da noite",
-    "recordRefused": "Hóspede recusou o serviço"
+    "openPlan": "Abrir plano da noite"
   },
   "room": {
     "serviceShort": {
@@ -346,7 +326,6 @@
     "refused": "Recusou",
     "correctionRequested": "Correção Solicitada:",
     "cleaningBy": "Em limpeza por {{name}}",
-    "defaultWorker": "Empregada",
     "startedAt": "Início: {{time}}",
     "start": "Iniciar",
     "finish": "Terminar (Clean)",
@@ -421,9 +400,13 @@
   },
   "sheet": {
     "number": "Sheet #{{number}}",
-    "mergeTitle": "Juntar esta secção com outra",
-    "mergeWith": "Juntar com outra secção:",
+    "editSheetTitle": "Editar nome e bloco desta task sheet",
+    "fieldTitle": "Nome",
+    "fieldBlock": "Bloco",
     "assignedTeam": "Equipa Atribuída:",
+    "offDuty": "Fora",
+    "dropRemove": "Largar aqui: sai da sheet ou do bloco e passa a Apoio",
+    "multiSheet": "Também em: {{sheets}}",
     "assignPerson": "Atribuir Pessoa",
     "edit": "Editar",
     "noPerson": "Sem pessoa atribuída",
@@ -443,11 +426,10 @@
     "okRatio": "{{done}}/{{total}} OK",
     "dropStaff": "Atribuir colaboradora à Secção #{{number}}",
     "dropRoom": "Soltar quarto na Secção #{{number}} · {{block}}",
-    "dropRoomHint": "Soltar quarto nesta secção",
-    "dropStaffHint": "Soltar colaboradora nesta secção",
     "emptyParking": "Task Sheet de Estacionamento Vazia",
     "empty": "Secção Vazia",
-    "emptyHint": "Arraste e solte quartos para aqui"
+    "emptyHint": "Arraste e solte quartos para aqui",
+    "offDutyHint": "Fora da escala de serviço: foi adicionado por defeito. Remova ou ative em Equipa."
   },
   "staff": {
     "title": "Gestor de Perfis & Equipa de Housekeeping",
@@ -570,6 +552,7 @@
     "perPerson": "{{value}} cr / pessoa",
     "dropTransfer": "Soltar para transferir para {{block}}",
     "noneAllocated": "Nenhum colaborador alocado",
+    "dropRemove": "Largue fora das equipas para remover do bloco",
     "dragHere": "Arraste alguém para cá",
     "offBadge": "Folga",
     "extraBadge": "Extra",
@@ -626,6 +609,12 @@
     "dutyOff": "Em Folga",
     "toggleToOff": "Clique para alternar para Folga",
     "toggleToOn": "Clique para alternar para De Serviço",
+    "fastEdit": {
+      "currentBlock": "Alterar o bloco de hoje",
+      "shift": "Alterar o turno",
+      "device": "Alterar o PDA (se estiver com outra pessoa, trocam)",
+      "sheet": "Mover para outra task sheet de hoje"
+    },
     "changeDefaultTitle": "Alterar o bloco padrão/fixo deste colaborador",
     "movedTitle": "Transferido hoje de {{block}}. Clique para repor ao bloco default.",
     "shiftShort": {
@@ -735,14 +724,15 @@
     "refreshRecorded": "Refresh executado por {{name}}",
     "dndRecorded": "Hóspede colocou sinal Do Not Disturb",
     "serviceRefused": "Hóspede recusou serviço de housekeeping",
+    "alreadyDone": "Quarto já arrumado (AC): turndown não necessário",
     "priorityOn": "Prioridade URGENTE ativada por {{name}}: {{reason}}",
     "priorityOnNoNote": "Prioridade URGENTE ativada por {{name}}: Sem nota",
     "priorityOff": "Prioridade desativada",
     "roomMoved": "Quarto {{number}} deslocado por drag-and-drop para {{title}}",
-    "sheetsMerged": "Secção {{source}} fundida na Secção {{target}}",
     "staffMoved": "Colaboradora {{name}} transferida da equipa \"{{from}}\" para a equipa \"{{to}}\" (Drag & Drop).",
+    "staffOffDuty": "Colaboradora {{name}} passou a Fora de serviço (retirada do Apoio, Drag & Drop).",
+    "staffRemoved": "Colaboradora {{name}} removida da equipa \"{{from}}\" (Drag & Drop).",
     "staffMovedFromNone": "Colaboradora {{name}} associada à equipa \"{{to}}\" (Drag & Drop).",
-    "turndownUpdated": "[TURNDOWN NOITE] Quarto marcado como {{status}} por {{name}}. Sem envio ao Opera.",
     "nightAudit": "Fecho do dia Opera executado: {{clean}} quartos Inspected revertidos para Clean (Refreshes); {{dirty}} No-Shows revertidos para Dirty.",
     "turndownDone": "Turndown concluído por {{name}}. Sem envio ao Opera.",
     "roomFinishedNoTime": "Quarto finalizado por {{name}} (sem hora de início registada). Estado Opera: CLEAN.",
@@ -751,7 +741,13 @@
     "operaConflict": "Conflito Opera: o quarto {{number}} mudou entretanto e o estado {{status}} não foi enviado. Requer decisão humana.",
     "operaPulled": "O Opera atualizou o quarto {{number}} para {{status}}.",
     "operaRetried": "Reenvio manual ao Opera: quarto {{number}} para {{status}}.",
-    "planOpened": "Plano {{kind}} aberto para {{date}}."
+    "planOpened": "Plano {{kind}} aberto para {{date}}.",
+    "staffSheetAdded": "{{name}} adicionado(a) a {{sheet}}",
+    "staffSheetRemoved": "{{name}} retirado(a) de {{sheet}}",
+    "staffSheetMoved": "{{name}} passou de {{from}} para {{sheet}}",
+    "sheetUpdated": "Sheet \"{{before}}\" editada: nome \"{{after}}\", bloco {{block}}",
+    "staffDutyOn": "{{name}} passou a estar de serviço",
+    "staffDutyOff": "{{name}} passou a fora de serviço"
   },
   "alerts": {
     "seedTrace": "Receção solicita Berço e Banheira no Quarto {{number}} antes das 11:30 (Chegada Antecipada VIP 1)",
@@ -760,13 +756,13 @@
   },
   "toasts": {
     "roomMoved": "Quarto {{number}} deslocado com sucesso para {{title}}!",
+    "staffOffDuty": "{{name}} passou a Fora de serviço.",
+    "staffRemoved": "{{name}} removida da Equipa do {{block}}.",
     "staffMoved": "{{name}} associada com sucesso à Equipa do {{block}}!",
-    "roomAdded": "Quarto {{number}} adicionado com sucesso ao {{block}}!",
-    "roomRemoved": "Quarto {{number}} removido do sistema.",
-    "roomConfigured": "Quarto {{number}} configurado para o {{block}}!",
     "baselineApplied": "Configuração default de partida aplicada com sucesso!",
     "error": "Não foi possível concluir a ação. Tente novamente.",
-    "planOpened": "Plano {{kind}} de {{date}} aberto."
+    "planOpened": "Plano {{kind}} de {{date}} aberto.",
+    "staffRemovedFromSheet": "{{name}} saiu de {{sheet}} e passou a Apoio"
   },
   "task": {
     "status": {
@@ -777,7 +773,8 @@
     },
     "notPerformed": {
       "DND": "Não incomodar",
-      "REFUSE_SERVICE": "Serviço recusado"
+      "REFUSE_SERVICE": "Serviço recusado",
+      "ALREADY_DONE": "Já arrumado"
     },
     "inspection": {
       "NOT_REQUIRED": "Sem inspeção",
@@ -817,7 +814,8 @@
     "tabs": {
       "sections": "Secções",
       "rooms": "Quartos",
-      "people": "Pessoas"
+      "people": "Pessoas",
+      "turndown": "Turndown"
     },
     "sections": {
       "name": "Nome",
@@ -828,7 +826,9 @@
       "roomCount_one": "{{count}} quarto",
       "roomCount_other": "{{count}} quartos",
       "deleteTitle": "Eliminar secção",
-      "deleteMessage": "Eliminar a secção \"{{name}}\"? Os planos já abertos não são afetados."
+      "deleteMessage": "Eliminar a secção \"{{name}}\"? Os planos já abertos não são afetados.",
+      "noStaff": "Sem equipa por defeito",
+      "offDutyHint": "Fora de serviço: não entra no plano ao abrir"
     },
     "rooms": {
       "readOnly": "Os quartos vêm do Opera e só podem ser consultados aqui.",

@@ -1,8 +1,5 @@
 {
   "app": {
-    "title": "Vila Vita Parc — Housekeeping OS",
-    "subtitle": "Operations & Opera Cloud PMS Integration",
-    "resort": "Vila Vita Parc Resort & Spa · Porches, Algarve",
     "hotelName": "Vila Vita Parc",
     "productName": "Housekeeping OS"
   },
@@ -17,10 +14,6 @@
     "turndownDistribution": "Turndown Service",
     "realtimeOverview": "Live Rooms Board",
     "timeAudit": "Time Audit Log",
-    "creditsAndStats": "Stats & Credits",
-    "chat": "Internal Chat",
-    "staffManager": "Staff Profiles",
-    "operaStatus": "Opera Sync Monitor",
     "main": "Main navigation",
     "settings": "Settings"
   },
@@ -28,12 +21,6 @@
     "dirty": "Dirty",
     "clean": "Clean",
     "inspected": "Inspected"
-  },
-  "serviceTypes": {
-    "departureArrival": "Departure with Arrival",
-    "stayover": "Stayover (In-house)",
-    "departureOnly": "Departure Only",
-    "refresh": "Refresh Touch-up"
   },
   "statusChange": {
     "inspectedTitle": "Confirm Inspected status",
@@ -44,23 +31,8 @@
     "changeConfirm": "Change status"
   },
   "actions": {
-    "startRoom": "Start Cleaning",
-    "finishRoom": "Finish Cleaning",
-    "approveInspection": "Approve (Inspected)",
     "reproveInspection": "Reject with Note",
-    "markRefresh": "Record Refresh Done",
-    "markDnd": "Do Not Disturb (DND)",
-    "markRefused": "Refused Service",
-    "togglePriority": "Urgent Priority",
-    "viewDetail": "View Full Sheet",
-    "moveRoom": "Move Section",
-    "mergeSheets": "Merge Sheets",
-    "simulateNightAudit": "Simulate Night Audit (03:00)",
-    "operaSync": "Sync with Opera Cloud",
-    "sendPhoto": "Send Photo",
-    "sendMessage": "Send Message",
     "acknowledgeAlert": "Acknowledge Alert",
-    "confirm": "Confirm",
     "cancel": "Cancel",
     "close": "Close",
     "save": "Save Changes",
@@ -68,25 +40,14 @@
   },
   "counters": {
     "stayovers": "Stayovers",
-    "departuresWithArrival": "Dep. w/ Arrival",
     "departuresOnly": "Dep. Only",
-    "refreshes": "Refreshes",
-    "totalRooms": "Total Rooms",
-    "credits": "Est. Credits"
+    "refreshes": "Refreshes"
   },
   "badges": {
-    "vip": "VIP",
-    "babyCot": "Baby Cot",
-    "linenChange": "Linen Change",
-    "priority": "Urgent",
-    "parked": "Parked",
-    "inProgress": "In Progress"
+    "linenChange": "Linen Change"
   },
   "mobile": {
-    "myList": "My Assigned Rooms",
     "servicePhone": "Service Handset",
-    "shiftMorning": "Morning Service",
-    "shiftTurndown": "Turndown Service",
     "alerts": "Alerts & Traces",
     "brand": "VVP Mobile · {{device}}",
     "defaultDevice": "TEL-GENERAL",
@@ -129,8 +90,6 @@
     "chatTitle": "Open Chat & Photos",
     "theme": "Theme",
     "themeTitle": "Toggle Light / Dark Theme",
-    "switchUser": "Switch Current User",
-    "backToOffice": "Back to Office",
     "logout": "Sign out"
   },
   "moveRoom": {
@@ -164,7 +123,6 @@
     "nightAuditTitle": "Runs the Opera end-of-day rules: Inspected rooms revert to Clean and no-shows revert to Dirty",
     "recentTransactions": "Recent OHIP API Transactions (Oracle Hospitality Integration Platform):",
     "room": "Room {{number}}",
-    "httpStatus": "HTTP {{status}}",
     "empty": "No sync events recorded.",
     "allRooms": "ALL",
     "source": {
@@ -203,16 +161,7 @@
     "filterRoom": "Filter Room...",
     "filterType": "Filter by event type",
     "filters": {
-      "all": "All Types",
-      "started": "Room Started",
-      "finished": "Room Finished (Clean)",
-      "approved": "Approval (Inspected)",
-      "reproved": "Rejection with Note",
-      "refresh": "Refresh",
-      "dnd": "DND / Do Not Disturb",
-      "nightAudit": "Opera Night Audit",
-      "reopened": "Room Reopened",
-      "turndown": "Turndown (Evening)"
+      "all": "All Types"
     },
     "events": {
       "started": "Started",
@@ -234,7 +183,10 @@
       "staffMoved": "Team",
       "correctionDone": "Correction done",
       "planOpened": "Plan opened",
-      "operaConflict": "Opera conflict"
+      "operaConflict": "Opera conflict",
+      "staffDuty": "Duty roster",
+      "staffSheet": "Sheet team",
+      "sheetUpdated": "Sheet edited"
     },
     "columns": {
       "time": "Time",
@@ -295,6 +247,26 @@
     "messagePlaceholder": "Write a message...",
     "send": "Send message"
   },
+  "staffDuty": {
+    "title": "Collaborator off duty",
+    "message": "{{name}} is not on the duty roster. Add them to today's duty roster? Adding them marks them as on duty.",
+    "confirm": "Add to roster"
+  },
+  "report": {
+    "progress": "{{done}} of {{total}} finished",
+    "pending": "Not started",
+    "inProgress": "In progress",
+    "completed": "Finished",
+    "dnd": "DND",
+    "nq": "NQ / Refused",
+    "ac": "AC",
+    "avgTime": "Average time",
+    "minutes": "{{count}} min",
+    "people": "People",
+    "perPerson": "Rooms / person",
+    "priority": "Priorities",
+    "credits": "Credits"
+  },
   "turndown": {
     "title": "Turndown Service (Evening Service)",
     "window": "{{start}} – {{end}}",
@@ -309,14 +281,22 @@
     "pending": "Pending",
     "dnd": "DND",
     "refused": "Refused",
-    "markDone": "Turndown Done",
+    "filterLabel": "Status",
+    "filterStarted": "In progress",
+    "filterFinished": "Finished",
+    "filterDND": "DND",
+    "filterNQ": "NQ",
+    "filterAC": "AC",
+    "start": "Start",
+    "finish": "Finish",
+    "toggleDND": "Do not disturb (DND)",
+    "toggleNQ": "Guest declines the service (NQ)",
+    "toggleAC": "Room already tidied (AC)",
     "reopen": "Reopen",
-    "recordDnd": "Record DND",
     "viewDetail": "View details",
     "noPlanTitle": "Tonight's plan has not been opened yet",
     "noPlanHint": "Open the plan to generate the turndown rooms.",
-    "openPlan": "Open tonight's plan",
-    "recordRefused": "Guest refused the service"
+    "openPlan": "Open tonight's plan"
   },
   "room": {
     "serviceShort": {
@@ -346,7 +326,6 @@
     "refused": "Refused",
     "correctionRequested": "Correction Requested:",
     "cleaningBy": "Being cleaned by {{name}}",
-    "defaultWorker": "Housekeeper",
     "startedAt": "Started: {{time}}",
     "start": "Start",
     "finish": "Finish (Clean)",
@@ -421,9 +400,13 @@
   },
   "sheet": {
     "number": "Sheet #{{number}}",
-    "mergeTitle": "Merge this section with another",
-    "mergeWith": "Merge with another section:",
+    "editSheetTitle": "Edit this task sheet's name and block",
+    "fieldTitle": "Name",
+    "fieldBlock": "Block",
     "assignedTeam": "Assigned Team:",
+    "offDuty": "Off",
+    "dropRemove": "Drop here: leaves the sheet or block and moves to Support",
+    "multiSheet": "Also in: {{sheets}}",
     "assignPerson": "Assign Person",
     "edit": "Edit",
     "noPerson": "No person assigned",
@@ -443,11 +426,10 @@
     "okRatio": "{{done}}/{{total}} OK",
     "dropStaff": "Assign housekeeper to Section #{{number}}",
     "dropRoom": "Drop room into Section #{{number}} · {{block}}",
-    "dropRoomHint": "Drop room into this section",
-    "dropStaffHint": "Drop housekeeper into this section",
     "emptyParking": "Empty Parking Task Sheet",
     "empty": "Empty Section",
-    "emptyHint": "Drag and drop rooms here"
+    "emptyHint": "Drag and drop rooms here",
+    "offDutyHint": "Not on the duty roster: added by default. Remove or activate in Team."
   },
   "staff": {
     "title": "Profile & Housekeeping Team Manager",
@@ -570,6 +552,7 @@
     "perPerson": "{{value}} cr / person",
     "dropTransfer": "Drop to transfer to {{block}}",
     "noneAllocated": "No staff allocated",
+    "dropRemove": "Drop outside the teams to remove from the block",
     "dragHere": "Drag someone here",
     "offBadge": "Off",
     "extraBadge": "Extra",
@@ -626,6 +609,12 @@
     "dutyOff": "Off Duty",
     "toggleToOff": "Click to switch to Off Duty",
     "toggleToOn": "Click to switch to On Duty",
+    "fastEdit": {
+      "currentBlock": "Change today's block",
+      "shift": "Change the shift",
+      "device": "Change the device (if someone else has it, you swap)",
+      "sheet": "Move to another of today's task sheets"
+    },
     "changeDefaultTitle": "Change this staff member's default/fixed block",
     "movedTitle": "Moved today from {{block}}. Click to restore to the default block.",
     "shiftShort": {
@@ -735,14 +724,15 @@
     "refreshRecorded": "Refresh carried out by {{name}}",
     "dndRecorded": "Guest put out the Do Not Disturb sign",
     "serviceRefused": "Guest refused housekeeping service",
+    "alreadyDone": "Room already tidied (AC): turndown not needed",
     "priorityOn": "URGENT priority enabled by {{name}}: {{reason}}",
     "priorityOnNoNote": "URGENT priority enabled by {{name}}: No note",
     "priorityOff": "Priority disabled",
     "roomMoved": "Room {{number}} moved by drag-and-drop to {{title}}",
-    "sheetsMerged": "Section {{source}} merged into Section {{target}}",
     "staffMoved": "{{name}} moved from team \"{{from}}\" to team \"{{to}}\" (Drag & Drop).",
+    "staffOffDuty": "{{name}} set to Off duty (taken out of Support, Drag & Drop).",
+    "staffRemoved": "{{name}} removed from team \"{{from}}\" (Drag & Drop).",
     "staffMovedFromNone": "{{name}} assigned to team \"{{to}}\" (Drag & Drop).",
-    "turndownUpdated": "[EVENING TURNDOWN] Room marked as {{status}} by {{name}}. Not sent to Opera.",
     "nightAudit": "Opera end-of-day run: {{clean}} Inspected rooms reverted to Clean (Refreshes); {{dirty}} no-shows reverted to Dirty.",
     "turndownDone": "Turndown completed by {{name}}. Nothing sent to Opera.",
     "roomFinishedNoTime": "Room finished by {{name}} (no start time recorded). Opera status: CLEAN.",
@@ -751,7 +741,13 @@
     "operaConflict": "Opera conflict: room {{number}} changed in the meantime and status {{status}} was not sent. Needs a human decision.",
     "operaPulled": "Opera updated room {{number}} to {{status}}.",
     "operaRetried": "Manual resend to Opera: room {{number}} to {{status}}.",
-    "planOpened": "{{kind}} plan opened for {{date}}."
+    "planOpened": "{{kind}} plan opened for {{date}}.",
+    "staffSheetAdded": "{{name}} added to {{sheet}}",
+    "staffSheetRemoved": "{{name}} removed from {{sheet}}",
+    "staffSheetMoved": "{{name}} moved from {{from}} to {{sheet}}",
+    "sheetUpdated": "Sheet \"{{before}}\" edited: name \"{{after}}\", block {{block}}",
+    "staffDutyOn": "{{name}} is now on duty",
+    "staffDutyOff": "{{name}} is now off duty"
   },
   "alerts": {
     "seedTrace": "Front Desk requests a Cot and Baby Bath in Room {{number}} before 11:30 (Early VIP 1 Arrival)",
@@ -760,13 +756,13 @@
   },
   "toasts": {
     "roomMoved": "Room {{number}} successfully moved to {{title}}!",
+    "staffOffDuty": "{{name}} set to Off duty.",
+    "staffRemoved": "{{name}} removed from the {{block}} Team.",
     "staffMoved": "{{name}} successfully assigned to the {{block}} Team!",
-    "roomAdded": "Room {{number}} successfully added to {{block}}!",
-    "roomRemoved": "Room {{number}} removed from the system.",
-    "roomConfigured": "Room {{number}} configured for {{block}}!",
     "baselineApplied": "Default starting configuration applied successfully!",
     "error": "The action could not be completed. Please try again.",
-    "planOpened": "{{kind}} plan for {{date}} opened."
+    "planOpened": "{{kind}} plan for {{date}} opened.",
+    "staffRemovedFromSheet": "{{name}} left {{sheet}} and moved to Support"
   },
   "task": {
     "status": {
@@ -777,7 +773,8 @@
     },
     "notPerformed": {
       "DND": "Do not disturb",
-      "REFUSE_SERVICE": "Service refused"
+      "REFUSE_SERVICE": "Service refused",
+      "ALREADY_DONE": "Already tidied"
     },
     "inspection": {
       "NOT_REQUIRED": "No inspection",
@@ -817,7 +814,8 @@
     "tabs": {
       "sections": "Sections",
       "rooms": "Rooms",
-      "people": "People"
+      "people": "People",
+      "turndown": "Turndown"
     },
     "sections": {
       "name": "Name",
@@ -828,7 +826,9 @@
       "roomCount_one": "{{count}} room",
       "roomCount_other": "{{count}} rooms",
       "deleteTitle": "Delete section",
-      "deleteMessage": "Delete the section \"{{name}}\"? Plans that are already open are not affected."
+      "deleteMessage": "Delete the section \"{{name}}\"? Plans that are already open are not affected.",
+      "noStaff": "No default team",
+      "offDutyHint": "Off duty: not added to the plan when it opens"
     },
     "rooms": {
       "readOnly": "Rooms come from Opera and can only be viewed here.",

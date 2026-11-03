@@ -1,3 +1,4 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useTranslation } from 'react-i18next';
 import { Sparkles, UserCheck, UserX, Users } from 'lucide-react';
 import type { User } from '@/types/auth.types';
@@ -6,7 +7,7 @@ const CARD = 'p-3 rounded-xl border flex items-center justify-between shadow-2xs
 
 export const DirectoryStats = ({ users }: { users: User[] }) => {
   const { t } = useTranslation();
-  const onDuty = users.filter(user => user.isOnDuty !== false).length;
+  const onDuty = users.filter(isOnDuty).length;
   const offDuty = users.length - onDuty;
   const extras = users.filter(user => user.isExtra).length;
 

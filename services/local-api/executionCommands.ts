@@ -99,11 +99,19 @@ export const finishTask: Command<ExecutionArgs & { occurredAt?: string | undefin
   };
 };
 
-// - DND e recusa são impedimentos registados; nunca contam como limpo nem tocam no Opera (§7.3)
+// - DND, recusa (NQ) e já arrumado (AC) são impedimentos registados; nunca contam como limpo nem tocam no Opera (§7.3).
+//   Pode trocar-se de motivo sem passar pelo início (toggle no turndown); repetir o mesmo motivo não faz nada.
+const NOT_PERFORMED_EVENT: Record<NotPerformedReason, { type: 'DND_RECORDED' | 'SERVICE_REFUSED' | 'TURNDOWN_UPDATED'; key: string }> = {
+  [NotPerformedReason.DND]: { type: 'DND_RECORDED', key: 'events.dndRecorded' },
+  [NotPerformedReason.REFUSE_SERVICE]: { type: 'SERVICE_REFUSED', key: 'events.serviceRefused' },
+  [NotPerformedReason.ALREADY_DONE]: { type: 'TURNDOWN_UPDATED', key: 'events.alreadyDone' }
+};
+
 export const recordNotPerformed: Command<TaskArgs & { reason: NotPerformedReason }> = (state, { taskId, reason }, ctx) => {
   const task = findTask(state, taskId);
   const room = task && findRoom(state, task.roomId);
-  if (!task || !room || (task.status !== TaskStatus.PENDING && task.status !== TaskStatus.IN_PROGRESS)) return { state };
+  if (!task || !room || task.status === TaskStatus.COMPLETED) return { state };
+  if (task.status === TaskStatus.NOT_PERFORMED && task.notPerformedReason === reason) return { state };
 
   const blocked = updateTaskIn(state, taskId, t => ({
     ...t,
@@ -112,16 +120,8 @@ export const recordNotPerformed: Command<TaskArgs & { reason: NotPerformedReason
     inspectionStatus: InspectionStatus.NOT_REQUIRED
   }));
 
-  const isDnd = reason === NotPerformedReason.DND;
-  return {
-    state: withEvent(blocked, ctx, {
-      type: isDnd ? 'DND_RECORDED' : 'SERVICE_REFUSED',
-      roomId: room.id,
-      roomNumber: room.number,
-      taskId,
-      detail: { key: isDnd ? 'events.dndRecorded' : 'events.serviceRefused' }
-    })
-  };
+  const { type, key } = NOT_PERFORMED_EVENT[reason];
+  return { state: withEvent(blocked, ctx, { type, roomId: room.id, roomNumber: room.number, taskId, detail: { key } }) };
 };
 
 // - Reabrir uma tarefa de turndown ou de refresh já concluída (volta a "por iniciar"). Nunca toca no Opera.

@@ -94,7 +94,7 @@ export const DetailActions = ({ view, onClose }: { view: TaskView; onClose: () =
         {canExecute && open && (task.status === TaskStatus.IN_PROGRESS || isTurndown) && (
           <button onClick={() => { void finishTask(task.id); onClose(); }} className={`${PRIMARY} bg-emerald-600 hover:bg-emerald-700`}>
             <Check className="w-4 h-4" />
-            <span>{isTurndown ? t('turndown.markDone') : t('room.detail.finishCleaning')}</span>
+            <span>{isTurndown ? t('turndown.finish') : t('room.detail.finishCleaning')}</span>
           </button>
         )}
 

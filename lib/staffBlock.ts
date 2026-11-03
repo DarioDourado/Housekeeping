@@ -1,3 +1,4 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { BLOCK, type BlockName } from '@/config/constants';
 import type { User } from '@/types/auth.types';
 
@@ -25,3 +26,7 @@ export const getDisplayBlock = (user: Pick<User, 'assignedArea' | 'defaultBlock'
 
 export const getDefaultBlock = (user: Pick<User, 'assignedArea' | 'defaultBlock'>): string =>
   user.defaultBlock || getDisplayBlock(user);
+
+// - Quem está num bloco. O pool de apoio são só as pessoas DE SERVIÇO que ainda não têm posição: fora de serviço não conta.
+export const teamMembers = <U extends Pick<User, 'assignedArea' | 'isOnDuty'>>(users: U[], block: string): U[] =>
+  users.filter(user => getStaffBlock(user) === block && (block !== BLOCK.SUPPORT || isOnDuty(user)));

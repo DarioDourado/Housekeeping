@@ -1,3 +1,4 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useTranslation } from 'react-i18next';
 import { GripVertical, Smartphone } from 'lucide-react';
 import { useMoveStaffToBlock } from '@/hooks/housekeeping';
@@ -55,7 +56,7 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-bold text-xs text-slate-900 dark:text-slate-100">{member.name}</span>
-              {member.isOnDuty === false && <span className={`${BADGE} bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300`}>{t('team.offBadge')}</span>}
+              {!isOnDuty(member) && <span className={`${BADGE} bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300`}>{t('team.offBadge')}</span>}
               {member.isExtra && <span className={`${BADGE} bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300`}>{t('team.extraBadge')}</span>}
               {member.role === UserRole.SUPERVISOR && <span className={`${BADGE} bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300`}>{t('team.supervisorBadge')}</span>}
               {member.defaultBlock && member.defaultBlock !== team.block && (

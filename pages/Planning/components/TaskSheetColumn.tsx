@@ -1,21 +1,20 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Layers, Merge, Sparkles } from 'lucide-react';
+import { Layers, Sparkles } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
-import { useAssignStaffToSheet, useMergeSheets, useMoveTask } from '@/hooks/housekeeping';
+import { useDropStaffOnSheet, useMoveTask } from '@/hooks/housekeeping';
 import { calculateCounters } from '@/lib/counters';
 import type { SheetColumn, TaskView } from '@/lib/taskViews';
 import { useUiStore } from '@/store/uiStore';
-import { SheetRole } from '@/types/housekeeping.types';
 import { RoomCard } from '@/UI/components/RoomCard/RoomCard';
 import { SheetAssignees } from '@/UI/components/SheetAssignees';
+import { SheetEditor } from '@/UI/components/SheetEditor';
 import { getTeamColorPalette } from '@/UI/components/TeamManager/teamColorUtils';
 
 export type ColumnLayout = 'GRID' | 'FULL_FIT';
 
 interface TaskSheetColumnProps {
   column: SheetColumn;
-  otherSheets: { id: string; title: string }[];
   layout: ColumnLayout;
   // - cartões a mostrar quando há filtros ativos; os contadores usam sempre todos os da sheet
   cards?: TaskView[] | undefined;
@@ -29,18 +28,16 @@ const COUNTERS = [
 ] as const;
 
 // - Uma task sheet do dia: pessoas atribuídas, contadores automáticos (§6.6) e os cartões das suas tarefas
-export const TaskSheetColumn = ({ column, otherSheets, layout, cards }: TaskSheetColumnProps) => {
+export const TaskSheetColumn = ({ column, layout, cards }: TaskSheetColumnProps) => {
   const { t } = useTranslation();
   const { sheet, views, assignees } = column;
   const canDistribute = usePermission('sheets.distribute');
   const canAssign = usePermission('staff.assign');
   const moveTask = useMoveTask();
-  const mergeSheets = useMergeSheets();
-  const assignStaff = useAssignStaffToSheet();
+  const dropStaff = useDropStaffOnSheet();
   const draggingTaskId = useUiStore(state => state.draggingTaskId);
   const draggingStaffId = useUiStore(state => state.draggingStaffId);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [mergeOpen, setMergeOpen] = useState(false);
 
   const counters = calculateCounters(views);
   const palette = getTeamColorPalette(sheet.block);
@@ -48,12 +45,11 @@ export const TaskSheetColumn = ({ column, otherSheets, layout, cards }: TaskShee
 
   const handleDrop = (event: React.DragEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     setIsDragOver(false);
     const staffId = event.dataTransfer.getData('application/staff-id') || draggingStaffId;
     if (staffId) {
-      if (canAssign && !sheet.assignments.some(a => a.staffId === staffId)) {
-        void assignStaff(sheet.id, [...sheet.assignments, { staffId, role: sheet.assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }]);
-      }
+      if (canAssign) void dropStaff(staffId, sheet.id, event.dataTransfer.getData('application/from-sheet') || undefined);
       return;
     }
     const taskId = event.dataTransfer.getData('text/plain') || draggingTaskId;
@@ -64,6 +60,7 @@ export const TaskSheetColumn = ({ column, otherSheets, layout, cards }: TaskShee
 
   return (
     <div
+      data-sheet-drop
       onDragOver={event => { if (canDistribute || canAssign) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setIsDragOver(true); } }}
       onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setIsDragOver(false); }}
       onDrop={handleDrop}
@@ -91,26 +88,7 @@ export const TaskSheetColumn = ({ column, otherSheets, layout, cards }: TaskShee
             </div>
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1 line-clamp-1">{sheet.title}</h4>
           </div>
-
-          {canDistribute && (
-            <div className="relative">
-              <button onClick={() => setMergeOpen(!mergeOpen)} aria-expanded={mergeOpen} className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-md" title={t('sheet.mergeTitle')} aria-label={t('sheet.mergeTitle')}>
-                <Merge className="w-3.5 h-3.5" />
-              </button>
-              {mergeOpen && (
-                <div className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 p-2 text-xs">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 px-1">{t('sheet.mergeWith')}</span>
-                  <div className="max-h-48 overflow-y-auto space-y-0.5">
-                    {otherSheets.map(target => (
-                      <button key={target.id} onClick={() => { void mergeSheets(sheet.id, target.id); setMergeOpen(false); }} className="w-full text-left px-2 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-800 dark:text-slate-200 truncate">
-                        {target.title}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          {canDistribute && <SheetEditor sheet={sheet} />}
         </div>
 
         <SheetAssignees sheetId={sheet.id} assignments={sheet.assignments} assignees={assignees} canEdit={canAssign} />

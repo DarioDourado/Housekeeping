@@ -1,14 +1,15 @@
+import { isOnDuty } from '@/lib/staffDuty';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useConfirm } from '@/hooks/common/useConfirm';
-import { useBlockTeams, useBoard } from '@/hooks/housekeeping';
-import { useAddStaff, useDeleteStaff, useStaff, useUpdateStaff } from '@/hooks/staff';
+import { useAssignStaffToSheet, useBlockTeams, useBoard, useMoveStaffToBlock } from '@/hooks/housekeeping';
+import { useAddStaff, useDeleteStaff, useEnsureOnDuty, useStaff, useUpdateStaff } from '@/hooks/staff';
 import { getDefaultBlock } from '@/lib/staffBlock';
 import type { User } from '@/types/auth.types';
-import { PlanKind } from '@/types/housekeeping.types';
+import { PlanKind, SheetRole } from '@/types/housekeeping.types';
 import { DirectoryFilters, type DirectoryFilterState } from './DirectoryFilters';
 import { DirectoryRow } from './DirectoryRow';
 import { DirectoryStats } from './DirectoryStats';
@@ -27,6 +28,9 @@ export const CollaboratorDirectoryTab = () => {
   const addUser = useAddStaff();
   const updateUser = useUpdateStaff();
   const deleteUser = useDeleteStaff();
+  const ensureOnDuty = useEnsureOnDuty();
+  const moveStaffToBlock = useMoveStaffToBlock();
+  const assignStaff = useAssignStaffToSheet();
   const canManage = usePermission('staff.assign');
   const [filters, setFilters] = useState(NO_FILTERS);
   const [editor, setEditor] = useState<{ user?: User | undefined } | null>(null);
@@ -36,14 +40,36 @@ export const CollaboratorDirectoryTab = () => {
     return users.filter(user => {
       if (query && ![user.name, user.email, user.phoneDeviceId ?? '', user.notes ?? ''].some(text => text.toLowerCase().includes(query))) return false;
       if (filters.block !== 'ALL' && getDefaultBlock(user) !== filters.block) return false;
-      if (filters.duty === 'ON_DUTY' && user.isOnDuty === false) return false;
-      if (filters.duty === 'OFF_DUTY' && user.isOnDuty !== false) return false;
+      if (filters.duty === 'ON_DUTY' && !isOnDuty(user)) return false;
+      if (filters.duty === 'OFF_DUTY' && isOnDuty(user)) return false;
       if (filters.role === 'EXTRA') return !!user.isExtra;
       return filters.role === 'ALL' || user.role === filters.role;
     });
   }, [users, filters]);
 
-  const sheetNumberOf = (userId: string) => columns.find(column => column.assignees.some(a => a.user.id === userId))?.sheet.number;
+  const sheetIdOf = (userId: string) => columns.find(column => column.assignees.some(a => a.user.id === userId))?.sheet.id;
+  const sheets = columns.map(({ sheet }) => ({ id: sheet.id, number: sheet.number }));
+  const devices = Array.from(new Set(users.flatMap(user => (user.phoneDeviceId ? [user.phoneDeviceId] : [])))).sort();
+
+  // - um PDA só está com uma pessoa: escolher o de outra pessoa troca os dois
+  const changeDevice = async (user: User, device: string) => {
+    const holder = device ? users.find(other => other.id !== user.id && other.phoneDeviceId === device) : undefined;
+    await updateUser({ ...user, phoneDeviceId: device || undefined });
+    if (holder) await updateUser({ ...holder, phoneDeviceId: user.phoneDeviceId });
+  };
+
+  // - uma pessoa está numa task sheet do dia: escolher outra move-a (sai das restantes); vazio tira-a de todas
+  const changeSheet = async (user: User, sheetId: string) => {
+    if (sheetId && !(await ensureOnDuty(user))) return;
+    for (const { sheet } of columns) {
+      const isMember = sheet.assignments.some(a => a.staffId === user.id);
+      if (isMember && sheet.id !== sheetId) await assignStaff(sheet.id, sheet.assignments.filter(a => a.staffId !== user.id));
+    }
+    const target = columns.find(column => column.sheet.id === sheetId)?.sheet;
+    if (target && !target.assignments.some(a => a.staffId === user.id)) {
+      await assignStaff(target.id, [...target.assignments, { staffId: user.id, role: target.assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }]);
+    }
+  };
 
   const handleDelete = async (user: User) => {
     const confirmed = await confirm({
@@ -92,12 +118,18 @@ export const CollaboratorDirectoryTab = () => {
                     key={user.id}
                     user={user}
                     blockTeams={blockTeams}
-                    sheetNumber={sheetNumberOf(user.id)}
+                    sheetId={sheetIdOf(user.id)}
+                    sheets={sheets}
+                    devices={devices}
                     canManage={canManage}
-                    onToggleDuty={target => updateUser({ ...target, isOnDuty: target.isOnDuty === false })}
+                    onToggleDuty={target => updateUser({ ...target, isOnDuty: !isOnDuty(target) })}
                     onChangeDefaultBlock={(target, block) =>
                       updateUser({ ...target, defaultBlock: block, assignedArea: target.assignedArea === target.defaultBlock ? block : target.assignedArea })
                     }
+                    onChangeCurrentBlock={(target, block) => moveStaffToBlock(target.id, block)}
+                    onChangeShift={(target, shift) => updateUser({ ...target, shift })}
+                    onChangeDevice={changeDevice}
+                    onChangeSheet={changeSheet}
                     onRestoreDefault={target => updateUser({ ...target, assignedArea: getDefaultBlock(target) })}
                     onSwitchUser={switchUser}
                     onEdit={target => setEditor({ user: target })}

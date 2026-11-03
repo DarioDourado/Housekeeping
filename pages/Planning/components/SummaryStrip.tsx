@@ -1,22 +1,25 @@
 import { useTranslation } from 'react-i18next';
 import { RotateCcw } from 'lucide-react';
 import { calculateCounters } from '@/lib/counters';
-import type { TaskView } from '@/lib/taskViews';
+import { buildReport } from '@/lib/report';
+import type { SheetColumn } from '@/lib/taskViews';
 import { RoomStatus } from '@/types/housekeeping.types';
 
 interface SummaryStripProps {
-  views: TaskView[];
+  columns: SheetColumn[];
   onReset?: (() => void) | undefined;
 }
 
 // - Totais do dia: composição do trabalho por tipo e estado dos quartos no Opera
-export const SummaryStrip = ({ views, onReset }: SummaryStripProps) => {
+export const SummaryStrip = ({ columns, onReset }: SummaryStripProps) => {
+  const views = columns.flatMap(column => column.views);
+  const report = buildReport(columns);
   const { t } = useTranslation();
   const counters = calculateCounters(views);
   const rooms = new Map(views.map(view => [view.room.id, view.room]));
   const opera = (status: RoomStatus) => Array.from(rooms.values()).filter(room => room.operaStatus === status).length;
 
-  const stat = (label: string, value: number, tone: string) => (
+  const stat = (label: string, value: number | string, tone = 'text-slate-900 dark:text-slate-100') => (
     <>
       <div>
         <span className="text-slate-400 block font-medium">{label}</span>
@@ -39,6 +42,25 @@ export const SummaryStrip = ({ views, onReset }: SummaryStripProps) => {
           {stat(t('counters.stayovers'), counters.stayoverCount, 'text-blue-600 dark:text-blue-400')}
           {stat(t('counters.departuresOnly'), counters.departureOnlyCount, 'text-stone-500')}
           {stat(t('counters.refreshes'), counters.refreshCount, 'text-purple-600 dark:text-purple-400')}
+          {/* - métricas de relatório: continuam os totais acima, na mesma linha */}
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+          <div className="min-w-28" title={t('report.progress', { done: report.completed, total: report.total })}>
+            <span className="text-slate-400 block font-medium">{t('report.completed')}</span>
+            <span className="text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{report.progress}%</span>
+            <div className="mt-0.5 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={report.progress} aria-valuemin={0} aria-valuemax={100}>
+              <div className="h-full bg-emerald-500" style={{ width: `${report.progress}%` }} />
+            </div>
+          </div>
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+          {stat(t('report.pending'), report.pending)}
+          {stat(t('report.inProgress'), report.inProgress, 'text-blue-600 dark:text-blue-400')}
+          {stat(t('report.dnd'), report.dnd, 'text-purple-600 dark:text-purple-400')}
+          {stat(t('report.nq'), report.nq, 'text-stone-600 dark:text-stone-300')}
+          {stat(t('report.priority'), report.priority, 'text-rose-600 dark:text-rose-400')}
+          {stat(t('report.avgTime'), report.avgMinutes === undefined ? '—' : t('report.minutes', { count: report.avgMinutes }))}
+          {stat(t('report.people'), report.people)}
+          {stat(t('report.perPerson'), report.perPerson)}
+          {stat(t('report.credits'), report.credits)}
         </div>
 
         <div className="flex items-center gap-3">

@@ -47,7 +47,9 @@ export enum TaskStatus {
 
 export enum NotPerformedReason {
   DND = 'DND',
-  REFUSE_SERVICE = 'REFUSE_SERVICE'
+  REFUSE_SERVICE = 'REFUSE_SERVICE',
+  // - AC do turndown: quarto já arrumado (pelo cliente/equipa) — também nunca conta como serviço feito
+  ALREADY_DONE = 'ALREADY_DONE'
 }
 
 export enum InspectionStatus {

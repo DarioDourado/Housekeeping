@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCK } from '@/config/constants';
-import { getDefaultBlock, getDisplayBlock, getStaffBlock } from '@/lib/staffBlock';
+import { getDefaultBlock, getDisplayBlock, getStaffBlock, teamMembers } from '@/lib/staffBlock';
 
 describe('getStaffBlock', () => {
   it('normaliza áreas de texto livre para o bloco', () => {
@@ -27,5 +27,16 @@ describe('getDisplayBlock / getDefaultBlock', () => {
     expect(getDisplayBlock({ defaultBlock: BLOCK.D })).toBe(BLOCK.D);
     expect(getDefaultBlock({ assignedArea: 'Bloco C', defaultBlock: BLOCK.B })).toBe(BLOCK.B);
     expect(getDefaultBlock({ assignedArea: 'Bloco C' })).toBe(BLOCK.C);
+  });
+});
+
+describe('teamMembers', () => {
+  it('o apoio só tem quem está de serviço e sem posição', () => {
+    const users = [
+      { assignedArea: undefined, isOnDuty: true }, { assignedArea: undefined, isOnDuty: false },
+      { assignedArea: BLOCK.A, isOnDuty: false }, { assignedArea: BLOCK.A }
+    ];
+    expect(teamMembers(users, BLOCK.SUPPORT)).toHaveLength(1);
+    expect(teamMembers(users, BLOCK.A)).toHaveLength(2);
   });
 });

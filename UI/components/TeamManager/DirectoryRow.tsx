@@ -1,4 +1,6 @@
+import { isGovernanta } from '@/lib/jobTitles';
 import { isOnDuty } from '@/lib/staffDuty';
+import { JobTitleBadges } from './JobTitleBadges';
 import { useTranslation } from 'react-i18next';
 import { ArrowRightLeft, Edit2, LogIn, Trash2 } from 'lucide-react';
 import { SHIFT } from '@/config/constants';
@@ -49,7 +51,7 @@ export const DirectoryRow = ({ user, blockTeams, sheetId, sheets, devices, canMa
 
   const avatar = user.isExtra
     ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-amber-300'
-    : user.role === UserRole.SUPERVISOR
+    : isGovernanta(user)
       ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200 border-purple-300'
       : `${defaultPalette.avatar} border-white/20`;
 
@@ -62,7 +64,7 @@ export const DirectoryRow = ({ user, blockTeams, sheetId, sheets, devices, canMa
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-900 dark:text-slate-100">{user.name}</span>
               {user.isExtra && <span className="text-[10px] font-bold px-1.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">{t('team.extraBadge')}</span>}
-              {user.role === UserRole.SUPERVISOR && <span className="text-[10px] font-bold px-1.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">{t('directory.badgeSupervisor')}</span>}
+              <JobTitleBadges user={user} className="text-[10px] font-bold px-1.5 rounded" />
               {user.role === UserRole.ADMIN && <span className="text-[10px] font-bold px-1.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">{t('directory.badgeAdmin')}</span>}
             </div>
             <span className="text-[11px] text-slate-400 block mt-0.5 truncate max-w-[200px]">{user.email}</span>
@@ -134,7 +136,8 @@ export const DirectoryRow = ({ user, blockTeams, sheetId, sheets, devices, canMa
       </td>
 
       <td className="py-3 px-3">
-        <select value={sheetId ?? ''} disabled={!canManage} onChange={event => onChangeSheet(user, event.target.value)} aria-label={t('directory.fastEdit.sheet')} title={t('directory.fastEdit.sheet')} className={`${FAST} text-blue-600 dark:text-blue-400`}>
+        {/* - a governanta responde por várias sheets: a sheet atribui-se na própria sheet (★) */}
+        <select value={sheetId ?? ''} disabled={!canManage || isGovernanta(user)} title={isGovernanta(user) ? t('directory.governantaSheets') : undefined} onChange={event => onChangeSheet(user, event.target.value)} aria-label={t('directory.fastEdit.sheet')} className={`${FAST} text-blue-600 dark:text-blue-400`}>
           <option value="">{t('directory.noSheet')}</option>
           {sheets.map(sheet => <option key={sheet.id} value={sheet.id}>{t('sheet.number', { number: sheet.number })}</option>)}
         </select>

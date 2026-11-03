@@ -3,7 +3,7 @@ import { finishTask, recordNotPerformed, reopenRoom, reopenTask, setRoomStatus, 
 import { completeCorrection, inspectTask, requestCorrection } from './inspectionCommands';
 import { recordRefresh, togglePriority, updateRoomInstructions } from './interventionCommands';
 import { receiveOperaStatus, retryOperaJob, syncWithOpera, triggerNightAudit } from './operaCommands';
-import { assignStaffToSheet, moveStaffToSheet, moveTask, openPlan, removeStaffFromSheet, updateSheet } from './planningCommands';
+import { addSheet, assignStaffToSheet, moveStaffToSheet, moveTask, openPlan, removeStaffFromSheet, setSheetLead, updateSheet } from './planningCommands';
 import {
   addBlockTeam,
   addSection,
@@ -42,6 +42,8 @@ export const commands = {
   updateSheet,
   assignStaffToSheet,
   moveStaffToSheet,
+  addSheet,
+  setSheetLead,
   removeStaffFromSheet,
   // Opera
   receiveOperaStatus,

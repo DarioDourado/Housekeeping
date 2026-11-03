@@ -1,6 +1,6 @@
 import { calculateCounters } from '@/lib/counters';
 import type { SheetColumn } from '@/lib/taskViews';
-import { NotPerformedReason, TaskStatus } from '@/types/housekeeping.types';
+import { NotPerformedReason, SheetRole, TaskStatus } from '@/types/housekeeping.types';
 
 // - Métricas de relatório de um plano (dia ou noite), calculadas a partir das sheets visíveis
 export const buildReport = (columns: SheetColumn[]) => {
@@ -9,7 +9,8 @@ export const buildReport = (columns: SheetColumn[]) => {
   const blocked = (reason: NotPerformedReason) =>
     views.filter(({ task }) => task.status === TaskStatus.NOT_PERFORMED && task.notPerformedReason === reason).length;
   const durations = views.flatMap(({ task }) => (task.status === TaskStatus.COMPLETED && task.durationSeconds !== undefined ? [task.durationSeconds] : []));
-  const people = new Set(columns.flatMap(column => column.assignees.map(({ user }) => user.id))).size;
+  // - quem arruma: a equipa das sheets sem as responsáveis (governantas), que supervisionam várias sheets
+  const people = new Set(columns.flatMap(column => column.assignees.filter(({ role }) => role !== SheetRole.LEAD).map(({ user }) => user.id))).size;
 
   return {
     total: counters.totalTasks,

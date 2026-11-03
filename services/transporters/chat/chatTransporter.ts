@@ -11,7 +11,7 @@ export const INITIAL_CHANNELS: ChatChannel[] = [
     unreadCount: 0,
     lastMessage: 'Bom serviço a todas! Atenção redobrada aos berços no Bloco A.',
     lastMessageTimestamp: '08:05',
-    participantRoles: ['admin', 'supervisor', 'housekeeper', 'reception']
+    participantRoles: ['admin', 'housekeeper', 'reception']
   },
   {
     id: 'ch-reception',
@@ -20,7 +20,7 @@ export const INITIAL_CHANNELS: ChatChannel[] = [
     unreadCount: 1,
     lastMessage: 'Quarto 101: Hóspede VIP 1 chega às 11:30 no transfer.',
     lastMessageTimestamp: '08:14',
-    participantRoles: ['admin', 'supervisor', 'reception']
+    participantRoles: ['admin', 'reception']
   },
   {
     id: 'ch-supervisors',
@@ -30,7 +30,7 @@ export const INITIAL_CHANNELS: ChatChannel[] = [
     unreadCount: 0,
     lastMessage: 'Adriana, já validei a inspeção do 302, ficou impecável.',
     lastMessageTimestamp: '08:46',
-    participantRoles: ['supervisor', 'housekeeper']
+    participantRoles: ['admin', 'housekeeper']
   }
 ];
 
@@ -40,7 +40,7 @@ export const INITIAL_MESSAGES: ChatMessage[] = [
     channelId: 'ch-general',
     senderId: 'user-filipa',
     senderName: 'Filipa Mendes (Governanta)',
-    senderRole: 'supervisor',
+    senderRole: 'admin',
     text: 'Bom dia equipa! Task sheets enviadas para todos os telemóveis de serviço. Qualquer alteração ou dúvida com berços, avisem no chat.',
     timestamp: '08:00'
   },
@@ -70,7 +70,7 @@ export const INITIAL_MESSAGES: ChatMessage[] = [
     channelId: 'ch-supervisors',
     senderId: 'user-filipa',
     senderName: 'Filipa Mendes (Governanta)',
-    senderRole: 'supervisor',
+    senderRole: 'admin',
     roomNumber: '302',
     text: 'Inspecionei agora mesmo. Aprovado e passado a Inspected no Opera! Muito bom trabalho.',
     timestamp: '08:46'

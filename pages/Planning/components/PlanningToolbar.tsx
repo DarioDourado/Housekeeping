@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, Columns, Filter, Layers, LayoutGrid, Search } from 'lucide-react';
 import { BLOCK } from '@/config/constants';
@@ -19,6 +20,8 @@ export const BOARD_PAGE = 'flex flex-col gap-4 w-full h-full min-h-[32rem]';
 export const SCROLL_ITEM = 'shrink-0 w-[calc((100%-5*0.75rem)/6)] min-w-[220px]';
 
 interface PlanningToolbarProps {
+  // - ação extra no fim da primeira linha (ex.: nova sheet)
+  trailing?: ReactNode;
   blockFilter: string;
   onBlockFilter: (value: string) => void;
   sheetCount: number;
@@ -63,7 +66,7 @@ const LAYOUTS = [
   ['SCROLL', 'layoutScroll', ArrowLeftRight]
 ] as const;
 
-export const PlanningToolbar = ({ blockFilter, onBlockFilter, sheetCount, parkingRange, layout, onLayout, movementFilter, onMovementFilter, query, onQuery, stateFilter, onStateFilter }: PlanningToolbarProps) => {
+export const PlanningToolbar = ({ trailing, blockFilter, onBlockFilter, sheetCount, parkingRange, layout, onLayout, movementFilter, onMovementFilter, query, onQuery, stateFilter, onStateFilter }: PlanningToolbarProps) => {
   const { t } = useTranslation();
   const night = !!onStateFilter;
   const filters = [
@@ -112,6 +115,7 @@ export const PlanningToolbar = ({ blockFilter, onBlockFilter, sheetCount, parkin
             </button>
           ))}
         </div>
+        {trailing}
       </div>
     </div>
 

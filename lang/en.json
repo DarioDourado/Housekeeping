@@ -5,7 +5,6 @@
   },
   "roles": {
     "admin": "Housekeeping Office (Head)",
-    "supervisor": "Floor Supervisor (Governanta)",
     "housekeeper": "Area Housekeeper (Maid)",
     "reception": "Front Desk Reception"
   },
@@ -186,7 +185,8 @@
       "operaConflict": "Opera conflict",
       "staffDuty": "Duty roster",
       "staffSheet": "Sheet team",
-      "sheetUpdated": "Sheet edited"
+      "sheetUpdated": "Sheet edited",
+      "blockLead": "Block lead"
     },
     "columns": {
       "time": "Time",
@@ -318,8 +318,6 @@
     "refreshCount_other": "{{count}} refreshes",
     "eta": "ETA {{time}}",
     "etd": "ETD {{time}}",
-    "checkIn": "Check-in",
-    "checkOut": "Check-out",
     "guestIn": "In",
     "instructionsLabel": "Room instructions",
     "dnd": "DND",
@@ -396,7 +394,8 @@
     "priorityOrigin": {
       "RECEPTION": "Reception",
       "HOUSEKEEPING": "Housekeeping"
-    }
+    },
+    "guestOut": "Out"
   },
   "sheet": {
     "number": "Sheet #{{number}}",
@@ -429,7 +428,16 @@
     "emptyParking": "Empty Parking Task Sheet",
     "empty": "Empty Section",
     "emptyHint": "Drag and drop rooms here",
-    "offDutyHint": "Not on the duty roster: added by default. Remove or activate in Team."
+    "offDutyHint": "Not on the duty roster: added by default. Remove or activate in Team.",
+    "responsible": "Sheet lead:",
+    "responsibleHint": "Lead of this sheet (★)",
+    "newSheet": "New sheet",
+    "newSheetPlaceholder": "Name (optional)",
+    "create": "Create",
+    "fieldLead": "Lead",
+    "noLead": "No lead for now",
+    "makeLead": "Make sheet lead",
+    "noLeadHint": "No lead: a housekeeping lead is missing"
   },
   "staff": {
     "title": "Profile & Housekeeping Team Manager",
@@ -542,7 +550,6 @@
     "notAvailable": "N/A",
     "currentColor": "Current colour: {{color}} · Click to change",
     "pickColor": "Choose Card Colour ({{block}}):",
-    "supervisorShort": "· Sup: {{name}}",
     "people_one": "{{count}} person",
     "people_other": "{{count}} people",
     "rooms": "Rooms: <b>{{rooms}}</b> ({{departures}} departures w/ arrival)",
@@ -556,7 +563,6 @@
     "dragHere": "Drag someone here",
     "offBadge": "Off",
     "extraBadge": "Extra",
-    "supervisorBadge": "Sup",
     "defaultBlockTitle": "Default Block: {{block}}",
     "defaultBlockShort": "Def: {{block}}",
     "sheetRef": "· Sheet #{{number}}",
@@ -575,7 +581,10 @@
     "devicePlaceholder": "E.g.: TEL-AREA-09",
     "isExtra": "Is an Extra (Extra Gas / Temporary Support)",
     "onDuty": "Staff member is On Duty today (untick for Off)",
-    "register": "Register in Team"
+    "register": "Register in Team",
+    "blockResponsible": "Block lead:",
+    "blockResponsibleHint": "Lead of this block (different from each sheet lead)",
+    "noBlockResponsible": "No lead"
   },
   "directory": {
     "metrics": {
@@ -602,7 +611,6 @@
     },
     "empty": "No staff found with the current filters.",
     "clearFilters": "Clear filters",
-    "badgeSupervisor": "Supervisor",
     "badgeAdmin": "Management",
     "note": "Note: {{note}}",
     "dutyOn": "On Duty",
@@ -658,8 +666,11 @@
       "extraHint": "Temporary reinforcement for flexible distribution across blocks",
       "notes": "Notes / Remarks",
       "notesPlaceholder": "E.g.: Weekly day off scheduled for Thursday",
-      "create": "Create Staff Member"
-    }
+      "create": "Create Staff Member",
+      "jobTitles": "Job titles",
+      "jobTitlesHint": "Housekeeping leads are responsible for sheets; floor managers for blocks"
+    },
+    "governantaSheets": "The housekeeping lead covers several sheets: set it on each sheet (★)"
   },
   "errors": {
     "title": "Something went wrong",
@@ -747,7 +758,10 @@
     "staffSheetMoved": "{{name}} moved from {{from}} to {{sheet}}",
     "sheetUpdated": "Sheet \"{{before}}\" edited: name \"{{after}}\", block {{block}}",
     "staffDutyOn": "{{name}} is now on duty",
-    "staffDutyOff": "{{name}} is now off duty"
+    "staffDutyOff": "{{name}} is now off duty",
+    "sheetCreated": "Sheet \"{{title}}\" created ({{block}})",
+    "staffSheetLead": "{{name}} is now the lead of {{sheet}}",
+    "blockLeadChanged": "Block {{block}} lead: {{name}}"
   },
   "alerts": {
     "seedTrace": "Front Desk requests a Cot and Baby Bath in Room {{number}} before 11:30 (Early VIP 1 Arrival)",
@@ -762,7 +776,8 @@
     "baselineApplied": "Default starting configuration applied successfully!",
     "error": "The action could not be completed. Please try again.",
     "planOpened": "{{kind}} plan for {{date}} opened.",
-    "staffRemovedFromSheet": "{{name}} left {{sheet}} and moved to Support"
+    "staffRemovedFromSheet": "{{name}} left {{sheet}} and moved to Support",
+    "sheetCreated": "Sheet \"{{title}}\" created."
   },
   "task": {
     "status": {
@@ -844,5 +859,9 @@
       "staffTitle": "Staff",
       "staffHint": "Create, edit and remove staff members."
     }
+  },
+  "jobTitles": {
+    "GOVERNANTA": "Housekeeping lead",
+    "RESPONSAVEL_ANDARES": "Floor manager"
   }
 }

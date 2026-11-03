@@ -20,6 +20,22 @@ describe('staffSheets', () => {
   });
 });
 
+describe('responsáveis não contam como repetidos', () => {
+  it('quem lidera sheets (LEAD) pode ter várias; só os membros repetidos são assinalados', () => {
+    const lead = (id: string, planId: string, ...staff: string[]) => ({ id, planId, assignments: staff.map((staffId, i) => ({ staffId, role: i === 0 ? SheetRole.LEAD : SheetRole.MEMBER })) });
+    const led = [lead('a', 'day', 'boss', 'x'), lead('b', 'day', 'boss', 'y'), lead('c', 'day', 'x')];
+    expect([...duplicatedStaff(led, 'day').keys()]).toEqual([]);
+    // - boss lidera a e b (isento); x e y são membros em duas sheets cada (x também lidera c, que não conta)
+    const members = [...led, { id: 'd', planId: 'day', assignments: [{ staffId: 'y', role: SheetRole.MEMBER }, { staffId: 'x', role: SheetRole.MEMBER }] }];
+    expect([...duplicatedStaff(members, 'day').keys()].sort()).toEqual(['x', 'y']);
+  });
+
+  it('responsáveis de bloco ficam isentos', () => {
+    const dup = duplicatedStaff([sheet('a', 'day', 'gov', 'x'), sheet('b', 'day', 'gov', 'x')], 'day', new Set(['gov']));
+    expect([...dup.keys()]).toEqual(['x']);
+  });
+});
+
 describe('isOnDuty', () => {
   it('só false é fora de serviço', () => {
     expect(isOnDuty({})).toBe(true);

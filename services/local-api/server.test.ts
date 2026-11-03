@@ -36,10 +36,10 @@ describe('localServer (persistência + validação)', () => {
   it('JSON corrompido ou com formato inválido não rebenta: volta à seed e avisa', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-    localStorage.setItem('vvp_hk_rooms_v5', '{isto não é json');
+    localStorage.setItem('vvp_hk_rooms_v6', '{isto não é json');
     expect(localServer.query().rooms).toHaveLength(INITIAL_ROOMS.length);
 
-    localStorage.setItem('vvp_hk_rooms_v5', JSON.stringify([{ id: 1 }]));
+    localStorage.setItem('vvp_hk_rooms_v6', JSON.stringify([{ id: 1 }]));
     expect(localServer.query().rooms).toHaveLength(INITIAL_ROOMS.length);
     expect(warn).toHaveBeenCalledTimes(2);
   });

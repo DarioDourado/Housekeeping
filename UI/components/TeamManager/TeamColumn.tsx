@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AlertTriangle, Palette, Plus, UserCheck, Users } from 'lucide-react';
+import { AlertTriangle, Palette, Plus, ShieldCheck, UserCheck, Users } from 'lucide-react';
 import { BLOCK } from '@/config/constants';
 import { useMoveStaffToBlock, useUpdateBlockTeam } from '@/hooks/housekeeping';
+import { useStaff } from '@/hooks/staff';
+import { isFloorManager } from '@/lib/jobTitles';
+import { isOnDuty } from '@/lib/staffDuty';
 import type { BlockLoad } from '@/hooks/housekeeping/useBlockLoad';
 import { useUiStore } from '@/store/uiStore';
 import type { User } from '@/types/auth.types';
@@ -28,6 +31,7 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
   const palette = getTeamColorPalette(team.color || team.block);
   const moveStaffToBlock = useMoveStaffToBlock();
   const updateBlockTeam = useUpdateBlockTeam();
+  const { data: staff = [] } = useStaff();
   const draggingStaffId = useUiStore(state => state.draggingStaffId);
   const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
   const [isOver, setIsOver] = useState(false);
@@ -94,8 +98,32 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
               </div>
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
-              {team.description} {team.supervisorName ? t('team.supervisorShort', { name: team.supervisorName }) : ''}
+              {team.description}
             </p>
+            {/* - a responsável do bloco (distinta da responsável de cada sheet): governantas de serviço */}
+            {!isPool && (
+              <label className={`mt-1 flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md border ${palette.badge}`} title={t('team.blockResponsibleHint')}>
+                <ShieldCheck className="w-3 h-3 shrink-0" />
+                <span className="opacity-75 font-medium shrink-0">{t('team.blockResponsible')}</span>
+                <select
+                  value={team.supervisorId ?? ''}
+                  aria-label={t('team.blockResponsible')}
+                  onChange={event => {
+                    const person = staff.find(user => user.id === event.target.value);
+                    const next = { ...team };
+                    delete next.supervisorId;
+                    delete next.supervisorName;
+                    void updateBlockTeam(person ? { ...next, supervisorId: person.id, supervisorName: person.name } : next);
+                  }}
+                  className="min-w-0 flex-1 bg-transparent font-semibold truncate"
+                >
+                  <option value="">{t('team.noBlockResponsible')}</option>
+                  {staff.filter(user => isFloorManager(user) && (isOnDuty(user) || user.id === team.supervisorId)).map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${palette.badge}`}>{t('team.people', { count: members.length })}</span>
         </div>

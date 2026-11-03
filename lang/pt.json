@@ -5,7 +5,6 @@
   },
   "roles": {
     "admin": "Escritório (Chefia)",
-    "supervisor": "Governanta de Serviço",
     "housekeeper": "Empregada de Andares",
     "reception": "Receção (Front Desk)"
   },
@@ -186,7 +185,8 @@
       "operaConflict": "Conflito Opera",
       "staffDuty": "Escala de serviço",
       "staffSheet": "Equipa da sheet",
-      "sheetUpdated": "Sheet editada"
+      "sheetUpdated": "Sheet editada",
+      "blockLead": "Responsável do bloco"
     },
     "columns": {
       "time": "Hora",
@@ -318,9 +318,7 @@
     "refreshCount_other": "{{count}} refreshes",
     "eta": "ETA {{time}}",
     "etd": "ETD {{time}}",
-    "checkIn": "Check-in",
-    "checkOut": "Check-out",
-    "guestIn": "Entra",
+    "guestIn": "In",
     "instructionsLabel": "Instruções do quarto",
     "dnd": "DND",
     "refused": "Recusou",
@@ -396,7 +394,8 @@
     "priorityOrigin": {
       "RECEPTION": "Receção",
       "HOUSEKEEPING": "Housekeeping"
-    }
+    },
+    "guestOut": "Out"
   },
   "sheet": {
     "number": "Sheet #{{number}}",
@@ -429,7 +428,16 @@
     "emptyParking": "Task Sheet de Estacionamento Vazia",
     "empty": "Secção Vazia",
     "emptyHint": "Arraste e solte quartos para aqui",
-    "offDutyHint": "Fora da escala de serviço: foi adicionado por defeito. Remova ou ative em Equipa."
+    "offDutyHint": "Fora da escala de serviço: foi adicionado por defeito. Remova ou ative em Equipa.",
+    "responsible": "Resp. da sheet:",
+    "responsibleHint": "Responsável por esta sheet (★)",
+    "newSheet": "Nova sheet",
+    "newSheetPlaceholder": "Nome (opcional)",
+    "create": "Criar",
+    "fieldLead": "Responsável",
+    "noLead": "Sem responsável por agora",
+    "makeLead": "Tornar responsável da sheet",
+    "noLeadHint": "Sem responsável: falta uma governanta"
   },
   "staff": {
     "title": "Gestor de Perfis & Equipa de Housekeeping",
@@ -542,7 +550,6 @@
     "notAvailable": "N/A",
     "currentColor": "Cor atual: {{color}} · Clique para trocar",
     "pickColor": "Escolher Cor do Cartão ({{block}}):",
-    "supervisorShort": "· Gov: {{name}}",
     "people_one": "{{count}} pessoa",
     "people_other": "{{count}} pessoas",
     "rooms": "Quartos: <b>{{rooms}}</b> ({{departures}} saídas c/ chegada)",
@@ -556,7 +563,6 @@
     "dragHere": "Arraste alguém para cá",
     "offBadge": "Folga",
     "extraBadge": "Extra",
-    "supervisorBadge": "Gov",
     "defaultBlockTitle": "Bloco Padrão: {{block}}",
     "defaultBlockShort": "Def: {{block}}",
     "sheetRef": "· Sheet #{{number}}",
@@ -575,7 +581,10 @@
     "devicePlaceholder": "Ex: TEL-AREA-09",
     "isExtra": "É funcionária Extra (Gás Extra / Apoio Temporário)",
     "onDuty": "Colaborador está De Serviço hoje (desmarcar para Folga)",
-    "register": "Registar na Equipa"
+    "register": "Registar na Equipa",
+    "blockResponsible": "Resp. do bloco:",
+    "blockResponsibleHint": "Responsável por este bloco (distinta da responsável de cada sheet)",
+    "noBlockResponsible": "Sem responsável"
   },
   "directory": {
     "metrics": {
@@ -602,7 +611,6 @@
     },
     "empty": "Nenhum colaborador encontrado com os filtros atuais.",
     "clearFilters": "Limpar filtros",
-    "badgeSupervisor": "Governanta",
     "badgeAdmin": "Chefia",
     "note": "Nota: {{note}}",
     "dutyOn": "De Serviço",
@@ -658,8 +666,11 @@
       "extraHint": "Reforço temporário para distribuição flexível entre blocos",
       "notes": "Notas / Observações",
       "notesPlaceholder": "Ex: Folga semanal agendada para 5ª feira",
-      "create": "Criar Colaborador"
-    }
+      "create": "Criar Colaborador",
+      "jobTitles": "Funções",
+      "jobTitlesHint": "Governanta responde pelas sheets; Responsável de andares pelos blocos"
+    },
+    "governantaSheets": "A governanta responde por várias sheets: escolhe-se em cada sheet (★)"
   },
   "errors": {
     "title": "Algo correu mal",
@@ -747,7 +758,10 @@
     "staffSheetMoved": "{{name}} passou de {{from}} para {{sheet}}",
     "sheetUpdated": "Sheet \"{{before}}\" editada: nome \"{{after}}\", bloco {{block}}",
     "staffDutyOn": "{{name}} passou a estar de serviço",
-    "staffDutyOff": "{{name}} passou a fora de serviço"
+    "staffDutyOff": "{{name}} passou a fora de serviço",
+    "sheetCreated": "Sheet \"{{title}}\" criada ({{block}})",
+    "staffSheetLead": "{{name}} passou a responsável de {{sheet}}",
+    "blockLeadChanged": "Responsável do bloco {{block}}: {{name}}"
   },
   "alerts": {
     "seedTrace": "Receção solicita Berço e Banheira no Quarto {{number}} antes das 11:30 (Chegada Antecipada VIP 1)",
@@ -762,7 +776,8 @@
     "baselineApplied": "Configuração default de partida aplicada com sucesso!",
     "error": "Não foi possível concluir a ação. Tente novamente.",
     "planOpened": "Plano {{kind}} de {{date}} aberto.",
-    "staffRemovedFromSheet": "{{name}} saiu de {{sheet}} e passou a Apoio"
+    "staffRemovedFromSheet": "{{name}} saiu de {{sheet}} e passou a Apoio",
+    "sheetCreated": "Sheet \"{{title}}\" criada."
   },
   "task": {
     "status": {
@@ -844,5 +859,9 @@
       "staffTitle": "Pessoal",
       "staffHint": "Criar, editar e remover colaboradores."
     }
+  },
+  "jobTitles": {
+    "GOVERNANTA": "Governanta",
+    "RESPONSAVEL_ANDARES": "Resp. de Andares"
   }
 }

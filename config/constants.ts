@@ -85,10 +85,10 @@ export type Permission =
   | 'messages.send'
   | 'config.zones';
 
-// - Grupos de permissões. O que ainda nenhum ecrã verifica fica só para a administração até haver regras para os restantes
+// - Grupos de permissões (as governantas e os responsáveis de andares são admin). O que ainda nenhum ecrã verifica fica só para a administração até haver regras para os restantes
 //   perfis (aí passa-se de PENDING_RULES para o perfil certo, sem mexer nos ecrãs).
 const EXECUTION: readonly Permission[] = ['task.startFinish'];                          // todos os perfis começam e concluem
-const REVIEW: readonly Permission[] = ['room.markInspected', 'room.markDirty', 'correction.request', 'room.editDetails']; // aprovar, rejeitar e reabrir: governanta
+const REVIEW: readonly Permission[] = ['room.markInspected', 'room.markDirty', 'correction.request', 'room.editDetails']; // aprovar, rejeitar e reabrir
 const PENDING_RULES: readonly Permission[] = [
   'rooms.viewAssigned', 'room.markClean', 'stats.teamTimes', 'stats.supervisors', 'guest.view', 'messages.send'
 ];
@@ -98,7 +98,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'rooms.viewAll', 'sheets.distribute', 'staff.assign', 'priority.reorder', 'config.zones',
     ...EXECUTION, ...REVIEW, ...PENDING_RULES,
   ],
-  [UserRole.SUPERVISOR]: ['rooms.viewArea', 'priority.reorder', ...EXECUTION, ...REVIEW],
   [UserRole.HOUSEKEEPER]: [...EXECUTION],
   [UserRole.RECEPTION]: ['priority.reorder', ...EXECUTION],
 };

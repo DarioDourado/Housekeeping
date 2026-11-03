@@ -2,7 +2,7 @@ import { BLOCK } from './constants';
 import { buildVolumeData, withTimeline } from './hotelDataVolume';
 import { todayAt } from '@/lib/clock';
 import { operationalDate } from '@/lib/operationalDate';
-import { UserRole, type User } from '@/types/auth.types';
+import { JobTitle, UserRole, type User } from '@/types/auth.types';
 import {
   CommercialBlock,
   InspectionStatus,
@@ -48,6 +48,7 @@ export const INITIAL_STAFF: User[] = [
     name: 'Dario Dourado',
     email: 'dario@vilavitaparc.com',
     role: UserRole.ADMIN,
+    jobTitles: [JobTitle.FLOOR_MANAGER],
     assignedArea: 'Resort Geral',
     defaultBlock: BLOCK.SUPPORT,
     isOnDuty: true,
@@ -58,7 +59,8 @@ export const INITIAL_STAFF: User[] = [
     id: 'user-filipa',
     name: 'Filipa Mendes',
     email: 'filipa.governanta@vilavitaparc.com',
-    role: UserRole.SUPERVISOR,
+    role: UserRole.ADMIN,
+    jobTitles: [JobTitle.GOVERNANTA, JobTitle.FLOOR_MANAGER],
     assignedArea: BLOCK.A,
     defaultBlock: BLOCK.A,
     isOnDuty: true,
@@ -69,7 +71,8 @@ export const INITIAL_STAFF: User[] = [
     id: 'user-ana',
     name: 'Ana Rodrigues',
     email: 'ana.governanta@vilavitaparc.com',
-    role: UserRole.SUPERVISOR,
+    role: UserRole.ADMIN,
+    jobTitles: [JobTitle.GOVERNANTA, JobTitle.FLOOR_MANAGER],
     assignedArea: BLOCK.C,
     defaultBlock: BLOCK.C,
     isOnDuty: true,
@@ -176,7 +179,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa Bloco A',
     description: 'Pisos 0, 1 e 2 · Ala Nascente',
     color: 'blue',
-    supervisorName: 'Filipa Mendes'
+    supervisorId: 'user-filipa', supervisorName: 'Filipa Mendes'
   },
   {
     id: 'team-bloco-b',
@@ -184,7 +187,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa Bloco B',
     description: 'Pisos 0, 1 e 2 · Ala Central',
     color: 'indigo',
-    supervisorName: 'Filipa Mendes'
+    supervisorId: 'user-filipa', supervisorName: 'Filipa Mendes'
   },
   {
     id: 'team-bloco-c',
@@ -192,7 +195,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa Bloco C',
     description: 'Pisos 1 e 2 · Ala Poente',
     color: 'violet',
-    supervisorName: 'Ana Rodrigues'
+    supervisorId: 'user-ana', supervisorName: 'Ana Rodrigues'
   },
   {
     id: 'team-bloco-d',
@@ -200,7 +203,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa Bloco D',
     description: 'Pisos 0 e 1 · Ala Norte',
     color: 'emerald',
-    supervisorName: 'Ana Rodrigues'
+    supervisorId: 'user-ana', supervisorName: 'Ana Rodrigues'
   },
   {
     id: 'team-oasis',
@@ -208,7 +211,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa Oasis Parc',
     description: 'Suites Oasis & Jardins',
     color: 'amber',
-    supervisorName: 'Ana Rodrigues'
+    supervisorId: 'user-ana', supervisorName: 'Ana Rodrigues'
   },
   {
     id: 'team-villas',
@@ -216,7 +219,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa Master Villas',
     description: 'Vilas Privadas & Piscinas',
     color: 'rose',
-    supervisorName: 'Ana Rodrigues'
+    supervisorId: 'user-ana', supervisorName: 'Ana Rodrigues'
   },
   {
     id: 'team-apoio',
@@ -224,7 +227,7 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     name: 'Equipa de Apoio & Extras',
     description: 'Reforço, Gás Extra, Estacionamento e Turno Tarde',
     color: 'slate',
-    supervisorName: 'Dario Dourado'
+    supervisorId: 'user-dario', supervisorName: 'Dario Dourado'
   }
 ];
 
@@ -437,7 +440,7 @@ const byUser = (userId: string, name: string, role: string, onBehalf = false) =>
 
 export const INITIAL_EVENTS: TaskEvent[] = [
   { id: 'ev-seed-9', occurredAt: todayAt('08:45'), type: 'INSPECTION_APPROVED', roomId: 'room-302', roomNumber: '302', taskId: 'task-302-cleaning',
-    ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), executorIds: [], supervisorId: 'user-filipa',
+    ...byUser('user-filipa', 'Filipa Mendes', 'admin'), executorIds: [], supervisorId: 'user-filipa',
     detail: { key: 'events.inspectionApproved', params: { name: 'Filipa Mendes' } } },
   { id: 'ev-seed-8', occurredAt: todayAt('08:35'), type: 'ROOM_FINISHED', roomId: 'room-302', roomNumber: '302', taskId: 'task-302-cleaning',
     ...byUser('user-adriana', 'Adriana Silva', 'housekeeper'), durationSeconds: 2100,
@@ -451,9 +454,9 @@ export const INITIAL_EVENTS: TaskEvent[] = [
     ...byUser('user-patricia', 'Patrícia Gomes', 'housekeeper'), detail: { key: 'events.roomStarted', params: { name: 'Patrícia Gomes' } } },
   { id: 'ev-seed-1', occurredAt: todayAt('08:00'), type: 'OPERA_SYNC_PULL', roomId: 'room-101', roomNumber: '101', ...SYSTEM, detail: { key: 'events.seedPull' } },
   // - refreshes de dias anteriores: a contagem por quarto sai dos eventos, não de um contador guardado
-  { id: 'ev-hist-3', occurredAt: todayAt('15:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-502', roomNumber: '502', ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } },
-  { id: 'ev-hist-2', occurredAt: todayAt('11:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-502', roomNumber: '502', ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } },
-  { id: 'ev-hist-1', occurredAt: todayAt('15:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-103', roomNumber: '103', ...byUser('user-filipa', 'Filipa Mendes', 'supervisor'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } }
+  { id: 'ev-hist-3', occurredAt: todayAt('15:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-502', roomNumber: '502', ...byUser('user-filipa', 'Filipa Mendes', 'admin'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } },
+  { id: 'ev-hist-2', occurredAt: todayAt('11:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-502', roomNumber: '502', ...byUser('user-filipa', 'Filipa Mendes', 'admin'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } },
+  { id: 'ev-hist-1', occurredAt: todayAt('15:00', -1), type: 'REFRESH_RECORDED', roomId: 'room-103', roomNumber: '103', ...byUser('user-filipa', 'Filipa Mendes', 'admin'), detail: { key: 'events.refreshRecorded', params: { name: 'Filipa Mendes' } } }
 ];
 
 const job = (
@@ -488,10 +491,21 @@ export const INITIAL_ALERTS: RoomAlert[] = [
 
 // - Cada zona de turndown do arranque tem a sua secção base (kind NIGHT): é o default que as Definições editam e que
 //   o plano da noite copia ao abrir. Quartos e equipa vêm da distribuição de arranque.
-export const INITIAL_TASK_SHEETS: TaskSheet[] = BASE_TASK_SHEETS.map(sheet => (sheet.planId === NIGHT_PLAN_ID ? { ...sheet, sectionId: `tsec-${sheet.id}` } : sheet));
+// - Cada sheet com gente é da responsabilidade de uma governanta (LEAD): a Filipa nos blocos A/B e no estacionamento, a Ana nos restantes
+const governantaOf = (block: string): string => (/Bloco (A|B)\b|Estacionamento/.test(block) ? 'user-filipa' : 'user-ana');
+const withGovernanta = (staffIds: string[], block: string): string[] => (staffIds.length === 0 ? [] : [governantaOf(block), ...staffIds.filter(id => id !== governantaOf(block))]);
+
+export const INITIAL_TASK_SHEETS: TaskSheet[] = BASE_TASK_SHEETS.map(sheet => {
+  const ids = withGovernanta(sheet.assignments.map(a => a.staffId), sheet.block);
+  return {
+    ...sheet,
+    ...(sheet.planId === NIGHT_PLAN_ID && { sectionId: `tsec-${sheet.id}` }),
+    assignments: ids.map((staffId, index) => ({ staffId, role: index === 0 ? SheetRole.LEAD : SheetRole.MEMBER }))
+  };
+});
 
 export const INITIAL_SECTIONS: Section[] = [
-  ...DAY_SECTIONS,
+  ...DAY_SECTIONS.map(section => ({ ...section, defaultStaffIds: withGovernanta(section.defaultStaffIds, section.block) })),
   ...INITIAL_TASK_SHEETS.filter(sheet => sheet.planId === NIGHT_PLAN_ID).map((sheet): Section => ({
     id: sheet.sectionId ?? sheet.id, name: sheet.title, kind: PlanKind.NIGHT, block: sheet.block,
     defaultRoomIds: INITIAL_TASKS.filter(t => t.sheetId === sheet.id).map(t => t.roomId),

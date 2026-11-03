@@ -4,6 +4,7 @@ import { Palette, Search, UserMinus } from 'lucide-react';
 import { useBlockTeams, useBoard, useRemoveStaffFromBlock } from '@/hooks/housekeeping';
 import { useBlockLoad } from '@/hooks/housekeeping/useBlockLoad';
 import { useStaff } from '@/hooks/staff';
+import { isGovernanta } from '@/lib/jobTitles';
 import { teamMembers } from '@/lib/staffBlock';
 import { useUiStore } from '@/store/uiStore';
 import { UserRole } from '@/types/auth.types';
@@ -42,7 +43,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
         || (user.assignedArea ?? '').toLowerCase().includes(query);
       const matchesRole = roleFilter === 'ALL'
         || (roleFilter === 'EXTRA' && user.isExtra)
-        || (roleFilter === 'SUPERVISOR' && user.role === UserRole.SUPERVISOR)
+        || (roleFilter === 'SUPERVISOR' && isGovernanta(user))
         || (roleFilter === 'HOUSEKEEPER' && user.role === UserRole.HOUSEKEEPER && !user.isExtra)
         || (roleFilter === 'ADMIN' && user.role === UserRole.ADMIN);
       return matchesSearch && matchesRole;
@@ -50,7 +51,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
   }, [users, search, roleFilter]);
 
   const activeStaff = users.filter(user => user.role === UserRole.HOUSEKEEPER || user.isExtra).length;
-  const supervisors = users.filter(user => user.role === UserRole.SUPERVISOR).length;
+  const supervisors = users.filter(isGovernanta).length;
   const average = activeStaff > 0 ? (totalCredits / activeStaff).toFixed(1) : '0.0';
   const sheetNumberOf = (userId: string) => columns.find(column => column.assignees.some(a => a.user.id === userId))?.sheet.number;
 

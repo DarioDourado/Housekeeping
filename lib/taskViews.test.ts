@@ -55,7 +55,7 @@ describe('buildColumns', () => {
 
   it('resolve as pessoas atribuídas com o seu papel', () => {
     const villas = columns.find(c => c.sheet.id === 'sheet-3');
-    expect(villas?.assignees.map(a => [a.user.id, a.role])).toEqual([['user-extra-1', SheetRole.LEAD], ['user-celia', SheetRole.MEMBER]]);
+    expect(villas?.assignees.map(a => [a.user.id, a.role])).toEqual([['user-ana', SheetRole.LEAD], ['user-extra-1', SheetRole.MEMBER], ['user-celia', SheetRole.MEMBER]]);
   });
 
   it('sem plano não há colunas', () => {

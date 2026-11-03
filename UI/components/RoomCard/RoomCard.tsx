@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Baby, BellOff, ClipboardList, GripVertical, Home, Luggage, LogIn, LogOut, RotateCw, Sparkles, Star, UserX } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useTaskDrag } from '@/hooks/housekeeping/useTaskDrag';
-import { formatDateTime, formatTime } from '@/lib/datetime';
+import { formatTime } from '@/lib/datetime';
 import { formatChildAges, serviceLabelKey, type ServiceLabelKey } from '@/lib/taskLabels';
 import type { TaskView } from '@/lib/taskViews';
 import { useOverlayStore } from '@/store/overlayStore';
@@ -115,25 +115,17 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
       </div>
 
       <div className="mb-3 space-y-1">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[190px]">{stay?.guestName ?? '—'}</span>
-          {stay?.arrivalEta && !stay.arrivingGuestName && <span className="text-slate-500 tabular-nums text-[11px]">{t('room.eta', { time: etaTime(stay.arrivalEta) })}</span>}
+        {/* - linha 1: ícone de saída + quem está em casa/sai + ETD à direita; linha 2: ícone de entrada + quem entra + ETA à direita */}
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[190px]">
+            {stay?.departureEta || stay?.departingGuestName ? <LogOut className="inline w-3 h-3 mr-1 -mt-0.5 text-stone-500 dark:text-stone-400" aria-label={t('room.guestOut')} role="img" /> : null}
+            {stay?.departingGuestName ?? stay?.guestName ?? '—'}
+          </span>
+          {stay?.departureEta && <span className="shrink-0 text-slate-500 tabular-nums text-[11px]">{t('room.etd', { time: etaTime(stay.departureEta) })}</span>}
         </div>
-        {(stay?.checkInAt || stay?.checkOutAt) && (
-          <div className="space-y-0.5 text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
-            {stay.checkInAt && <div className="flex items-center gap-1"><LogIn className="w-3 h-3 shrink-0" />{t('room.checkIn')} {formatDateTime(stay.checkInAt)}</div>}
-            {/* - justify-between: o ETD fica em frente ao check-out, à direita, por cima do ETA da linha "Entra" */}
-            {stay.checkOutAt && (
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1"><LogOut className="w-3 h-3 shrink-0" />{t('room.checkOut')} {formatDateTime(stay.checkOutAt)}</span>
-                {stay.departureEta && <span className="shrink-0">{t('room.etd', { time: etaTime(stay.departureEta) })}</span>}
-              </div>
-            )}
-          </div>
-        )}
         {stay?.arrivingGuestName && (
           <div className="flex items-baseline justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
-            <span className="truncate"><span className="font-semibold text-rose-600 dark:text-rose-400">{t('room.guestIn')}:</span> {stay.arrivingGuestName}</span>
+            <span className="truncate"><LogIn className="inline w-3 h-3 mr-1 -mt-0.5 text-rose-600 dark:text-rose-400" aria-label={t('room.guestIn')} role="img" />{stay.arrivingGuestName}</span>
             {stay.arrivalEta && <span className="shrink-0 text-slate-500 tabular-nums">{t('room.eta', { time: etaTime(stay.arrivalEta) })}</span>}
           </div>
         )}

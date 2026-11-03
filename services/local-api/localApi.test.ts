@@ -287,29 +287,31 @@ describe('turndown (serviço independente)', () => {
     const moved = next(before, 'moveStaffToSheet', { staffId: 'user-maria', fromSheetId: 'sheet-1', toSheetId: 'sheet-4' });
     const staffOf = (state: typeof before, id: string) => state.sheets.find(s => s.id === id)?.assignments.map(a => a.staffId);
 
-    expect(staffOf(moved, 'sheet-1')).toEqual([]);
-    expect(staffOf(moved, 'sheet-4')).toEqual(['user-sandra', 'user-maria']);
+    expect(staffOf(moved, 'sheet-1')).toEqual(['user-filipa']);
+    expect(staffOf(moved, 'sheet-4')).toEqual(['user-ana', 'user-sandra', 'user-maria']);
     // - sem origem só acrescenta; e não duplica
     expect(run(moved, 'moveStaffToSheet', { staffId: 'user-maria', toSheetId: 'sheet-4' }).state).toBe(moved);
     // - manhã e noite são distribuições independentes
     expect(run(before, 'moveStaffToSheet', { staffId: 'user-maria', fromSheetId: 'sheet-1', toSheetId: 'td-1' }).state).toBe(before);
-    // - a responsável que sai passa o papel à primeira que fica
-    const lead = next(before, 'moveStaffToSheet', { staffId: 'user-extra-1', fromSheetId: 'sheet-3', toSheetId: 'sheet-4' });
-    expect(lead.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-celia', role: 'LEAD' }]);
+    // - a governanta responsável que sai (a Ana, que também está na sheet 4) deixa a sheet 3 sem responsável: falta outra governanta
+    const lead = next(before, 'moveStaffToSheet', { staffId: 'user-ana', fromSheetId: 'sheet-3', toSheetId: 'sheet-4' });
+    expect(lead.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-extra-1', role: 'MEMBER' }, { staffId: 'user-celia', role: 'MEMBER' }]);
   });
 
-  it('uma sheet com gente tem sempre uma responsável: ao desmarcar a LEAD ou eliminar a pessoa, passa à primeira que fica', () => {
+  it('a responsável da sheet é sempre uma governanta: passa à seguinte governanta e, sem nenhuma, a sheet fica sem responsável', () => {
     const before = seed();
-    const unchecked = next(before, 'assignStaffToSheet', { sheetId: 'sheet-3', assignments: [{ staffId: 'user-celia', role: SheetRole.MEMBER }] });
-    expect(unchecked.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-celia', role: 'LEAD' }]);
-    const deleted = next(before, 'deleteStaff', { userId: 'user-extra-1' });
-    expect(deleted.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-celia', role: 'LEAD' }]);
+    // - entra a Filipa (governanta) e a Ana desmarca-se → a Filipa passa a responsável; as camareiras nunca
+    const swapped = next(before, 'assignStaffToSheet', { sheetId: 'sheet-3', assignments: [{ staffId: 'user-celia', role: SheetRole.MEMBER }, { staffId: 'user-filipa', role: SheetRole.MEMBER }] });
+    expect(swapped.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-celia', role: 'MEMBER' }, { staffId: 'user-filipa', role: 'LEAD' }]);
+    const noLead = next(before, 'deleteStaff', { userId: 'user-ana' });
+    expect(noLead.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-extra-1', role: 'MEMBER' }, { staffId: 'user-celia', role: 'MEMBER' }]);
   });
 
   it('seed coerente: uma LEAD por sheet com gente, só pessoas em serviço, ordem contínua e sem tarefas repetidas por quarto', () => {
     const state = seed();
     state.sheets.forEach(sheet => {
       if (sheet.assignments.length > 0) expect(sheet.assignments.filter(a => a.role === 'LEAD'), sheet.title).toHaveLength(1);
+      sheet.assignments.filter(a => a.role === 'LEAD').forEach(a => expect(state.staff.find(u => u.id === a.staffId)?.jobTitles, sheet.title).toContain('GOVERNANTA'));
       sheet.assignments.forEach(a => expect(state.staff.find(u => u.id === a.staffId)?.isOnDuty, sheet.title).not.toBe(false));
       const order = state.tasks.filter(t => t.sheetId === sheet.id).map(t => t.orderIndex).sort((x, y) => x - y);
       expect(order, sheet.title).toEqual(order.map((_, i) => i));
@@ -429,7 +431,7 @@ describe('abrir o serviço (CT-01)', () => {
     expect(tasks.every(t => t.kind === TaskKind.CLEANING)).toBe(true);
     expect(tasks.some(t => t.movement === Movement.VACANT)).toBe(false);
     expect(tasks.find(t => t.roomId === 'room-101')?.sheetId).toBe(sheets.find(s => s.sectionId === 'sec-1')?.id);
-    expect(sheets.find(s => s.sectionId === 'sec-1')?.assignments.map(a => a.staffId)).toEqual(['user-maria']);
+    expect(sheets.find(s => s.sectionId === 'sec-1')?.assignments.map(a => a.staffId)).toEqual(['user-filipa', 'user-maria']);
     expect(result.state.sections).toEqual(before.sections);
     expect(result.toast).toMatchObject({ key: 'toasts.planOpened' });
   });
@@ -440,7 +442,7 @@ describe('abrir o serviço (CT-01)', () => {
     expect(nightSections).toHaveLength(14);
 
     // - uma secção nova de turndown com um quarto ocupado esta noite e uma pessoa fora de serviço
-    const configured = next(before, 'addSection', { section: { name: 'Turndown Zona 15', kind: PlanKind.NIGHT, block: 'Bloco A', defaultRoomIds: ['room-101'], defaultStaffIds: ['user-extra-2', 'user-maria'] } });
+    const configured = next(before, 'addSection', { section: { name: 'Turndown Zona 15', kind: PlanKind.NIGHT, block: 'Bloco A', defaultRoomIds: ['room-101'], defaultStaffIds: ['user-extra-2', 'user-filipa', 'user-maria'] } });
     const result = run(configured, 'openPlan', { kind: PlanKind.NIGHT, date: DAY }).state;
     const night = result.plans.find(p => p.operationalDate === DAY && p.kind === PlanKind.NIGHT);
     const sheets = result.sheets.filter(sh => sh.planId === night?.id);
@@ -448,7 +450,7 @@ describe('abrir o serviço (CT-01)', () => {
 
     expect(sheets).toHaveLength(15);
     expect(added?.number).toBe(115);
-    expect(added?.assignments).toEqual([{ staffId: 'user-maria', role: 'LEAD' }]);
+    expect(added?.assignments).toEqual([{ staffId: 'user-filipa', role: 'LEAD' }, { staffId: 'user-maria', role: 'MEMBER' }]);
     // - quartos e equipa vêm da configuração, não de uma divisão automática
     expect(result.tasks.filter(t => t.sheetId === added?.id).map(t => t.roomId).length).toBeLessThanOrEqual(1);
     expect(result.sections).toEqual(configured.sections);
@@ -466,7 +468,8 @@ describe('abrir o serviço (CT-01)', () => {
     const base = seed();
     const offDuty = deepFreeze({ ...base, staff: base.staff.map(u => (u.id === 'user-maria' ? { ...u, isOnDuty: false } : u)) });
     const state = run(offDuty, 'openPlan', { kind: PlanKind.DAY, date: DAY }).state;
-    expect(state.sheets.find(s => s.sectionId === 'sec-1' && s.planId !== 'plan-day')?.assignments).toEqual([]);
+    // - a Maria está fora de serviço: só fica a governanta responsável
+    expect(state.sheets.find(s => s.sectionId === 'sec-1' && s.planId !== 'plan-day')?.assignments).toEqual([{ staffId: 'user-filipa', role: 'LEAD' }]);
   });
 
   it('abrir um dia já aberto não faz nada', () => {
@@ -583,8 +586,8 @@ describe('pessoal, equipas e secções', () => {
 
     const removed = run(seed(), 'deleteStaff', { userId: 'user-maria' }).state;
     expect(removed.staff.some(u => u.id === 'user-maria')).toBe(false);
-    expect(removed.sheets.find(s => s.id === 'sheet-1')?.assignments).toEqual([]);
-    expect(removed.sections.find(s => s.id === 'sec-1')?.defaultStaffIds).toEqual([]);
+    expect(removed.sheets.find(s => s.id === 'sheet-1')?.assignments).toEqual([{ staffId: 'user-filipa', role: 'LEAD' }]);
+    expect(removed.sections.find(s => s.id === 'sec-1')?.defaultStaffIds).toEqual(['user-filipa']);
   });
 
   it('repor a configuração base devolve as pessoas ao bloco por defeito', () => {
@@ -648,12 +651,29 @@ describe('alertas', () => {
   });
 });
 
+describe('criar sheets no plano de hoje', () => {
+  it('a manhã e o turndown ganham uma sheet vazia, numerada a seguir, sem tocar na configuração base', () => {
+    const before = deepFreeze(seedState());
+    const day = run(before, 'addSheet', { planId: 'plan-day', title: '  Extra Gala ', block: 'Bloco A' }).state;
+    const created = day.sheets.find(s => s.title === 'Extra Gala');
+    expect(created).toMatchObject({ planId: 'plan-day', block: 'Bloco A', isReserve: false, assignments: [] });
+    expect(created!.number).toBe(Math.max(...before.sheets.filter(s => s.planId === 'plan-day').map(s => s.number)) + 1);
+    expect(day.events[0]).toMatchObject({ type: 'SHEET_UPDATED', metadata: { action: 'created', sheetId: created!.id } });
+    expect(day.sections).toEqual(before.sections);
+
+    const night = run(before, 'addSheet', { planId: 'plan-night', title: '', block: 'Bloco A' }).state.sheets.filter(s => s.planId === 'plan-night');
+    expect(night).toHaveLength(15);
+    expect(night.at(-1)).toMatchObject({ number: 115, title: 'Turndown Zona 15' });
+    expect(run(before, 'addSheet', { planId: 'nope', title: 'x', block: 'Bloco A' }).state).toBe(before);
+  });
+});
+
 describe('tirar uma pessoa de uma sheet (zona de apagar)', () => {
-  it('sai da sheet, passa a Apoio (continua de serviço) e fica na auditoria; a responsável passa à seguinte', () => {
+  it('sai da sheet, passa a Apoio (continua de serviço) e fica na auditoria', () => {
     const before = seedState();
     const done = run(deepFreeze(before), 'removeStaffFromSheet', { staffId: 'user-extra-1', sheetId: 'sheet-3' }).state;
 
-    expect(done.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-celia', role: 'LEAD' }]);
+    expect(done.sheets.find(s => s.id === 'sheet-3')?.assignments).toEqual([{ staffId: 'user-ana', role: 'LEAD' }, { staffId: 'user-celia', role: 'MEMBER' }]);
     const person = done.staff.find(u => u.id === 'user-extra-1');
     expect(person?.assignedArea).toBe('Apoio & Rotativas');
     expect(person?.isOnDuty).not.toBe(false);
@@ -665,5 +685,33 @@ describe('tirar uma pessoa de uma sheet (zona de apagar)', () => {
     // - quem não está nessa sheet não muda nada
     const none = deepFreeze(before);
     expect(run(none, 'removeStaffFromSheet', { staffId: 'user-maria', sheetId: 'sheet-3' }).state).toBe(none);
+  });
+});
+
+describe('responsáveis de sheet e de bloco', () => {
+  it('a responsável da sheet é uma governanta: escolhe-se ao criar ou depois, entre as que lá estão, e fica na auditoria', () => {
+    const before = deepFreeze(seedState());
+    const created = run(before, 'addSheet', { planId: 'plan-day', title: 'Gala', block: 'Bloco A', leadId: 'user-ana' }).state;
+    expect(created.sheets.find(s => s.title === 'Gala')?.assignments).toEqual([{ staffId: 'user-ana', role: 'LEAD' }]);
+    // - uma camareira não pode ser a responsável da sheet
+    expect(run(before, 'addSheet', { planId: 'plan-day', title: 'Gala 2', block: 'Bloco A', leadId: 'user-maria' }).state.sheets.find(s => s.title === 'Gala 2')?.assignments).toEqual([]);
+
+    // - sheet-3: a Ana lidera; entra a Filipa e passa a responsável; a Célia (camareira) não pode
+    const withFilipa = deepFreeze(run(before, 'assignStaffToSheet', { sheetId: 'sheet-3', assignments: [{ staffId: 'user-ana', role: SheetRole.LEAD }, { staffId: 'user-celia', role: SheetRole.MEMBER }, { staffId: 'user-filipa', role: SheetRole.MEMBER }] }).state);
+    const swapped = run(withFilipa, 'setSheetLead', { sheetId: 'sheet-3', staffId: 'user-filipa' }).state;
+    expect(swapped.sheets.find(s => s.id === 'sheet-3')?.assignments.map(a => [a.staffId, a.role])).toEqual([['user-ana', 'MEMBER'], ['user-celia', 'MEMBER'], ['user-filipa', 'LEAD']]);
+    expect(swapped.events[0]).toMatchObject({ type: 'STAFF_SHEET_CHANGED', metadata: { staffId: 'user-filipa', action: 'lead' } });
+    expect(run(withFilipa, 'setSheetLead', { sheetId: 'sheet-3', staffId: 'user-celia' }).state).toBe(withFilipa);
+    expect(run(before, 'setSheetLead', { sheetId: 'sheet-3', staffId: 'user-maria' }).state).toBe(before);
+  });
+
+  it('o responsável do bloco é uma pessoa e a troca fica na auditoria', () => {
+    const before = deepFreeze(seedState());
+    const team = before.blockTeams.find(t => t.block === 'Bloco A')!;
+    expect(team.supervisorId).toBe('user-filipa');
+    const changed = run(before, 'updateBlockTeam', { team: { ...team, supervisorId: 'user-ana', supervisorName: 'Ana Rodrigues' } }).state;
+    expect(changed.events[0]).toMatchObject({ type: 'BLOCK_LEAD_CHANGED', metadata: { block: 'Bloco A', from: 'user-filipa', to: 'user-ana' } });
+    // - mudar só a cor não regista nada
+    expect(run(before, 'updateBlockTeam', { team: { ...team, color: 'rose' } }).state.events).toHaveLength(before.events.length);
   });
 });

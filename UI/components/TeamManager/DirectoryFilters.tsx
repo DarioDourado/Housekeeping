@@ -53,7 +53,7 @@ export const DirectoryFilters = ({ value, blockTeams, canAdd, onChange, onAdd }:
           <option value="ALL">{t('team.filters.all')}</option>
           <option value={UserRole.HOUSEKEEPER}>{t('team.filters.housekeepers')}</option>
           <option value="EXTRA">{t('team.filters.extras')}</option>
-          <option value={UserRole.SUPERVISOR}>{t('team.filters.supervisors')}</option>
+          <option value="GOVERNANTA">{t('team.filters.supervisors')}</option>
           <option value={UserRole.ADMIN}>{t('team.filters.management')}</option>
         </select>
       </div>

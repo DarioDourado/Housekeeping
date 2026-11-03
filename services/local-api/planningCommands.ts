@@ -1,6 +1,7 @@
 import { isOnDuty } from '@/lib/staffDuty';
 import { ALL_ROOMS, BLOCK, DEFAULT_PARKING_SHEET_COUNT } from '@/config/constants';
 import { operationalDate } from '@/lib/operationalDate';
+import { isGovernanta } from '@/lib/jobTitles';
 import { getStaffBlock } from '@/lib/staffBlock';
 import {
   InspectionStatus,
@@ -15,7 +16,7 @@ import {
   type TaskSheet
 } from '@/types/housekeeping.types';
 import type { Command, CommandContext, HousekeepingState } from './types';
-import { findRoom, findSheet, findTask, reindexSheet, tasksOfSheet, withEvent, withLead } from './helpers';
+import { findRoom, findSheet, findTask, governantaRule, reindexSheet, tasksOfSheet, withEvent, withLead } from './helpers';
 
 // - Mover uma tarefa só muda a sua task sheet: nunca a apaga nem a conclui, e fica em qualquer estado (§6.4/§6.5).
 //   Não se mistura trabalho entre o plano diurno e o noturno: são distribuições independentes (§10.4).
@@ -59,10 +60,10 @@ export const moveTask: Command<{ taskId: string; targetSheetId: string; targetIn
 const logStaffSheet = (
   state: HousekeepingState,
   ctx: CommandContext,
-  { staffId, action, sheet, from }: { staffId: string; action: 'added' | 'removed' | 'moved'; sheet: TaskSheet; from?: TaskSheet | undefined }
+  { staffId, action, sheet, from }: { staffId: string; action: 'added' | 'removed' | 'moved' | 'lead'; sheet: TaskSheet; from?: TaskSheet | undefined }
 ): HousekeepingState => {
   const name = state.staff.find(user => user.id === staffId)?.name ?? staffId;
-  const key = { added: 'events.staffSheetAdded', removed: 'events.staffSheetRemoved', moved: 'events.staffSheetMoved' }[action];
+  const key = { added: 'events.staffSheetAdded', removed: 'events.staffSheetRemoved', moved: 'events.staffSheetMoved', lead: 'events.staffSheetLead' }[action];
   return withEvent(state, ctx, {
     type: 'STAFF_SHEET_CHANGED',
     roomId: sheet.id,
@@ -70,6 +71,24 @@ const logStaffSheet = (
     detail: { key, params: { name, sheet: sheet.title, from: from?.title ?? '' } },
     metadata: { staffId, action, ...(from && { fromSheetId: from.id }), ...(action !== 'removed' && { toSheetId: sheet.id }) }
   });
+};
+
+// - Criar uma sheet nova no plano de hoje (sem tarefas nem equipa). Não toca na configuração base (Definições): só vale neste plano.
+export const addSheet: Command<{ planId: string; title: string; block: string; leadId?: string | undefined }> = (state, { planId, title, block, leadId }, ctx) => {
+  const plan = state.plans.find(item => item.id === planId);
+  if (!plan || !block.trim()) return { state };
+  const number = Math.max(plan.kind === PlanKind.NIGHT ? 100 : 0, ...state.sheets.filter(sheet => sheet.planId === planId).map(sheet => sheet.number)) + 1;
+  const lead = state.staff.find(user => user.id === leadId && isGovernanta(user));
+  const name = title.trim() || (plan.kind === PlanKind.NIGHT ? `Turndown Zona ${number - 100}` : `Secção ${String(number).padStart(2, '0')}`);
+  const sheet: TaskSheet = { id: ctx.newId('sheet'), planId, number, title: name, block: block.trim(), isReserve: false, assignments: lead ? [{ staffId: lead.id, role: SheetRole.LEAD }] : [] };
+  return {
+    state: withEvent({ ...state, sheets: [...state.sheets, sheet] }, ctx, {
+      type: 'SHEET_UPDATED', roomId: sheet.id, roomNumber: name,
+      detail: { key: 'events.sheetCreated', params: { title: name, block: sheet.block } },
+      metadata: { action: 'created', sheetId: sheet.id, planId, title: name, block: sheet.block, ...(lead && { leadId: lead.id }) }
+    }),
+    toast: { key: 'toasts.sheetCreated', params: { title: name } }
+  };
 };
 
 // - Editar a task sheet do dia (nome e bloco). Não toca na secção base nem em planos já abertos (§6.1).
@@ -100,12 +119,25 @@ export const moveStaffToSheet: Command<{ staffId: string; toSheetId: string; fro
   const sheets = state.sheets.map(sheet => {
     if (sheet.id === to.id) {
       if (sheet.assignments.some(a => a.staffId === staffId)) return sheet;
-      return { ...sheet, assignments: [...sheet.assignments, { staffId, role: sheet.assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }] };
+      return { ...sheet, assignments: withLead([...sheet.assignments, { staffId, role: SheetRole.MEMBER }], governantaRule(state)) };
     }
     if (sheet.id !== from?.id) return sheet;
-    return { ...sheet, assignments: withLead(sheet.assignments.filter(a => a.staffId !== staffId)) };
+    return { ...sheet, assignments: withLead(sheet.assignments.filter(a => a.staffId !== staffId), governantaRule(state)) };
   });
   return { state: logStaffSheet({ ...state, sheets }, ctx, { staffId, action: from ? 'moved' : 'added', sheet: to, from }) };
+};
+
+// - Mudar a responsável da sheet: tem de ser uma governanta que já esteja na sheet; a anterior fica como membro
+export const setSheetLead: Command<{ sheetId: string; staffId: string }> = (state, { sheetId, staffId }, ctx) => {
+  const sheet = findSheet(state, sheetId);
+  const person = state.staff.find(user => user.id === staffId);
+  const current = sheet?.assignments.find(a => a.role === SheetRole.LEAD)?.staffId;
+  if (!sheet || !person || !isGovernanta(person) || current === staffId || !sheet.assignments.some(a => a.staffId === staffId)) return { state };
+  const changed: HousekeepingState = {
+    ...state,
+    sheets: state.sheets.map(item => (item.id === sheetId ? { ...item, assignments: item.assignments.map(a => ({ ...a, role: a.staffId === staffId ? SheetRole.LEAD : SheetRole.MEMBER })) } : item))
+  };
+  return { state: logStaffSheet(changed, ctx, { staffId, action: 'lead', sheet }) };
 };
 
 // - Tirar uma pessoa de uma sheet (arrastar para a zona de apagar): sai da sheet e passa ao pool de Apoio (de serviço, sem posição)
@@ -116,7 +148,7 @@ export const removeStaffFromSheet: Command<{ staffId: string; sheetId: string }>
 
   const without: HousekeepingState = {
     ...state,
-    sheets: state.sheets.map(current => (current.id === sheetId ? { ...current, assignments: withLead(current.assignments.filter(a => a.staffId !== staffId)) } : current))
+    sheets: state.sheets.map(current => (current.id === sheetId ? { ...current, assignments: withLead(current.assignments.filter(a => a.staffId !== staffId), governantaRule(state)) } : current))
   };
   const from = getStaffBlock(person);
   const parked = from === BLOCK.SUPPORT
@@ -138,7 +170,7 @@ export const assignStaffToSheet: Command<{ sheetId: string; assignments: SheetAs
   if (!sheet) return { state };
   const before = new Set(sheet.assignments.map(a => a.staffId));
   const after = new Set(assignments.map(a => a.staffId));
-  let next: HousekeepingState = { ...state, sheets: state.sheets.map(current => (current.id === sheetId ? { ...current, assignments: withLead(assignments) } : current)) };
+  let next: HousekeepingState = { ...state, sheets: state.sheets.map(current => (current.id === sheetId ? { ...current, assignments: withLead(assignments, governantaRule(state)) } : current)) };
   after.forEach(staffId => { if (!before.has(staffId)) next = logStaffSheet(next, ctx, { staffId, action: 'added', sheet }); });
   before.forEach(staffId => { if (!after.has(staffId)) next = logStaffSheet(next, ctx, { staffId, action: 'removed', sheet }); });
   return { state: next };
@@ -175,7 +207,7 @@ export const openPlan: Command<{ kind: PlanKind; date?: string | undefined }> = 
       sheets.push({
         id: ctx.newId('sheet'), planId, number: Number(section.name.match(/\d+/)?.[0] ?? index + 1), title: section.name,
         block: section.block, sectionId: section.id, isReserve: false,
-        assignments: staffIds.map((staffId, position) => ({ staffId, role: position === 0 ? SheetRole.LEAD : SheetRole.MEMBER }))
+        assignments: withLead(staffIds.map(staffId => ({ staffId, role: SheetRole.MEMBER })), governantaRule(state))
       });
     });
     const lastNumber = Math.max(0, ...sheets.map(sheet => sheet.number));
@@ -198,7 +230,7 @@ export const openPlan: Command<{ kind: PlanKind; date?: string | undefined }> = 
       const sheet: TaskSheet = {
         id: ctx.newId('sheet'), planId, number: 100 + Number(section.name.match(/\d+/)?.[0] ?? index + 1), title: section.name,
         block: section.block, sectionId: section.id, isReserve: false,
-        assignments: staffIds.map((staffId, position) => ({ staffId, role: position === 0 ? SheetRole.LEAD : SheetRole.MEMBER }))
+        assignments: withLead(staffIds.map(staffId => ({ staffId, role: SheetRole.MEMBER })), governantaRule(state))
       };
       sheets.push(sheet);
       section.defaultRoomIds.filter(roomId => occupiedTonight.has(roomId)).forEach(roomId => {

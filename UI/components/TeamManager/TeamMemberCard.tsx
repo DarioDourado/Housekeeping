@@ -1,10 +1,12 @@
+import { isGovernanta } from '@/lib/jobTitles';
 import { isOnDuty } from '@/lib/staffDuty';
+import { JobTitleBadges } from './JobTitleBadges';
 import { useTranslation } from 'react-i18next';
 import { GripVertical, Smartphone } from 'lucide-react';
 import { useMoveStaffToBlock } from '@/hooks/housekeeping';
 import { getStaffBlock } from '@/lib/staffBlock';
 import { useUiStore } from '@/store/uiStore';
-import { UserRole, type User } from '@/types/auth.types';
+import type { User } from '@/types/auth.types';
 import type { BlockTeam } from '@/types/housekeeping.types';
 import type { TeamColorPalette } from './teamColorUtils';
 
@@ -29,7 +31,7 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
 
   const avatar = member.isExtra
     ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border border-amber-300'
-    : member.role === UserRole.SUPERVISOR
+    : isGovernanta(member)
       ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200 border border-purple-300'
       : `${palette.avatar} border border-white/20`;
 
@@ -58,7 +60,7 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
               <span className="font-bold text-xs text-slate-900 dark:text-slate-100">{member.name}</span>
               {!isOnDuty(member) && <span className={`${BADGE} bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300`}>{t('team.offBadge')}</span>}
               {member.isExtra && <span className={`${BADGE} bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300`}>{t('team.extraBadge')}</span>}
-              {member.role === UserRole.SUPERVISOR && <span className={`${BADGE} bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300`}>{t('team.supervisorBadge')}</span>}
+              <JobTitleBadges user={member} className={BADGE} />
               {member.defaultBlock && member.defaultBlock !== team.block && (
                 <span className="text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: member.defaultBlock })}>
                   {t('team.defaultBlockShort', { block: member.defaultBlock })}

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Users } from 'lucide-react';
-import { useAssignStaffToSheet, useTaskSheets } from '@/hooks/housekeeping';
+import { Plus, Star, Users } from 'lucide-react';
+import { useAssignStaffToSheet, useBlockTeams, useSetSheetLead, useTaskSheets } from '@/hooks/housekeeping';
 import { useEnsureOnDuty, useStaff } from '@/hooks/staff';
 import { useUiStore } from '@/store/uiStore';
+import { isGovernanta } from '@/lib/jobTitles';
 import { isOnDuty } from '@/lib/staffDuty';
 import { duplicateColorIndex, duplicatedStaff } from '@/lib/staffSheets';
 import type { SheetColumn } from '@/lib/taskViews';
@@ -31,6 +32,7 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
   const { t } = useTranslation();
   const { data: staff = [] } = useStaff();
   const assignStaff = useAssignStaffToSheet();
+  const setLead = useSetSheetLead();
   const ensureOnDuty = useEnsureOnDuty();
   const { data: sheets = [] } = useTaskSheets();
   const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
@@ -44,15 +46,30 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
     // - quem está fora de serviço só entra depois de confirmar que se ativa
     const person = staff.find(user => user.id === staffId);
     if (person && !(await ensureOnDuty(person))) return;
-    await assignStaff(sheetId, [...assignments, { staffId, role: assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }]);
+    await assignStaff(sheetId, [...assignments, { staffId, role: SheetRole.MEMBER }]);
   };
 
   // - quem está em mais do que uma sheet do mesmo plano fica assinalado (dia e noite são independentes)
   const planId = sheets.find(sheet => sheet.id === sheetId)?.planId ?? '';
-  const duplicated = duplicatedStaff(sheets, planId);
+  // - responsáveis de bloco podem estar em várias sheets sem serem assinalados
+  const { data: teams = [] } = useBlockTeams();
+  const blockLeads = new Set(staff.filter(user => teams.some(team => team.supervisorId === user.id || team.supervisorName === user.name)).map(user => user.id));
+  const duplicated = duplicatedStaff(sheets, planId, blockLeads);
+  const lead = assignees.find(a => a.role === SheetRole.LEAD);
 
   return (
     <div className="relative">
+      {/* - a responsável da sheet (★) no cabeçalho da sheet; a do bloco aparece no cabeçalho do bloco */}
+      {!lead && assignees.length > 0 && (
+        <p className="text-[11px] font-medium text-slate-400 italic">{t('sheet.noLeadHint')}</p>
+      )}
+      {lead && (
+        <p className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200" title={t('sheet.responsibleHint')}>
+          <Star className="w-3 h-3 text-amber-500 fill-amber-400 shrink-0" />
+          <span className="text-slate-400 font-medium">{t('sheet.responsible')}</span>
+          <span className="truncate">{lead.user.name}</span>
+        </p>
+      )}
       <div className="flex items-center justify-between text-xs pt-1">
         <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1"><Users className="w-3 h-3" />{t('sheet.assignedTeam')}</span>
         {canEdit && (
@@ -66,7 +83,7 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
       <div className="flex flex-wrap gap-1 mt-1.5 min-h-[24px]">
         {assignees.length > 0 ? (
           assignees.map(({ user, role }) => {
-            const others = (duplicated.get(user.id) ?? []).filter(sheet => sheet.id !== sheetId);
+            const others = role === SheetRole.LEAD ? [] : (duplicated.get(user.id) ?? []).filter(sheet => sheet.id !== sheetId);
             const off = !isOnDuty(user);
             return (
             <span
@@ -91,6 +108,11 @@ export const SheetAssignees = ({ sheetId, assignments, assignees, canEdit }: She
               {user.name}{user.isExtra ? t('sheet.extraSuffix') : ''}{role === SheetRole.LEAD && assignees.length > 1 ? ' ★' : ''}
               {off && <span className="text-[10px] font-bold">· {t('sheet.offDuty')}</span>}
               {others.length > 0 && <span className="text-[10px] font-bold">⚠ {others.length + 1}</span>}
+              {canEdit && role !== SheetRole.LEAD && isGovernanta(user) && (
+                <button onClick={() => void setLead(sheetId, user.id)} className="opacity-40 hover:opacity-100" title={t('sheet.makeLead')} aria-label={t('sheet.makeLead')}>
+                  <Star className="w-3 h-3" />
+                </button>
+              )}
             </span>
             );
           })

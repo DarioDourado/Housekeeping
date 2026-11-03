@@ -20,6 +20,7 @@ export const EVENT_LABEL_KEY: Record<TaskEventType, string> = {
   STAFF_DUTY_CHANGED: 'staffDuty',
   STAFF_SHEET_CHANGED: 'staffSheet',
   SHEET_UPDATED: 'sheetUpdated',
+  BLOCK_LEAD_CHANGED: 'blockLead',
   PLAN_OPENED: 'planOpened',
   OPERA_SYNC_PUSH: 'operaSync',
   OPERA_SYNC_PULL: 'operaSync',

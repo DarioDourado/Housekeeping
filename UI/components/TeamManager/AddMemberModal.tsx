@@ -58,7 +58,7 @@ export const AddMemberModal = ({ defaultBlock, onClose }: AddMemberModalProps) =
           <div>
             <label htmlFor="member-role" className={LABEL}>{t('team.roleLabel')}</label>
             <select id="member-role" value={role} onChange={event => setRole(event.target.value as UserRole)} className={INPUT}>
-              {[UserRole.HOUSEKEEPER, UserRole.SUPERVISOR, UserRole.ADMIN].map(value => <option key={value} value={value}>{t(`roles.${value}`)}</option>)}
+              {[UserRole.HOUSEKEEPER, UserRole.ADMIN].map(value => <option key={value} value={value}>{t(`roles.${value}`)}</option>)}
             </select>
           </div>
         </div>

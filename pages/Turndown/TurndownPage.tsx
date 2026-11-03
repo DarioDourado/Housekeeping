@@ -9,6 +9,7 @@ import { buildReport } from '@/lib/report';
 import { PlanKind } from '@/types/housekeeping.types';
 import { PageEmpty, PageError, PageLoading } from '@/UI/components/feedback/PageStates';
 import { SheetRemoveZone } from '@/UI/components/SheetAssignees';
+import { NewSheet } from '@/UI/components/SheetEditor';
 import { BlockTeamRosterBar } from '@/UI/components/TeamManager';
 import { BOARD_PAGE, LAYOUT_GRID, PlanningToolbar, SCROLL_ITEM, type LayoutMode } from '@/pages/Planning/components/PlanningToolbar';
 import { TurndownColumn } from './components/TurndownColumn';
@@ -89,6 +90,7 @@ export const TurndownPage = () => {
 
         {canDistribute && <BlockTeamRosterBar />}
         <PlanningToolbar
+          trailing={canDistribute ? <NewSheet planId={board.plan.id} /> : undefined}
           blockFilter={blockFilter}
           onBlockFilter={setBlockFilter}
           sheetCount={board.columns.length}

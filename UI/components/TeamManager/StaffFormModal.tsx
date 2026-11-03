@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Edit2, UserPlus } from 'lucide-react';
 import { BLOCK, SHIFT } from '@/config/constants';
 import { getDefaultBlock } from '@/lib/staffBlock';
-import { UserRole, type User } from '@/types/auth.types';
+import { JobTitle, UserRole, type User } from '@/types/auth.types';
 import type { BlockTeam } from '@/types/housekeeping.types';
 import { Modal } from '@/UI/components/Modal';
 
@@ -22,6 +22,7 @@ interface FormState {
   shift: string;
   phoneDeviceId: string;
   isExtra: boolean;
+  jobTitles: JobTitle[];
   notes: string;
 }
 
@@ -44,6 +45,7 @@ const initialState = (user?: User): FormState => {
     shift: user?.shift || SHIFT.MORNING,
     phoneDeviceId: user?.phoneDeviceId ?? '',
     isExtra: !!user?.isExtra,
+    jobTitles: user?.jobTitles ?? [],
     notes: user?.notes ?? ''
   };
 };
@@ -68,6 +70,8 @@ export const StaffFormModal = ({ user, blockTeams, onSave, onClose }: StaffFormM
       shift: form.shift,
       phoneDeviceId: form.phoneDeviceId.trim(),
       isExtra: form.isExtra,
+      // - as funções só existem para a chefia (admin)
+      jobTitles: form.role === UserRole.ADMIN ? form.jobTitles : [],
       notes: form.notes.trim()
     });
     onClose();
@@ -124,6 +128,25 @@ export const StaffFormModal = ({ user, blockTeams, onSave, onClose }: StaffFormM
             </div>
             <input type="checkbox" checked={form.isOnDuty} onChange={event => set({ isOnDuty: event.target.checked })} />
           </label>
+          {form.role === UserRole.ADMIN && (
+            <>
+              <div className="h-px bg-slate-200 dark:bg-slate-700/60" />
+              <div className="space-y-1.5">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block">{t('directory.form.jobTitles')}</span>
+                <span className="text-[11px] text-slate-400 block">{t('directory.form.jobTitlesHint')}</span>
+                {Object.values(JobTitle).map(title => (
+                  <label key={title} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.jobTitles.includes(title)}
+                      onChange={event => set({ jobTitles: event.target.checked ? [...form.jobTitles, title] : form.jobTitles.filter(item => item !== title) })}
+                    />
+                    <span>{t(`jobTitles.${title}`)}</span>
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
           <div className="h-px bg-slate-200 dark:bg-slate-700/60" />
           <label className="flex items-center justify-between cursor-pointer">
             <div>

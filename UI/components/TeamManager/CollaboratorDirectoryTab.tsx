@@ -1,3 +1,4 @@
+import { isGovernanta } from '@/lib/jobTitles';
 import { isOnDuty } from '@/lib/staffDuty';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +44,7 @@ export const CollaboratorDirectoryTab = () => {
       if (filters.duty === 'ON_DUTY' && !isOnDuty(user)) return false;
       if (filters.duty === 'OFF_DUTY' && isOnDuty(user)) return false;
       if (filters.role === 'EXTRA') return !!user.isExtra;
+      if (filters.role === 'GOVERNANTA') return isGovernanta(user);
       return filters.role === 'ALL' || user.role === filters.role;
     });
   }, [users, filters]);
@@ -67,7 +69,7 @@ export const CollaboratorDirectoryTab = () => {
     }
     const target = columns.find(column => column.sheet.id === sheetId)?.sheet;
     if (target && !target.assignments.some(a => a.staffId === user.id)) {
-      await assignStaff(target.id, [...target.assignments, { staffId: user.id, role: target.assignments.length === 0 ? SheetRole.LEAD : SheetRole.MEMBER }]);
+      await assignStaff(target.id, [...target.assignments, { staffId: user.id, role: SheetRole.MEMBER }]);
     }
   };
 

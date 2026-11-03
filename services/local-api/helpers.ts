@@ -1,3 +1,4 @@
+import { isGovernanta } from '@/lib/jobTitles';
 import { selectActivePlan } from '@/lib/taskViews';
 import {
   InspectionStatus,
@@ -78,11 +79,18 @@ export const resetTask = (task: ServiceTask): ServiceTask => ({
   onBehalfOfTeam: false
 });
 
-// - uma sheet com gente tem sempre uma responsável: se saiu a LEAD, a primeira que fica passa a LEAD
-export const withLead = (assignments: SheetAssignment[]): SheetAssignment[] =>
-  assignments.length > 0 && !assignments.some(a => a.role === SheetRole.LEAD)
-    ? assignments.map((a, i) => (i === 0 ? { ...a, role: SheetRole.LEAD } : a))
-    : assignments;
+// - A responsável de uma sheet (LEAD) é sempre uma governanta. Se a atual saiu, passa à primeira governanta da sheet;
+//   sem nenhuma governanta, a sheet fica sem responsável e todos são MEMBER.
+export const withLead = (assignments: SheetAssignment[], canLead: (staffId: string) => boolean): SheetAssignment[] => {
+  const lead = (assignments.find(a => a.role === SheetRole.LEAD && canLead(a.staffId)) ?? assignments.find(a => canLead(a.staffId)))?.staffId;
+  return assignments.map(a => ({ ...a, role: a.staffId === lead ? SheetRole.LEAD : SheetRole.MEMBER }));
+};
+
+// - quem pode ser responsável de uma sheet: as governantas
+export const governantaRule = (state: HousekeepingState) => (staffId: string): boolean => {
+  const user = state.staff.find(person => person.id === staffId);
+  return !!user && isGovernanta(user);
+};
 
 // ---------- eventos (append-only) ----------
 
@@ -125,7 +133,8 @@ export const resolveExecution = (
   if (explicitExecutorIds && explicitExecutorIds.length > 0) {
     return { executorIds: explicitExecutorIds, onBehalfOfTeam: !explicitExecutorIds.includes(actor.id) };
   }
-  const assigned = findSheet(state, task.sheetId)?.assignments.map(assignment => assignment.staffId) ?? [];
+  // - a equipa que arruma é a da sheet sem a responsável (a governanta supervisiona)
+  const assigned = findSheet(state, task.sheetId)?.assignments.filter(assignment => assignment.role !== SheetRole.LEAD).map(assignment => assignment.staffId) ?? [];
   if (assigned.length === 1 && assigned[0] === actor.id) return { executorIds: [actor.id], onBehalfOfTeam: false };
   return { executorIds: [], onBehalfOfTeam: true };
 };

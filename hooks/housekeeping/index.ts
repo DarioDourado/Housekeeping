@@ -44,5 +44,7 @@ export { useTriggerNightAudit } from './useTriggerNightAudit';
 export { useUpdateBlockTeam } from './useUpdateBlockTeam';
 export { useUpdateRoomInstructions } from './useUpdateRoomInstructions';
 export { useUpdateSection } from './useUpdateSection';
+export { useAddSheet } from './useAddSheet';
+export { useSetSheetLead } from './useSetSheetLead';
 export { useUpdateSheet } from './useUpdateSheet';
 export { useBoard } from './useBoard';

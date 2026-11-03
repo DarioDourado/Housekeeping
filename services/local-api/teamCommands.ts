@@ -4,7 +4,7 @@ import { getStaffBlock } from '@/lib/staffBlock';
 import type { User } from '@/types/auth.types';
 import type { BlockTeam, LocalizedText, Section } from '@/types/housekeeping.types';
 import type { Command } from './types';
-import { withEvent, withLead } from './helpers';
+import { governantaRule, withEvent, withLead } from './helpers';
 
 export const moveStaffToBlock: Command<{ staffId: string; targetBlock: string }> = (state, { staffId, targetBlock }, ctx) => {
   const person = state.staff.find(user => user.id === staffId);
@@ -57,9 +57,19 @@ export const removeStaffFromBlock: Command<{ staffId: string }> = (state, { staf
   };
 };
 
-export const updateBlockTeam: Command<{ team: BlockTeam }> = (state, { team }) => ({
-  state: { ...state, blockTeams: state.blockTeams.map(current => (current.id === team.id ? team : current)) }
-});
+// - mudar a responsável do bloco fica na auditoria: metadata = { block, from, to } (ids das pessoas)
+export const updateBlockTeam: Command<{ team: BlockTeam }> = (state, { team }, ctx) => {
+  const current = state.blockTeams.find(item => item.id === team.id);
+  const updated = { ...state, blockTeams: state.blockTeams.map(item => (item.id === team.id ? team : item)) };
+  if (!current || current.supervisorId === team.supervisorId) return { state: updated };
+  return {
+    state: withEvent(updated, ctx, {
+      type: 'BLOCK_LEAD_CHANGED', roomId: 'team', roomNumber: team.block,
+      detail: { key: 'events.blockLeadChanged', params: { block: team.block, name: team.supervisorName ?? '—' } },
+      metadata: { block: team.block, from: current.supervisorId ?? null, to: team.supervisorId ?? null }
+    })
+  };
+};
 
 export const addBlockTeam: Command<{ team: Omit<BlockTeam, 'id'> }> = (state, { team }, ctx) => ({
   state: { ...state, blockTeams: [...state.blockTeams, { ...team, id: ctx.newId('team') }] }
@@ -115,7 +125,7 @@ export const deleteStaff: Command<{ userId: string }> = (state, { userId }) => (
   state: {
     ...state,
     staff: state.staff.filter(user => user.id !== userId),
-    sheets: state.sheets.map(sheet => ({ ...sheet, assignments: withLead(sheet.assignments.filter(assignment => assignment.staffId !== userId)) })),
+    sheets: state.sheets.map(sheet => ({ ...sheet, assignments: withLead(sheet.assignments.filter(assignment => assignment.staffId !== userId), governantaRule(state)) })),
     sections: state.sections.map(section => ({ ...section, defaultStaffIds: section.defaultStaffIds.filter(id => id !== userId) }))
   }
 });

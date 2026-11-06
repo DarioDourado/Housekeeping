@@ -40,6 +40,7 @@ O serviço diurno e o turndown são ciclos independentes que podem decorrer ao m
 
 ## Brand Commitments
 
+- **`Theme.txt` é contrato do cliente e prevalece sobre qualquer outra regra de estilo.** Cores exclusivamente as do ficheiro (sem hexadecimais novos): principal `#00A9C5`, hover `#00879E`, canvas `#F5F5F7`/`#000`, superfície `#FFF`/`#1C1C1E`, texto `#1D1D1F`/`#FFF`, secundário `#86868B`/`#8E8E93`, e as cores semânticas Apple. Botão primário `bg-[#00A9C5] hover:bg-[#00879E] text-white`. Foco = auréola suave `ring-4 ring-[#00A9C5]/20`, nunca outline rígido. Cantos 12/16/24px, sombras difusas só no claro, sem `shadow-lg/xl`.
 - Vila Vita Parc: azul turquesa `#00A9C5` como cor principal; preto apenas quando a cor não for possível (`Theme.txt`).
 - O logótipo não leva gradientes, contornos, sombras ou brilhos, e não pode ser colocado sobre fotografias ou fundos poluídos.
 - Linguagem visual combinada com a convenção Apple (HIG), conforme `Theme.txt`.
@@ -59,4 +60,6 @@ O serviço diurno e o turndown são ciclos independentes que podem decorrer ao m
 
 ## Accessibility & Inclusion
 
-Cumprir WCAG 2.2 AA (norma por omissão do projeto, em `.agents/23-accessibility`): contraste de texto 4.5:1 e de UI 3:1, foco visível, navegação por teclado, skip link, hierarquia de headings, respeito por `prefers-reduced-motion`, idioma da página correto.
+Meta: WCAG 2.2 AA (norma por omissão do projeto, em `.agents/23-accessibility`): foco visível, navegação por teclado, skip link, hierarquia de headings, respeito por `prefers-reduced-motion`, idioma da página correto.
+
+**Conflito conhecido com o `Theme.txt` (decisão do cliente, não da equipa técnica):** a paleta obrigatória não cumpre AA de contraste em alguns usos. Branco sobre `#00A9C5` dá 2.81:1 e sobre `#00879E` 4.23:1; texto secundário `#86868B` sobre branco 3.6:1; a auréola de foco a 20% dá cerca de 1.2:1. Enquanto o cliente não autorizar uma exceção, prevalece o `Theme.txt` e estes pontos ficam documentados, não corrigidos.

@@ -5,7 +5,7 @@ import { OPERATIONAL_BLOCKS, BLOCK } from '@/config/constants';
 import { useUpdateSheet } from '@/hooks/housekeeping';
 import type { TaskSheet } from '@/types/housekeeping.types';
 
-const FIELD = 'w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-800 dark:text-slate-200';
+const FIELD = 'w-full rounded-md border border-slate-200 dark:border-slate-700 bg-surface px-2 py-1.5 text-xs text-slate-800 dark:text-slate-200';
 
 // - Edição rápida da task sheet (nome e bloco), a partir do cabeçalho da coluna
 export const SheetEditor = ({ sheet }: { sheet: Pick<TaskSheet, 'id' | 'title' | 'block'> }) => {

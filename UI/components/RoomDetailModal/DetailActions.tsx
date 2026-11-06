@@ -106,7 +106,7 @@ export const DetailActions = ({ view, onClose }: { view: TaskView; onClose: () =
         )}
 
         {canRequestCorrection && awaitingInspection && (
-          <button onClick={() => openCorrection(task.id)} className="px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950 border border-rose-200 dark:border-rose-800 rounded-lg">
+          <button onClick={() => openCorrection(task.id)} className="px-3 py-2 text-xs font-semibold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
             {t('actions.reproveInspection')}
           </button>
         )}

@@ -65,7 +65,7 @@ export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) =
   };
   const allowRemoveDrop = (event: React.DragEvent) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; };
 
-  const metric = (label: string, value: string | number, tone = 'text-slate-900 dark:text-slate-100') => (
+  const metric = (label: string, value: string | number, tone = 'text-content') => (
     <div className="flex items-center gap-1.5">
       <span className="text-slate-400">{label}</span>
       <span className={`font-bold ${tone}`}>{value}</span>
@@ -74,7 +74,7 @@ export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) =
 
   return (
     <>
-      <div className="px-5 py-2.5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="px-5 py-2.5 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-4">
           {metric(t('team.activeStaff'), activeStaff)}
           {metric(t('team.supervisors'), supervisors, 'text-purple-600 dark:text-purple-400')}
@@ -90,7 +90,7 @@ export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) =
               aria-label={t('team.searchPlaceholder')}
               value={search}
               onChange={event => setSearch(event.target.value)}
-              className="w-full pl-8 pr-3 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              className="w-full pl-8 pr-3 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-content"
             />
           </div>
           <select
@@ -104,7 +104,7 @@ export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) =
         </div>
       </div>
 
-      <div className="px-5 py-2.5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div className="px-5 py-2.5 border-b border-line flex flex-wrap items-center justify-between gap-2.5 text-xs">
         <div className="flex items-center gap-2">
           <div className="p-1 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400"><Palette className="w-3.5 h-3.5" /></div>
           <span className="font-bold text-slate-800 dark:text-slate-200">{t('team.colorsTitle')}</span>
@@ -136,9 +136,9 @@ export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) =
         onDrop={dropRemove}
         className={`mx-4 mt-3 py-2.5 px-3 rounded-xl border-2 border-dashed text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
           overRemove
-            ? 'border-rose-500 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200'
+            ? 'border-red-500 bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-200'
             : draggingStaffId
-              ? 'border-rose-300 dark:border-rose-800 bg-rose-50/70 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300'
+              ? 'border-red-300 dark:border-red-800 bg-red-50/70 dark:bg-red-950/30 text-red-700 dark:text-red-300'
               : 'border-slate-200 dark:border-slate-700 text-slate-400'
         }`}
       >

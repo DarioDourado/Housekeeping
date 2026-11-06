@@ -48,11 +48,11 @@ export const BlockTeamRosterBar = ({ kind = PlanKind.DAY }: { kind?: PlanKind })
   };
 
   return (
-    <div className="w-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 shadow-2xs">
+    <div className="w-full bg-white/90 dark:bg-slate-900/90 border border-line rounded-xl p-2.5 shadow-2xs">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400"><Users className="w-4 h-4" /></div>
-          <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{t('roster.title')}</span>
+          <span className="text-xs font-bold text-content">{t('roster.title')}</span>
           <span className="text-[10px] text-slate-400 hidden sm:inline">· {t('roster.hint')}</span>
         </div>
         <div className="flex items-center gap-2">

@@ -17,9 +17,9 @@ interface RoomCardProps {
 }
 
 const SERVICE_STYLE: Record<ServiceLabelKey, { icon: typeof Home; color: string }> = {
-  departureArrival: { icon: Luggage, color: 'text-rose-600 dark:text-rose-400 font-semibold' },
+  departureArrival: { icon: Luggage, color: 'text-red-600 dark:text-red-400 font-semibold' },
   stayover: { icon: Home, color: 'text-blue-600 dark:text-blue-400' },
-  departureOnly: { icon: LogOut, color: 'text-stone-500 dark:text-stone-400' },
+  departureOnly: { icon: LogOut, color: 'text-slate-500 dark:text-slate-400' },
   refresh: { icon: Sparkles, color: 'text-purple-600 dark:text-purple-400 font-medium' },
   turndown: { icon: Home, color: 'text-indigo-600 dark:text-indigo-400' }
 };
@@ -58,12 +58,12 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
       // - clicar em qualquer ponto do cartão abre a ficha completa; os botões (ações, nº do quarto) mantêm o seu comportamento
       onClick={event => { if (!(event.target as HTMLElement).closest('button, a, input, select, textarea')) openDetail(task.id); }}
       title={t('room.openTitle')}
-      className={`relative group bg-white dark:bg-slate-900 border rounded-xl transition-all duration-150 select-none ${canDistribute ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${
+      className={`relative group bg-surface border rounded-xl transition-all duration-150 select-none ${canDistribute ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${
         isDragging
           ? 'opacity-35 scale-[0.98] ring-2 ring-blue-500 shadow-xl'
           : task.isPriority
-            ? 'border-rose-400 dark:border-rose-600 shadow-xs'
-            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 shadow-xs hover:shadow-md'
+            ? 'border-red-400 dark:border-red-600 shadow-xs'
+            : 'border-line hover:border-blue-400 dark:hover:border-blue-600 shadow-xs hover:shadow-md'
       } ${compact ? 'p-3' : 'p-3.5'}`}
     >
       {dropPosition && (
@@ -79,7 +79,7 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
           )}
           <button
             onClick={() => openDetail(task.id)}
-            className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 tabular-nums"
+            className="text-lg font-bold tracking-tight text-content hover:text-blue-600 dark:hover:text-blue-400 tabular-nums"
             title={t('room.openTitle')}
           >
             {room.number}
@@ -105,7 +105,7 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
           <span>{t(`room.serviceShort.${serviceKey}`)}</span>
         </span>
         {task.isPriority && (
-          <span className="text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1">
+          <span className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
             <AlertTriangle className="w-3.5 h-3.5" />
             <span>{task.priorityOrigin ? t('room.priorityBy', { by: t(`room.priorityOrigin.${task.priorityOrigin}`) }) : t('room.priority')}</span>
           </span>
@@ -118,14 +118,14 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
         {/* - linha 1: ícone de saída + quem está em casa/sai + ETD à direita; linha 2: ícone de entrada + quem entra + ETA à direita */}
         <div className="flex items-center justify-between gap-2 text-xs">
           <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[190px]">
-            {stay?.departureEta || stay?.departingGuestName ? <LogOut className="inline w-3 h-3 mr-1 -mt-0.5 text-stone-500 dark:text-stone-400" aria-label={t('room.guestOut')} role="img" /> : null}
+            {stay?.departureEta || stay?.departingGuestName ? <LogOut className="inline w-3 h-3 mr-1 -mt-0.5 text-slate-500 dark:text-slate-400" aria-label={t('room.guestOut')} role="img" /> : null}
             {stay?.departingGuestName ?? stay?.guestName ?? '—'}
           </span>
           {stay?.departureEta && <span className="shrink-0 text-slate-500 tabular-nums text-[11px]">{t('room.etd', { time: etaTime(stay.departureEta) })}</span>}
         </div>
         {stay?.arrivingGuestName && (
           <div className="flex items-baseline justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
-            <span className="truncate"><LogIn className="inline w-3 h-3 mr-1 -mt-0.5 text-rose-600 dark:text-rose-400" aria-label={t('room.guestIn')} role="img" />{stay.arrivingGuestName}</span>
+            <span className="truncate"><LogIn className="inline w-3 h-3 mr-1 -mt-0.5 text-red-600 dark:text-red-400" aria-label={t('room.guestIn')} role="img" />{stay.arrivingGuestName}</span>
             {stay.arrivalEta && <span className="shrink-0 text-slate-500 tabular-nums">{t('room.eta', { time: etaTime(stay.arrivalEta) })}</span>}
           </div>
         )}
@@ -152,7 +152,7 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
             </span>
           )}
           {stay?.isLinenChangeDue && task.kind === TaskKind.CLEANING && (
-            <span className={`${CHIP} text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200 dark:border-cyan-800`}>
+            <span className={`${CHIP} text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800`}>
               <RotateCw className="w-3 h-3" />
               <span>{t('badges.linenChange')}</span>
             </span>
@@ -164,7 +164,7 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
             </span>
           )}
           {task.notPerformedReason === NotPerformedReason.REFUSE_SERVICE && (
-            <span className={`${CHIP} text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 border-transparent`}>
+            <span className={`${CHIP} text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-transparent`}>
               <UserX className="w-3 h-3" />
               <span>{t('room.refused')}</span>
             </span>
@@ -173,8 +173,8 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
       </div>
 
       {task.inspectionStatus === InspectionStatus.CORRECTION_REQUESTED && (
-        <div className="mb-3 p-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-300 flex items-start gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+        <div className="mb-3 p-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-xs text-red-800 dark:text-red-300 flex items-start gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0 mt-0.5" />
           <div>
             <span className="font-semibold">{t('room.correctionRequested')} </span>
             <span>{task.inspectionNote}</span>

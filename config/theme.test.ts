@@ -8,7 +8,7 @@ const sources = {
 };
 
 // - Theme.txt: "nunca inventes cores". Só famílias com escala definida em src/index.css.
-const ALLOWED = ['blue', 'slate', 'emerald', 'green', 'red', 'rose', 'amber', 'orange', 'purple', 'indigo', 'sky', 'cyan', 'stone', 'white', 'black', 'primary', 'canvas', 'surface', 'content', 'muted', 'line', 'success', 'danger', 'warning', 'transparent', 'current', 'inherit'];
+const ALLOWED = ['blue', 'slate', 'emerald', 'red', 'amber', 'purple', 'indigo', 'white', 'black', 'primary', 'canvas', 'surface', 'content', 'muted', 'line', 'success', 'danger', 'warning', 'transparent', 'current', 'inherit'];
 const UTILITY = /\b(?:bg|text|border|ring|from|to|via|divide|fill|stroke|outline|decoration|accent|caret|placeholder|shadow)-([a-z]+)(?:-\d{2,3})?(?:\/\d+)?\b/g;
 const COLOR_FAMILIES = /^(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|slate|gray|zinc|neutral|stone)$/;
 
@@ -34,7 +34,7 @@ describe('tema', () => {
   });
 
   it('cada família permitida tem escala completa no CSS do tema', () => {
-    const families = ['blue', 'slate', 'emerald', 'red', 'amber', 'purple', 'indigo', 'green', 'rose', 'orange', 'sky', 'cyan', 'stone'];
+    const families = ['blue', 'slate', 'emerald', 'red', 'amber', 'purple', 'indigo'];
     for (const family of families) {
       for (const step of [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]) {
         expect(css.includes(`--color-${family}-${step}:`), `${family}-${step}`).toBe(true);

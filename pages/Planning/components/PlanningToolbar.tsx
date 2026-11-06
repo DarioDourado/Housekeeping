@@ -81,7 +81,7 @@ export const PlanningToolbar = ({ trailing, blockFilter, onBlockFilter, sheetCou
   ];
 
   return (
-    <div className="space-y-2.5 text-xs w-full bg-white/70 dark:bg-slate-900/70 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+    <div className="space-y-2.5 text-xs w-full bg-white/70 dark:bg-slate-900/70 p-2.5 rounded-xl border border-line">
     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
       <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 lg:pb-0">
         <span className="text-slate-400 font-medium mr-1 flex items-center gap-1 shrink-0"><Filter className="w-3.5 h-3.5" />{t('planning.areaLabel')}</span>

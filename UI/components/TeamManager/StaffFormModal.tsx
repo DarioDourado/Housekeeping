@@ -9,7 +9,7 @@ import { JobTitle, UserRole, type User } from '@/types/auth.types';
 import type { BlockTeam } from '@/types/housekeeping.types';
 import { Modal } from '@/UI/components/Modal';
 
-const INPUT = 'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100';
+const INPUT = 'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-content';
 const LABEL = 'block font-semibold text-slate-700 dark:text-slate-300 mb-1';
 const SHIFTS = [[SHIFT.MORNING, 'morning'], [SHIFT.AFTERNOON, 'afternoon'], [SHIFT.TURNDOWN, 'turndown'], [SHIFT.GENERAL, 'general']] as const;
 
@@ -128,7 +128,7 @@ export const StaffFormModal = ({ kind, user, blockTeams, onSave, onClose }: Staf
             <input id="staff-form-device" type="text" value={form.phoneDeviceId} onChange={event => set({ phoneDeviceId: event.target.value })} placeholder={t('directory.form.devicePlaceholder')} className={`${INPUT} font-mono`} />
           </div>
         </div>
-        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2.5">
+        <div className="p-3 rounded-xl border border-line bg-slate-50 dark:bg-slate-800/50 space-y-2.5">
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="font-bold text-slate-800 dark:text-slate-200 block">{t('directory.form.onDutyToday')}</span>

@@ -57,11 +57,11 @@ export const NavMenu = () => {
         {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
       {open && (
-        <nav id="nav-menu" aria-label={t('nav.main')} className="absolute inset-x-0 top-full z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md">
+        <nav id="nav-menu" aria-label={t('nav.main')} className="absolute inset-x-0 top-full z-40 bg-surface border-b border-line shadow-md">
           {NAV_LINKS.map(link => (
             <NavLink key={link.to} to={link.to} end={link.end} onClick={close} className={linkClass}>{t(link.label)}</NavLink>
           ))}
-          <div className="sm:hidden border-t border-slate-200 dark:border-slate-800">
+          <div className="sm:hidden border-t border-line">
             {PANELS.map(({ panel, label, icon: Icon }) => (
               <button key={panel} type="button" onClick={() => { openPanel(panel); close(); }} className={ITEM}><Icon className="w-4 h-4" />{t(label)}</button>
             ))}

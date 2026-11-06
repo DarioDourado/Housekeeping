@@ -22,7 +22,7 @@ export const MobilePhoneLogin = ({ onDone }: { onDone: () => void }) => {
             onClick={async () => { await switchUser(person.id); onDone(); }}
             aria-pressed={user?.id === person.id}
             className={`w-full p-3.5 rounded-xl border text-left flex items-center justify-between min-h-[48px] ${
-              user?.id === person.id ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-50'
+              user?.id === person.id ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-surface border-line text-slate-800 dark:text-slate-200 hover:bg-slate-50'
             }`}
           >
             <div>

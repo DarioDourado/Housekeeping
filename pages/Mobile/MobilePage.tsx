@@ -58,10 +58,10 @@ export const MobilePage = () => {
           </div>
         </div>
 
-        <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-line px-4 py-3 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">{sees ? t('mobile.supervisorMode') : t('mobile.areaResponsible')}</span>
-            <h1 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">{title}</h1>
+            <h1 className="text-base font-bold text-content truncate">{title}</h1>
           </div>
           {sees && (
             <select value={area} onChange={event => setArea(event.target.value)} aria-label={t('mobile.areaLabel')} className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200">
@@ -78,11 +78,11 @@ export const MobilePage = () => {
           {tab === 'PHONE_LOGIN' && <MobilePhoneLogin onDone={() => setTab('LIST')} />}
         </div>
 
-        <nav className="sticky bottom-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 grid grid-cols-4 items-center h-16">
+        <nav className="sticky bottom-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-line grid grid-cols-4 items-center h-16">
           <button onClick={() => setTab('LIST')} aria-current={tab === 'LIST'} className={tabButton(tab === 'LIST')}><ListTodo className="w-5 h-5" /><span className="text-[11px] mt-0.5">{t('mobile.tabRooms')}</span></button>
           <button onClick={() => setTab('ALERTS')} aria-current={tab === 'ALERTS'} className={tabButton(tab === 'ALERTS')}>
             <Bell className="w-5 h-5" />
-            {pendingAlerts > 0 && <span className="absolute top-1 right-6 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white dark:ring-slate-900" />}
+            {pendingAlerts > 0 && <span className="absolute top-1 right-6 w-2.5 h-2.5 rounded-full bg-red-600 ring-2 ring-white dark:ring-slate-900" />}
             <span className="text-[11px] mt-0.5">{t('mobile.tabAlerts')}</span>
           </button>
           <button onClick={() => openPanel('chat')} className={tabButton(false)}><MessageSquare className="w-5 h-5" /><span className="text-[11px] mt-0.5">{t('mobile.tabChat')}</span></button>

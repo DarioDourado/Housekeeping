@@ -43,7 +43,7 @@ export const RoomInstructions = ({ roomId, instructions }: RoomInstructionsProps
             onChange={event => setDraft(event.target.value)}
             placeholder={t('room.detail.instructionsPlaceholder')}
             rows={3}
-            className="w-full rounded-md border border-amber-300 dark:border-amber-800 bg-white dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-200"
+            className="w-full rounded-md border border-amber-300 dark:border-amber-800 bg-surface p-2 text-xs text-slate-800 dark:text-slate-200"
           />
           <div className="flex justify-end gap-2">
             <button onClick={() => setDraft(null)} className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md">{t('actions.cancel')}</button>

@@ -37,7 +37,7 @@ export const DirectoryFilters = ({ value, blockTeams, canAdd, onChange, onAdd }:
             aria-label={t('directory.searchPlaceholder')}
             value={value.search}
             onChange={event => set({ search: event.target.value })}
-            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-content"
           />
         </div>
         <select value={value.duty} aria-label={t('directory.allStates')} onChange={event => set({ duty: event.target.value as DutyFilter })} className={SELECT}>

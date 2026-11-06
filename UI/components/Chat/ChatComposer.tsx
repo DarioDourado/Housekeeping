@@ -24,7 +24,7 @@ export const ChatComposer = ({ onSend }: { onSend: (draft: ChatDraft) => Promise
   };
 
   return (
-    <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
+    <div className="p-3 border-t border-line bg-surface space-y-2">
       <div className="flex items-center gap-2">
         <input
           type="text"
@@ -32,7 +32,7 @@ export const ChatComposer = ({ onSend }: { onSend: (draft: ChatDraft) => Promise
           onChange={event => setRoomNumber(event.target.value)}
           placeholder={t('chat.roomPlaceholder')}
           aria-label={t('chat.roomLabel')}
-          className="w-16 px-2 py-1 text-xs rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          className="w-16 px-2 py-1 text-xs rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-content"
         />
         <button
           type="button"
@@ -52,7 +52,7 @@ export const ChatComposer = ({ onSend }: { onSend: (draft: ChatDraft) => Promise
           onKeyDown={event => event.key === 'Enter' && send()}
           placeholder={t('chat.messagePlaceholder')}
           aria-label={t('chat.messagePlaceholder')}
-          className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-content"
         />
         <button
           onClick={() => send()}

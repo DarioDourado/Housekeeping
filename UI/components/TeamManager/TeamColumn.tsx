@@ -57,7 +57,7 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
           ? `${palette.borderFocused} ${palette.bgLight} shadow-xl scale-[1.01]`
           : isPool
             ? 'border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50'
-            : `${palette.borderLight} bg-white dark:bg-slate-900 shadow-xs`
+            : `${palette.borderLight} bg-surface shadow-xs`
       }`}
     >
       <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 space-y-2">
@@ -65,7 +65,7 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className={`w-3 h-3 rounded-full ${palette.dot} ring-2 ring-white dark:ring-slate-800 shrink-0`} />
-              <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{team.name}</h4>
+              <h4 className="font-bold text-sm text-content truncate">{team.name}</h4>
               <div className="relative shrink-0">
                 <button
                   onClick={() => setPickerOpen(open => !open)}
@@ -137,7 +137,7 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
             <div className="flex items-center justify-between font-semibold pt-0.5">
               <span className="text-slate-500">{t('team.loadPerPerson')}</span>
               {members.length === 0 ? (
-                <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1 font-bold"><AlertTriangle className="w-3 h-3" />{t('team.noStaffAlert')}</span>
+                <span className="text-red-600 dark:text-red-400 flex items-center gap-1 font-bold"><AlertTriangle className="w-3 h-3" />{t('team.noStaffAlert')}</span>
               ) : (
                 <span className={perPerson > OVERLOAD_THRESHOLD ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-emerald-600 dark:text-emerald-400'}>{t('team.perPerson', { value: perPerson })}</span>
               )}
@@ -155,7 +155,7 @@ export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onA
 
       <div className="p-3 flex-1 overflow-y-auto space-y-2.5 min-h-[160px]">
         {members.length === 0 && !isOver && (
-          <div className="h-28 flex flex-col items-center justify-center text-center p-3 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 text-xs">
+          <div className="h-28 flex flex-col items-center justify-center text-center p-3 border border-dashed border-line rounded-xl text-slate-400 text-xs">
             <Users className="w-6 h-6 mb-1 opacity-40" />
             <span>{t('team.noneAllocated')}</span>
             <span className="text-[10px] mt-0.5">{t('team.dragHere')}</span>

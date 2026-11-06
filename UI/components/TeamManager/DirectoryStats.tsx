@@ -13,10 +13,10 @@ export const DirectoryStats = ({ users }: { users: User[] }) => {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div className={`${CARD} border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900`}>
+      <div className={`${CARD} border-line bg-surface`}>
         <div>
           <span className="text-[11px] text-slate-400 font-medium block">{t('directory.metrics.total')}</span>
-          <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{users.length}</span>
+          <span className="text-xl font-bold text-content">{users.length}</span>
         </div>
         <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"><Users className="w-5 h-5" /></div>
       </div>

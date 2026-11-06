@@ -57,7 +57,7 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
           </div>
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-xs text-slate-900 dark:text-slate-100">{member.name}</span>
+              <span className="font-bold text-xs text-content">{member.name}</span>
               {!isOnDuty(member) && <span className={`${BADGE} bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300`}>{t('team.offBadge')}</span>}
               {member.isExtra && <span className={`${BADGE} bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300`}>{t('team.extraBadge')}</span>}
               <JobTitleBadges user={member} className={BADGE} />

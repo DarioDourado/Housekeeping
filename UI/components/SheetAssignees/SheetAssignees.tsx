@@ -12,12 +12,12 @@ import { SheetRole, type SheetAssignment } from '@/types/housekeeping.types';
 
 // - uma cor por pessoa repetida (classes literais para o Tailwind as encontrar; só famílias do tema; sem azul/ciano (chip normal), laranja/âmbar (extras) nem cinzento (fora de serviço))
 const DUPLICATE_COLORS = [
-  'bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-500 dark:border-rose-600',
+  'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-200 border-red-500 dark:border-red-600',
   'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-200 border-purple-500 dark:border-purple-600',
   'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-500 dark:border-emerald-600',
   'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 border-indigo-500 dark:border-indigo-600',
   'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-200 border-red-500 dark:border-red-600',
-  'bg-green-100 dark:bg-green-950/60 text-green-900 dark:text-green-200 border-green-500 dark:border-green-600'
+  'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-500 dark:border-emerald-600'
 ] as const;
 
 interface SheetAssigneesProps {

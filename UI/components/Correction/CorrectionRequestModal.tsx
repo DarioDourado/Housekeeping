@@ -35,7 +35,7 @@ export const CorrectionRequestModal = ({ taskId, onClose }: CorrectionRequestMod
   return (
     <Modal
       title={t('inspection.title', { number: view.room.number })}
-      subtitle={<Trans i18nKey="inspection.subtitle" components={{ status: <span className="font-semibold text-sky-700 dark:text-sky-400" /> }} />}
+      subtitle={<Trans i18nKey="inspection.subtitle" components={{ status: <span className="font-semibold text-blue-700 dark:text-blue-400" /> }} />}
       icon={<AlertTriangle className="w-5 h-5" />}
       tone="danger"
       maxWidth="max-w-lg"
@@ -51,7 +51,7 @@ export const CorrectionRequestModal = ({ taskId, onClose }: CorrectionRequestMod
             type="submit"
             form={FORM_ID}
             disabled={submitting || !note.trim()}
-            className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50 rounded-lg shadow-xs flex items-center gap-1.5"
+            className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg shadow-xs flex items-center gap-1.5"
           >
             <Check className="w-4 h-4" />
             <span>{t('inspection.submit')}</span>
@@ -69,7 +69,7 @@ export const CorrectionRequestModal = ({ taskId, onClose }: CorrectionRequestMod
             value={note}
             onChange={event => setNote(event.target.value)}
             placeholder={t('inspection.notePlaceholder')}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-content placeholder-slate-400"
           />
         </div>
 

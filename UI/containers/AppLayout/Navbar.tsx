@@ -22,10 +22,10 @@ export const Navbar = () => {
   const canConfigure = usePermission('config.zones');
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-line">
       <div className="flex items-center justify-between gap-3 px-3 sm:px-4 lg:px-5 py-2.5 w-full">
         <NavMenu />
-        <NavLink to={ROUTES.PLANNING} className="max-lg:mr-auto text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap shrink-0 flex items-center gap-2">
+        <NavLink to={ROUTES.PLANNING} className="max-lg:mr-auto text-lg font-bold tracking-tight text-content whitespace-nowrap shrink-0 flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-blue-600" />
           <span>{t('app.hotelName')}</span>
           <span className="text-slate-400 font-normal">/</span>
@@ -66,7 +66,7 @@ export const Navbar = () => {
             <Smartphone className="w-3.5 h-3.5" /><span className="hidden xl:inline">{t('mobile.servicePhone')}</span>
           </NavLink>
 
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2 pl-2 border-l border-line">
             <div className="hidden xl:block text-right leading-tight">
               <span className="block text-xs font-semibold text-slate-800 dark:text-slate-200 max-w-[140px] truncate">{user?.name}</span>
               <span className="block text-[11px] text-slate-500">{user && t(`roles.${user.role}`)}</span>

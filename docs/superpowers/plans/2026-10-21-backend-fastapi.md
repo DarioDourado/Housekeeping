@@ -10,6 +10,7 @@
 > - **Escopo:** só `user` (as suas tarefas). `admin` e `sub_admin` veem tudo. Substitui "governanta = a sua área".
 > - **T5 / CT-03:** sem `merge_sheets` nem `POST /sheets/{id}/merge`; `TaskSheet.blocks: string[]` cumpre o CT-03.
 > - **Prioridades:** cria a governanta geral (não a receção, que pede por alerta). Contrato secção 8, nota 2.
+> - **D1 alterado: SQL Server** (pyodbc, ODBC Driver 17; skill `25-sqlserver-odbc`), não PostgreSQL. SQLAlchemy síncrono com threadpool, como no scaffold. Códigos de erro em `MAIUSCULAS_COM_UNDERSCORE` (`VERSION_CONFLICT`, não `version_conflict`).
 > - **D5 fechado:** polling. **Créditos:** standby, fora da Fase 1.
 > - **Leituras:** `GET /boards/{kind}` agregado; resposta comum dos comandos `CommandResult` (contrato 3.0 e 3.1).
 > - **Comandos novos** face a T4/T5: `setRoomStatus`, `setSheetLead`, `moveStaffToSheet`, `removeStaffFromSheet`, `addSheet`, `updateSheet`, `updateRoomInstructions`, `deactivateStaff` (lista completa na secção 4 do contrato).

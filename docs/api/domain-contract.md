@@ -179,13 +179,13 @@ Regra do LEAD (`withLead`): é sempre uma governanta. Se o atual sai, passa à p
 | Situação | Hoje | **[proposta]** |
 |---|---|---|
 | Recurso inexistente (`task`, `room`, `sheet`…) | no-op | `404` |
-| Transição de estado inválida (ex.: `finishTask` numa tarefa `COMPLETED`) | no-op | `409` com `code` (`task.invalidTransition`) |
+| Transição de estado inválida (ex.: `finishTask` numa tarefa `COMPLETED`) | no-op | `409` com `code` (`TASK_INVALID_TRANSITION`) |
 | Repetir o mesmo resultado (`recordNotPerformed` com o mesmo motivo, `openPlan` num dia aberto, mover para a mesma sheet) | no-op | `200` idempotente, sem novo evento |
 | Regra de domínio violada (mover entre planos, LEAD que não é governanta) | no-op | `422` |
 | Sem permissão | (só esconde botões) | `403` |
 | Escrita no Opera mais antiga que o estado atual | job `CONFLICT`, comando **tem sucesso** | `200`; o conflito vem no corpo e no evento `OPERA_CONFLICT_DETECTED`. **Não é um erro HTTP** |
 
-Formato (do plano de backend): `application/problem+json` com `code` estável; o cliente traduz `errors.<code>` e nunca mostra texto do servidor. As mensagens geradas pelo sistema continuam a ser `LocalizedText` (`{key, params}`).
+Formato (já implementado em `housekeeping-api`): `application/problem+json` (RFC 9457) com `code` estável em `MAIUSCULAS_COM_UNDERSCORE` (`VALIDATION_ERROR`, `HTTP_404`, `TASK_INVALID_TRANSITION`, `SCOPE_FORBIDDEN`, `VERSION_CONFLICT`) e `errors[]` por campo nos 422; o cliente traduz `errors.<CODE>` e nunca mostra texto do servidor. As mensagens geradas pelo sistema continuam a ser `LocalizedText` (`{key, params}`).
 
 ## 6. Regras transversais
 
@@ -208,7 +208,7 @@ Hoje o cliente gera ids (`prefix-Date.now()-random`). Do plano: o servidor gera 
 
 ## 7. Decisões
 
-Do plano `2026-10-21-backend-fastapi.md` (aceites): PostgreSQL (D1), Opera atrás de um `Protocol` com `FakeOperaClient` até haver sandbox (D2), contas locais com argon2 (D3), sem apagar histórico na Fase 1 (D6), sheets criadas na app (D7), alertas na Fase 1 e chat na Fase 2 (D8).
+Do plano `2026-10-21-backend-fastapi.md` (aceites): **SQL Server** via ODBC (D1, alterado em 2026-11-06: é o que `housekeeping-api` já usa), Opera atrás de um `Protocol` com `FakeOperaClient` até haver sandbox (D2), contas locais com argon2 (D3), sem apagar histórico na Fase 1 (D6), sheets criadas na app (D7), alertas na Fase 1 e chat na Fase 2 (D8).
 
 Fechadas com o utilizador em 2026-11-06:
 
@@ -278,7 +278,7 @@ Hierarquia: `admin` → `sub_admin` → `user`. Os perfis substituem o `JobTitle
 
 **Responsável (LEAD) de uma sheet:** hoje é sempre uma pessoa com `JobTitle` `GOVERNANTA` (regra `withLead`). Com os perfis novos passa a ser **`admin` ou `sub_admin`** **[proposta, a confirmar]**: nos dados de demonstração as sheets têm várias governantas como LEAD, e "governanta geral" é uma pessoa só.
 
-**Escopo:** só a colaboradora (`user`) o tem. Vê e age apenas sobre as tarefas das sheets onde está atribuída no plano ativo (e os quartos dessas tarefas); fora disso, `403` com `code: scope.forbidden`. `superadmin`, `admin`, `sub_admin` e a receção (leitura) veem tudo.
+**Escopo:** só a colaboradora (`user`) o tem. Vê e age apenas sobre as tarefas das sheets onde está atribuída no plano ativo (e os quartos dessas tarefas); fora disso, `403` com `code: SCOPE_FORBIDDEN`. `superadmin`, `admin`, `sub_admin` e a receção (leitura) veem tudo.
 
 **`deleteStaff` (`superadmin`):** apaga a conta, mas o histórico fica intacto: os eventos guardam `registeredByName`/`registeredByRole` como snapshot e os `executorIds` órfãos passam a mostrar "pessoa removida". Nunca apaga eventos.
 

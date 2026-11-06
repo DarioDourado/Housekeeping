@@ -20,7 +20,7 @@ export const DemoAccounts = ({ users, onPick }: DemoAccountsProps) => {
             <button
               type="button"
               onClick={() => onPick(user)}
-              className="rounded-[12px] border border-line bg-surface px-3 py-1.5 text-xs text-content transition-all duration-300 hover:border-primary active:scale-[0.98]"
+              className="rounded-[12px] border border-line bg-surface px-3 py-1.5 text-xs text-content transition-all duration-300 hover:border-primary active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-primary/20"
             >
               {user.name} · {t(`roles.${user.role}`)}
             </button>

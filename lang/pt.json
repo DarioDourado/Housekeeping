@@ -30,6 +30,9 @@
     "changeMessage": "O quarto {{number}} passa de {{from}} para {{to}} e o estado será enviado ao Opera Cloud. Confirmas?",
     "changeConfirm": "Alterar estado"
   },
+  "common": {
+    "skipToContent": "Saltar para o conteúdo"
+  },
   "actions": {
     "reproveInspection": "Reprovar c/ Nota",
     "acknowledgeAlert": "Confirmar Receção",

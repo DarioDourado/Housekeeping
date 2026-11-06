@@ -67,6 +67,7 @@ export const PlanningPage = () => {
 
   return (
     <SheetRemoveZone kind={PlanKind.DAY} className={BOARD_PAGE}>
+      <h1 className="sr-only">{t('nav.morningDistribution')}</h1>
       <div className="space-y-4 shrink-0">
         <SummaryStrip columns={board.columns} onReset={canDistribute ? handleReset : undefined} />
         {canDistribute && <BlockTeamRosterBar kind={PlanKind.DAY} />}

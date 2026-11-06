@@ -30,6 +30,9 @@
     "changeMessage": "Room {{number}} goes from {{from}} to {{to}} and the status will be sent to Opera Cloud. Confirm?",
     "changeConfirm": "Change status"
   },
+  "common": {
+    "skipToContent": "Skip to content"
+  },
   "actions": {
     "reproveInspection": "Reject with Note",
     "acknowledgeAlert": "Acknowledge Alert",

@@ -29,7 +29,7 @@ export const AuditPage = () => {
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
       <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600" />{t('audit.title')}</h2>
+          <h1 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600" />{t('audit.title')}</h1>
           <p className="text-xs text-slate-500 mt-0.5">{t('audit.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">

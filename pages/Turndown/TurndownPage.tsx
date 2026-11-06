@@ -62,7 +62,7 @@ export const TurndownPage = () => {
             <div className="p-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"><Moon className="w-6 h-6" /></div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold tracking-tight">{t('turndown.title')}</h2>
+                <h1 className="text-lg font-bold tracking-tight">{t('turndown.title')}</h1>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 font-medium">
                   {t('turndown.window', { start: TURNDOWN_SCHEDULE.start, end: TURNDOWN_SCHEDULE.end })}
                 </span>

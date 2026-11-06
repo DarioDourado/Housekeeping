@@ -61,7 +61,7 @@ export const MobilePage = () => {
         <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">{sees ? t('mobile.supervisorMode') : t('mobile.areaResponsible')}</span>
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">{title}</h2>
+            <h1 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">{title}</h1>
           </div>
           {sees && (
             <select value={area} onChange={event => setArea(event.target.value)} aria-label={t('mobile.areaLabel')} className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200">

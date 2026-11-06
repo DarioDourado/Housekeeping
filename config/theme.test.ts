@@ -42,6 +42,18 @@ describe('tema', () => {
     }
   });
 
+  describe('foco de teclado (WCAG 2.4.7 / 1.4.11)', () => {
+    it('should use a solid action-colored outline for :focus-visible', () => {
+      const rule = /:focus-visible \{([^}]*)\}/.exec(css)?.[1] ?? '';
+      expect(rule).toMatch(/outline:\s*2px solid var\(--color-action-text\)/);
+    });
+
+    it('should not remove the focus outline in components', () => {
+      const offenders = Object.entries(sources).filter(([, source]) => /focus:outline-none|focus:ring-primary\/20/.test(source)).map(([file]) => file.split('/').pop());
+      expect(offenders).toEqual([]);
+    });
+  });
+
   describe('contraste (WCAG 2.2 AA, .agents/23-accessibility)', () => {
     const channel = (hex: string, offset: number) => {
       const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;

@@ -9,7 +9,7 @@ import { isOnDuty } from '@/lib/staffDuty';
 import type { PlanKind } from '@/types/housekeeping.types';
 import { PageEmpty, PageError, PageLoading } from '@/UI/components/feedback/PageStates';
 
-const field = 'rounded-[12px] border border-line bg-surface px-3 py-2 text-sm text-content focus:outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary';
+const field = 'rounded-[12px] border border-line bg-surface px-3 py-2 text-sm text-content focus:border-primary';
 
 // - Configuração base de um serviço (manhã ou turndown): o plano abre a copiar estas secções (§6.1)
 export const SectionsTab = ({ kind }: { kind: PlanKind }) => {

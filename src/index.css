@@ -259,10 +259,10 @@
     scale: 0.98;
   }
 
-  /* Foco: auréola suave da marca, nunca outline rígido */
+  /* Foco: contorno sólido da cor de ação (>=3:1 em claro e escuro, WCAG 2.4.7 / 1.4.11) */
   :focus-visible {
-    outline: 4px solid rgb(0 169 197 / 0.2);
-    outline-offset: 0;
+    outline: 2px solid var(--color-action-text);
+    outline-offset: 2px;
   }
   input:focus,
   textarea:focus,

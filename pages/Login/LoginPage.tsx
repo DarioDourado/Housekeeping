@@ -11,7 +11,7 @@ import { PageLoading } from '@/UI/components/feedback/PageStates';
 import { DemoAccounts } from './components/DemoAccounts';
 
 const inputClass =
-  'w-full rounded-[12px] border border-line bg-surface px-4 py-3 text-sm text-content placeholder:text-muted transition-colors duration-500 focus:outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary';
+  'w-full rounded-[12px] border border-line bg-surface px-4 py-3 text-sm text-content placeholder:text-muted transition-colors duration-500 focus:border-primary';
 
 // - Split-screen (Theme.txt): painel de marca só a partir de lg; abaixo, página inteira só com o formulário
 export const LoginPage = () => {
@@ -80,7 +80,7 @@ export const LoginPage = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-[12px] bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium transition-all duration-300 active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-60"
+            className="w-full rounded-[12px] bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium transition-all duration-300 active:scale-[0.98] disabled:opacity-60"
           >
             {isSubmitting ? t('login.submitting') : t('login.submit')}
           </button>

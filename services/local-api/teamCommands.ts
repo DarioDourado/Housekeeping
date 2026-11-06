@@ -1,36 +1,38 @@
 import { isOnDuty } from '@/lib/staffDuty';
 import { BLOCK } from '@/config/constants';
-import { getStaffBlock } from '@/lib/staffBlock';
+import { areaOf, defaultOf, getStaffBlock, withArea, withDefault } from '@/lib/staffBlock';
 import type { User } from '@/types/auth.types';
-import type { BlockTeam, LocalizedText, Section } from '@/types/housekeeping.types';
+import { PlanKind, type BlockTeam, type LocalizedText, type Section } from '@/types/housekeeping.types';
 import type { Command } from './types';
 import { governantaRule, withEvent, withLead } from './helpers';
 
-export const moveStaffToBlock: Command<{ staffId: string; targetBlock: string }> = (state, { staffId, targetBlock }, ctx) => {
+// - Os blocos são por serviço (manhã ou turndown): `kind` diz em qual se mexe (manhã por defeito)
+export const moveStaffToBlock: Command<{ staffId: string; targetBlock: string; kind?: PlanKind | undefined }> = (state, { staffId, targetBlock, kind = PlanKind.DAY }, ctx) => {
   const person = state.staff.find(user => user.id === staffId);
   if (!person) return { state };
+  const previous = areaOf(person, kind);
 
   const moved: typeof state = {
     ...state,
-    staff: state.staff.map(user => (user.id === staffId ? { ...user, assignedArea: targetBlock } : user))
+    staff: state.staff.map(user => (user.id === staffId ? withArea(user, kind, targetBlock) : user))
   };
 
-  const detail: LocalizedText = person.assignedArea
-    ? { key: 'events.staffMoved', params: { name: person.name, from: person.assignedArea, to: targetBlock } }
+  const detail: LocalizedText = previous
+    ? { key: 'events.staffMoved', params: { name: person.name, from: previous, to: targetBlock } }
     : { key: 'events.staffMovedFromNone', params: { name: person.name, to: targetBlock } };
 
   return {
-    state: withEvent(moved, ctx, { type: 'STAFF_MOVED', roomId: 'staff', roomNumber: person.name, detail, metadata: { staffId, from: person.assignedArea ?? null, to: targetBlock } }),
+    state: withEvent(moved, ctx, { type: 'STAFF_MOVED', roomId: 'staff', roomNumber: person.name, detail, metadata: { staffId, kind, from: previous ?? null, to: targetBlock } }),
     toast: { key: 'toasts.staffMoved', params: { name: person.name, block: targetBlock } }
   };
 };
 
 // - Tirar uma pessoa do bloco (arrastar para fora no quadro): vai para o pool "Apoio & Rotativas", sem equipa.
 //   Quem já está no pool não tem bloco de onde sair: passa a Fora de serviço. Nunca mexe nas task sheets.
-export const removeStaffFromBlock: Command<{ staffId: string }> = (state, { staffId }, ctx) => {
+export const removeStaffFromBlock: Command<{ staffId: string; kind?: PlanKind | undefined }> = (state, { staffId, kind = PlanKind.DAY }, ctx) => {
   const person = state.staff.find(user => user.id === staffId);
   if (!person) return { state };
-  const from = getStaffBlock(person);
+  const from = getStaffBlock(person, kind);
   if (from === BLOCK.SUPPORT) {
     if (!isOnDuty(person)) return { state };
     return {
@@ -45,13 +47,13 @@ export const removeStaffFromBlock: Command<{ staffId: string }> = (state, { staf
 
   const removed: typeof state = {
     ...state,
-    staff: state.staff.map(user => (user.id === staffId ? { ...user, assignedArea: BLOCK.SUPPORT } : user))
+    staff: state.staff.map(user => (user.id === staffId ? withArea(user, kind, BLOCK.SUPPORT) : user))
   };
   return {
     state: withEvent(removed, ctx, {
       type: 'STAFF_MOVED', roomId: 'staff', roomNumber: person.name,
       detail: { key: 'events.staffRemoved', params: { name: person.name, from } },
-      metadata: { staffId, from, to: BLOCK.SUPPORT }
+      metadata: { staffId, kind, from, to: BLOCK.SUPPORT }
     }),
     toast: { key: 'toasts.staffRemoved', params: { name: person.name, block: from } }
   };
@@ -75,31 +77,40 @@ export const addBlockTeam: Command<{ team: Omit<BlockTeam, 'id'> }> = (state, { 
   state: { ...state, blockTeams: [...state.blockTeams, { ...team, id: ctx.newId('team') }] }
 });
 
-// - ao apagar uma equipa, quem lá estava volta ao pool de apoio (de serviço e sem posição); o bloco por defeito também deixa de existir
+// - ao apagar uma equipa, quem lá estava (nesse serviço) volta ao pool de apoio (de serviço e sem posição); o bloco por defeito também deixa de existir
 export const deleteBlockTeam: Command<{ teamId: string }> = (state, { teamId }) => {
-  const block = state.blockTeams.find(team => team.id === teamId)?.block;
-  const inBlock = (area?: string) => !!block && block !== BLOCK.SUPPORT && !!area && getStaffBlock({ assignedArea: area }) === block;
+  const team = state.blockTeams.find(item => item.id === teamId);
+  const kind = team?.kind ?? PlanKind.DAY;
+  const block = team?.block;
+  const inBlock = (area?: string) => !!block && block !== BLOCK.SUPPORT && !!area && getStaffBlock(withArea({}, kind, area), kind) === block;
   return {
     state: {
       ...state,
-      blockTeams: state.blockTeams.filter(team => team.id !== teamId),
-      staff: state.staff.map(user => (inBlock(user.assignedArea) || inBlock(user.defaultBlock)
-        ? { ...user, ...(inBlock(user.assignedArea) && { assignedArea: BLOCK.SUPPORT }), ...(inBlock(user.defaultBlock) && { defaultBlock: BLOCK.SUPPORT }) }
-        : user))
+      blockTeams: state.blockTeams.filter(item => item.id !== teamId),
+      staff: state.staff.map(user => {
+        const area = inBlock(areaOf(user, kind));
+        const fixed = inBlock(defaultOf(user, kind));
+        if (!area && !fixed) return user;
+        return fixed ? withDefault(area ? withArea(user, kind, BLOCK.SUPPORT) : user, kind, BLOCK.SUPPORT) : withArea(user, kind, BLOCK.SUPPORT);
+      })
     }
   };
 };
 
-// - repõe as pessoas nos blocos por defeito de partida (a configuração base, não a distribuição do dia)
-export const restoreDailyToDefaultBaseline: Command = state => ({
-  state: {
-    ...state,
-    staff: state.staff.map(user =>
-      user.defaultBlock && user.assignedArea !== user.defaultBlock ? { ...user, assignedArea: user.defaultBlock } : user
-    )
-  },
-  toast: { key: 'toasts.baselineApplied' }
-});
+// - repõe as pessoas nos blocos por defeito de partida (a configuração base, não a distribuição do dia) do serviço indicado
+export const restoreDailyToDefaultBaseline: Command<{ kind?: PlanKind | undefined } | undefined> = (state, args) => {
+  const kind = args?.kind ?? PlanKind.DAY;
+  return {
+    state: {
+      ...state,
+      staff: state.staff.map(user => {
+        const fixed = defaultOf(user, kind);
+        return fixed && areaOf(user, kind) !== fixed ? withArea(user, kind, fixed) : user;
+      })
+    },
+    toast: { key: 'toasts.baselineApplied' }
+  };
+};
 
 export const addStaff: Command<{ user: Omit<User, 'id'> }> = (state, { user }, ctx) => ({
   state: { ...state, staff: [...state.staff, { ...user, id: ctx.newId('user') }] }

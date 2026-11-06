@@ -54,8 +54,6 @@ export const SummaryStrip = ({ columns, onReset }: SummaryStripProps) => {
           <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
           {stat(t('report.pending'), report.pending)}
           {stat(t('report.inProgress'), report.inProgress, 'text-blue-600 dark:text-blue-400')}
-          {stat(t('report.dnd'), report.dnd, 'text-purple-600 dark:text-purple-400')}
-          {stat(t('report.nq'), report.nq, 'text-stone-600 dark:text-stone-300')}
           {stat(t('report.priority'), report.priority, 'text-rose-600 dark:text-rose-400')}
           {stat(t('report.avgTime'), report.avgMinutes === undefined ? '—' : t('report.minutes', { count: report.avgMinutes }))}
           {stat(t('report.people'), report.people)}

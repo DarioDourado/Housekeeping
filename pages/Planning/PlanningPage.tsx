@@ -66,10 +66,10 @@ export const PlanningPage = () => {
     .filter(({ cards }) => !filtering || cards.length > 0);
 
   return (
-    <SheetRemoveZone className={BOARD_PAGE}>
+    <SheetRemoveZone kind={PlanKind.DAY} className={BOARD_PAGE}>
       <div className="space-y-4 shrink-0">
         <SummaryStrip columns={board.columns} onReset={canDistribute ? handleReset : undefined} />
-        {canDistribute && <BlockTeamRosterBar />}
+        {canDistribute && <BlockTeamRosterBar kind={PlanKind.DAY} />}
         <PlanningToolbar
           trailing={canDistribute ? <NewSheet planId={board.plan.id} /> : undefined}
           blockFilter={blockFilter}

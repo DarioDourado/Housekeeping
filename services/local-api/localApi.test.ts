@@ -715,3 +715,51 @@ describe('responsáveis de sheet e de bloco', () => {
     expect(run(before, 'updateBlockTeam', { team: { ...team, color: 'rose' } }).state.events).toHaveLength(before.events.length);
   });
 });
+
+describe('blocos separados: manhã e turndown', () => {
+  const area = (state: HousekeepingState, id: string, kind: PlanKind) => {
+    const user = state.staff.find(u => u.id === id)!;
+    return kind === PlanKind.NIGHT ? user.nightArea : user.assignedArea;
+  };
+
+  it('cada serviço tem as suas equipas de bloco', () => {
+    const state = seedState();
+    const day = state.blockTeams.filter(t => t.kind === PlanKind.DAY);
+    const night = state.blockTeams.filter(t => t.kind === PlanKind.NIGHT);
+    expect(day.length).toBeGreaterThan(0);
+    expect(night.map(t => t.block)).toEqual(day.map(t => t.block));
+    expect(new Set(state.blockTeams.map(t => t.id)).size).toBe(day.length + night.length);
+  });
+
+  it('mover alguém de bloco no turndown não mexe na manhã (e vice-versa)', () => {
+    const before = deepFreeze(seedState());
+    const night = run(before, 'moveStaffToBlock', { staffId: 'user-maria', targetBlock: 'Bloco B', kind: PlanKind.NIGHT }).state;
+    expect(area(night, 'user-maria', PlanKind.NIGHT)).toBe('Bloco B');
+    expect(area(night, 'user-maria', PlanKind.DAY)).toBe(area(before, 'user-maria', PlanKind.DAY));
+    expect(night.events[0]).toMatchObject({ type: 'STAFF_MOVED', metadata: { kind: 'NIGHT', to: 'Bloco B' } });
+
+    const day = run(before, 'moveStaffToBlock', { staffId: 'user-maria', targetBlock: 'Bloco B' }).state;
+    expect(area(day, 'user-maria', PlanKind.DAY)).toBe('Bloco B');
+    expect(area(day, 'user-maria', PlanKind.NIGHT)).toBe(area(before, 'user-maria', PlanKind.NIGHT));
+  });
+
+  it('tirar do bloco e apagar a equipa só valem para o serviço indicado', () => {
+    const before = deepFreeze(seedState());
+    const out = run(before, 'removeStaffFromBlock', { staffId: 'user-maria', kind: PlanKind.NIGHT }).state;
+    expect(area(out, 'user-maria', PlanKind.NIGHT)).toBe('Apoio & Rotativas');
+    expect(area(out, 'user-maria', PlanKind.DAY)).toBe(area(before, 'user-maria', PlanKind.DAY));
+
+    const nightTeam = before.blockTeams.find(t => t.block === 'Bloco C' && t.kind === PlanKind.NIGHT)!;
+    const deleted = run(before, 'deleteBlockTeam', { teamId: nightTeam.id }).state;
+    expect(deleted.blockTeams.some(t => t.block === 'Bloco C' && t.kind === PlanKind.DAY)).toBe(true);
+    expect(area(deleted, 'user-maria', PlanKind.NIGHT)).toBe('Apoio & Rotativas');
+    expect(area(deleted, 'user-maria', PlanKind.DAY)).toBe(area(before, 'user-maria', PlanKind.DAY));
+  });
+
+  it('apagar uma pessoa de uma sheet da noite manda-a para o Apoio do turndown, não da manhã', () => {
+    const before = deepFreeze(seedState());
+    const out = run(before, 'removeStaffFromSheet', { staffId: 'user-celia', sheetId: 'td-1' }).state;
+    expect(area(out, 'user-celia', PlanKind.NIGHT)).toBe('Apoio & Rotativas');
+    expect(area(out, 'user-celia', PlanKind.DAY)).toBe(area(before, 'user-celia', PlanKind.DAY));
+  });
+});

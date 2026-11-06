@@ -30,17 +30,17 @@ import type { HousekeepingState } from './types';
 // - "Base de dados" de demonstração em localStorage; desaparece quando o BE existir.
 //   v3: modelo do contrato (quartos/estadias/planos/tarefas); dados de versões anteriores são ignorados.
 const KEYS: Record<keyof HousekeepingState, string> = {
-  rooms: 'vvp_hk_rooms_v6',
-  stays: 'vvp_hk_stays_v6',
-  sections: 'vvp_hk_sections_v6',
-  plans: 'vvp_hk_plans_v6',
-  sheets: 'vvp_hk_sheets_v6',
-  tasks: 'vvp_hk_tasks_v6',
-  events: 'vvp_hk_events_v6',
-  alerts: 'vvp_hk_alerts_v6',
-  syncJobs: 'vvp_hk_sync_jobs_v6',
-  blockTeams: 'vvp_hk_teams_v6',
-  staff: 'vvp_hk_staff_v6'
+  rooms: 'vvp_hk_rooms_v7',
+  stays: 'vvp_hk_stays_v7',
+  sections: 'vvp_hk_sections_v7',
+  plans: 'vvp_hk_plans_v7',
+  sheets: 'vvp_hk_sheets_v7',
+  tasks: 'vvp_hk_tasks_v7',
+  events: 'vvp_hk_events_v7',
+  alerts: 'vvp_hk_alerts_v7',
+  syncJobs: 'vvp_hk_sync_jobs_v7',
+  blockTeams: 'vvp_hk_teams_v7',
+  staff: 'vvp_hk_staff_v7'
 };
 
 const SCHEMAS = {

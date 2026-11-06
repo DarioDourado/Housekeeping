@@ -55,7 +55,7 @@ export const TurndownPage = () => {
     .filter(({ cards }) => !filtering || cards.length > 0);
 
   return (
-    <SheetRemoveZone className={BOARD_PAGE}>
+    <SheetRemoveZone kind={PlanKind.NIGHT} className={BOARD_PAGE}>
       <div className="space-y-4 shrink-0">
         <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white border border-indigo-800/40 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -88,7 +88,7 @@ export const TurndownPage = () => {
           </div>
         </div>
 
-        {canDistribute && <BlockTeamRosterBar />}
+        {canDistribute && <BlockTeamRosterBar kind={PlanKind.NIGHT} />}
         <PlanningToolbar
           trailing={canDistribute ? <NewSheet planId={board.plan.id} /> : undefined}
           blockFilter={blockFilter}

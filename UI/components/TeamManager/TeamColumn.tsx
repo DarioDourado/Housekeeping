@@ -29,7 +29,7 @@ const OVERLOAD_THRESHOLD = 14;
 export const TeamColumn = ({ team, members, load, blockTeams, sheetNumberOf, onAdd, onSwitchUser }: TeamColumnProps) => {
   const { t } = useTranslation();
   const palette = getTeamColorPalette(team.color || team.block);
-  const moveStaffToBlock = useMoveStaffToBlock();
+  const moveStaffToBlock = useMoveStaffToBlock(team.kind);
   const updateBlockTeam = useUpdateBlockTeam();
   const { data: staff = [] } = useStaff();
   const draggingStaffId = useUiStore(state => state.draggingStaffId);

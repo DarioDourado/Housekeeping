@@ -9,9 +9,9 @@ export interface BlockLoad {
   departureArrivals: number;
 }
 
-// - Carga de trabalho do dia por bloco (tarefas, créditos estimados, saídas com chegada), para equilibrar equipas
-export const useBlockLoad = () => {
-  const { views } = useBoard(PlanKind.DAY);
+// - Carga de trabalho do serviço (manhã por defeito) por bloco (tarefas, créditos estimados, saídas com chegada), para equilibrar equipas
+export const useBlockLoad = (kind: PlanKind = PlanKind.DAY) => {
+  const { views } = useBoard(kind);
 
   return useMemo(() => {
     const blocks = Array.from(new Set(views.map(view => view.room.block)));

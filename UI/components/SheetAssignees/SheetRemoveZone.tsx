@@ -4,15 +4,16 @@ import { Trash2 } from 'lucide-react';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useRemoveStaffFromBlock, useRemoveStaffFromSheet } from '@/hooks/housekeeping';
 import { useUiStore } from '@/store/uiStore';
+import type { PlanKind } from '@/types/housekeeping.types';
 
 // - Envolve a página das sheets: largar o nome de uma pessoa (vinda de uma sheet) na barra de apagar, ou em qualquer sítio
 //   fora das colunas, tira-a dessa sheet e passa-a a Apoio (da barra de equipas: tira-a do bloco). As colunas e a barra de equipas tratam do seu próprio drop e
 //   param a propagação. A barra aparece no topo (zona do cabeçalho), nunca por cima dos cartões.
-export const SheetRemoveZone = ({ className, children }: { className: string; children: ReactNode }) => {
+export const SheetRemoveZone = ({ kind, className, children }: { kind: PlanKind; className: string; children: ReactNode }) => {
   const { t } = useTranslation();
   const canAssign = usePermission('staff.assign');
   const removeFromSheet = useRemoveStaffFromSheet();
-  const removeFromBlock = useRemoveStaffFromBlock();
+  const removeFromBlock = useRemoveStaffFromBlock(kind);
   const draggingStaffId = useUiStore(state => state.draggingStaffId);
   const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
   const [isOver, setIsOver] = useState(false);

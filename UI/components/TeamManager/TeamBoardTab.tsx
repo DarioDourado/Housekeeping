@@ -5,7 +5,7 @@ import { useBlockTeams, useBoard, useRemoveStaffFromBlock } from '@/hooks/housek
 import { useBlockLoad } from '@/hooks/housekeeping/useBlockLoad';
 import { useStaff } from '@/hooks/staff';
 import { isGovernanta } from '@/lib/jobTitles';
-import { teamMembers } from '@/lib/staffBlock';
+import { areaOf, teamMembers } from '@/lib/staffBlock';
 import { useUiStore } from '@/store/uiStore';
 import { UserRole } from '@/types/auth.types';
 import { PlanKind } from '@/types/housekeeping.types';
@@ -13,6 +13,7 @@ import { TeamColumn } from './TeamColumn';
 import { getTeamColorPalette } from './teamColorUtils';
 
 interface TeamBoardTabProps {
+  kind: PlanKind;
   onAdd: (block: string) => void;
   onSwitchUser: (userId: string) => void;
 }
@@ -22,13 +23,13 @@ const FILTER_KEY: Record<(typeof FILTERS)[number], string> = {
   ALL: 'all', HOUSEKEEPER: 'housekeepers', EXTRA: 'extras', SUPERVISOR: 'supervisors', ADMIN: 'management'
 };
 
-export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
+export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) => {
   const { t } = useTranslation();
   const { data: users = [] } = useStaff();
-  const { data: blockTeams = [] } = useBlockTeams();
-  const { columns } = useBoard(PlanKind.DAY);
-  const { byBlock, totalCredits } = useBlockLoad();
-  const removeFromBlock = useRemoveStaffFromBlock();
+  const { data: blockTeams = [] } = useBlockTeams(kind);
+  const { columns } = useBoard(kind);
+  const { byBlock, totalCredits } = useBlockLoad(kind);
+  const removeFromBlock = useRemoveStaffFromBlock(kind);
   const draggingStaffId = useUiStore(state => state.draggingStaffId);
   const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
   const [overRemove, setOverRemove] = useState(false);
@@ -40,7 +41,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
     return users.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(query)
         || (user.phoneDeviceId ?? '').toLowerCase().includes(query)
-        || (user.assignedArea ?? '').toLowerCase().includes(query);
+        || (areaOf(user, kind) ?? '').toLowerCase().includes(query);
       const matchesRole = roleFilter === 'ALL'
         || (roleFilter === 'EXTRA' && user.isExtra)
         || (roleFilter === 'SUPERVISOR' && isGovernanta(user))
@@ -48,7 +49,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
         || (roleFilter === 'ADMIN' && user.role === UserRole.ADMIN);
       return matchesSearch && matchesRole;
     });
-  }, [users, search, roleFilter]);
+  }, [users, search, roleFilter, kind]);
 
   const activeStaff = users.filter(user => user.role === UserRole.HOUSEKEEPER || user.isExtra).length;
   const supervisors = users.filter(isGovernanta).length;
@@ -112,7 +113,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
         <div className="flex flex-wrap items-center gap-1.5">
           {blockTeams.map(team => {
             const palette = getTeamColorPalette(team.color || team.block);
-            const count = teamMembers(users, team.block).length;
+            const count = teamMembers(users, team.block, kind).length;
             return (
               <div
                 key={team.id}
@@ -151,7 +152,7 @@ export const TeamBoardTab = ({ onAdd, onSwitchUser }: TeamBoardTabProps) => {
             <TeamColumn
               key={team.id}
               team={team}
-              members={teamMembers(filtered, team.block)}
+              members={teamMembers(filtered, team.block, kind)}
               load={byBlock.get(team.block) ?? { tasks: 0, credits: 0, departureArrivals: 0 }}
               blockTeams={blockTeams}
               sheetNumberOf={sheetNumberOf}

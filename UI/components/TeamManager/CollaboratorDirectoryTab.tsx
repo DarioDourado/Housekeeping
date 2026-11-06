@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { useConfirm } from '@/hooks/common/useConfirm';
 import { useAssignStaffToSheet, useBlockTeams, useBoard, useMoveStaffToBlock } from '@/hooks/housekeeping';
 import { useAddStaff, useDeleteStaff, useEnsureOnDuty, useStaff, useUpdateStaff } from '@/hooks/staff';
-import { getDefaultBlock } from '@/lib/staffBlock';
+import { areaOf, defaultOf, getDefaultBlock, withArea, withDefault } from '@/lib/staffBlock';
 import type { User } from '@/types/auth.types';
 import { PlanKind, SheetRole } from '@/types/housekeeping.types';
 import { DirectoryFilters, type DirectoryFilterState } from './DirectoryFilters';
@@ -19,18 +19,18 @@ import { StaffFormModal } from './StaffFormModal';
 const NO_FILTERS: DirectoryFilterState = { search: '', block: 'ALL', duty: 'ALL', role: 'ALL' };
 
 // - Pessoal e escalas: quem está de serviço, bloco por defeito vs. bloco de hoje, dispositivo e task sheet do dia
-export const CollaboratorDirectoryTab = () => {
+export const CollaboratorDirectoryTab = ({ kind }: { kind: PlanKind }) => {
   const { t } = useTranslation();
   const confirm = useConfirm();
   const { switchUser } = useAuth();
   const { data: users = [] } = useStaff();
-  const { data: blockTeams = [] } = useBlockTeams();
-  const { columns } = useBoard(PlanKind.DAY);
+  const { data: blockTeams = [] } = useBlockTeams(kind);
+  const { columns } = useBoard(kind);
   const addUser = useAddStaff();
   const updateUser = useUpdateStaff();
   const deleteUser = useDeleteStaff();
   const ensureOnDuty = useEnsureOnDuty();
-  const moveStaffToBlock = useMoveStaffToBlock();
+  const moveStaffToBlock = useMoveStaffToBlock(kind);
   const assignStaff = useAssignStaffToSheet();
   const canManage = usePermission('staff.assign');
   const [filters, setFilters] = useState(NO_FILTERS);
@@ -40,14 +40,14 @@ export const CollaboratorDirectoryTab = () => {
     const query = filters.search.trim().toLowerCase();
     return users.filter(user => {
       if (query && ![user.name, user.email, user.phoneDeviceId ?? '', user.notes ?? ''].some(text => text.toLowerCase().includes(query))) return false;
-      if (filters.block !== 'ALL' && getDefaultBlock(user) !== filters.block) return false;
+      if (filters.block !== 'ALL' && getDefaultBlock(user, kind) !== filters.block) return false;
       if (filters.duty === 'ON_DUTY' && !isOnDuty(user)) return false;
       if (filters.duty === 'OFF_DUTY' && isOnDuty(user)) return false;
       if (filters.role === 'EXTRA') return !!user.isExtra;
       if (filters.role === 'GOVERNANTA') return isGovernanta(user);
       return filters.role === 'ALL' || user.role === filters.role;
     });
-  }, [users, filters]);
+  }, [users, filters, kind]);
 
   const sheetIdOf = (userId: string) => columns.find(column => column.assignees.some(a => a.user.id === userId))?.sheet.id;
   const sheets = columns.map(({ sheet }) => ({ id: sheet.id, number: sheet.number }));
@@ -119,6 +119,7 @@ export const CollaboratorDirectoryTab = () => {
                   <DirectoryRow
                     key={user.id}
                     user={user}
+                    kind={kind}
                     blockTeams={blockTeams}
                     sheetId={sheetIdOf(user.id)}
                     sheets={sheets}
@@ -126,13 +127,13 @@ export const CollaboratorDirectoryTab = () => {
                     canManage={canManage}
                     onToggleDuty={target => updateUser({ ...target, isOnDuty: !isOnDuty(target) })}
                     onChangeDefaultBlock={(target, block) =>
-                      updateUser({ ...target, defaultBlock: block, assignedArea: target.assignedArea === target.defaultBlock ? block : target.assignedArea })
+                      updateUser(areaOf(target, kind) === defaultOf(target, kind) ? withArea(withDefault(target, kind, block), kind, block) : withDefault(target, kind, block))
                     }
                     onChangeCurrentBlock={(target, block) => moveStaffToBlock(target.id, block)}
                     onChangeShift={(target, shift) => updateUser({ ...target, shift })}
                     onChangeDevice={changeDevice}
                     onChangeSheet={changeSheet}
-                    onRestoreDefault={target => updateUser({ ...target, assignedArea: getDefaultBlock(target) })}
+                    onRestoreDefault={target => updateUser(withArea(target, kind, getDefaultBlock(target, kind)))}
                     onSwitchUser={switchUser}
                     onEdit={target => setEditor({ user: target })}
                     onDelete={handleDelete}
@@ -144,7 +145,7 @@ export const CollaboratorDirectoryTab = () => {
         </div>
       </div>
 
-      {editor && <StaffFormModal user={editor.user} blockTeams={blockTeams} onSave={save} onClose={() => setEditor(null)} />}
+      {editor && <StaffFormModal kind={kind} user={editor.user} blockTeams={blockTeams} onSave={save} onClose={() => setEditor(null)} />}
     </div>
   );
 };

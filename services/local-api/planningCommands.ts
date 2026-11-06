@@ -2,7 +2,7 @@ import { isOnDuty } from '@/lib/staffDuty';
 import { ALL_ROOMS, BLOCK, DEFAULT_PARKING_SHEET_COUNT } from '@/config/constants';
 import { operationalDate } from '@/lib/operationalDate';
 import { isGovernanta } from '@/lib/jobTitles';
-import { getStaffBlock } from '@/lib/staffBlock';
+import { getStaffBlock, withArea } from '@/lib/staffBlock';
 import {
   InspectionStatus,
   Movement,
@@ -150,13 +150,14 @@ export const removeStaffFromSheet: Command<{ staffId: string; sheetId: string }>
     ...state,
     sheets: state.sheets.map(current => (current.id === sheetId ? { ...current, assignments: withLead(current.assignments.filter(a => a.staffId !== staffId), governantaRule(state)) } : current))
   };
-  const from = getStaffBlock(person);
+  const kind = state.plans.find(plan => plan.id === sheet.planId)?.kind ?? PlanKind.DAY;
+  const from = getStaffBlock(person, kind);
   const parked = from === BLOCK.SUPPORT
     ? without
-    : withEvent({ ...without, staff: without.staff.map(user => (user.id === staffId ? { ...user, assignedArea: BLOCK.SUPPORT } : user)) }, ctx, {
+    : withEvent({ ...without, staff: without.staff.map(user => (user.id === staffId ? withArea(user, kind, BLOCK.SUPPORT) : user)) }, ctx, {
         type: 'STAFF_MOVED', roomId: 'staff', roomNumber: person.name,
         detail: { key: 'events.staffRemoved', params: { name: person.name, from } },
-        metadata: { staffId, from, to: BLOCK.SUPPORT }
+        metadata: { staffId, kind, from, to: BLOCK.SUPPORT }
       });
   return {
     state: logStaffSheet(parked, ctx, { staffId, action: 'removed', sheet }),

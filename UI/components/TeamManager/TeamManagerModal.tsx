@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutGrid, Scale, UserPlus, Users } from 'lucide-react';
-import { BLOCK } from '@/config/constants';
+import { BLOCK, ROUTES } from '@/config/constants';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useAutoBalance } from '@/hooks/housekeeping/useAutoBalance';
 import { useStaff } from '@/hooks/staff';
+import { PlanKind } from '@/types/housekeeping.types';
 import { Modal } from '@/UI/components/Modal';
 import { AddMemberModal } from './AddMemberModal';
 import { CollaboratorDirectoryTab } from './CollaboratorDirectoryTab';
@@ -17,7 +19,10 @@ export const TeamManagerModal = ({ onClose, initialTab = 'BOARD' }: { onClose: (
   const { t } = useTranslation();
   const { switchUser } = useAuth();
   const { data: users = [] } = useStaff();
-  const autoBalance = useAutoBalance();
+  // - manhã e turndown têm blocos e equipas separados: abre no serviço da página onde se está
+  const { pathname } = useLocation();
+  const [kind, setKind] = useState<PlanKind>(pathname === ROUTES.TURNDOWN ? PlanKind.NIGHT : PlanKind.DAY);
+  const autoBalance = useAutoBalance(kind);
   const canManage = usePermission('staff.assign');
   const [tab, setTab] = useState<Tab>(initialTab);
   const [addBlock, setAddBlock] = useState<string | null>(null);
@@ -27,6 +32,13 @@ export const TeamManagerModal = ({ onClose, initialTab = 'BOARD' }: { onClose: (
 
   const header = (
     <div className="flex items-center gap-3">
+      <div role="group" aria-label={t('team.serviceLabel')} className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl">
+        {([PlanKind.DAY, PlanKind.NIGHT] as const).map(service => (
+          <button key={service} aria-pressed={kind === service} onClick={() => setKind(service)} className={tabClass(kind === service)}>
+            {t(service === PlanKind.DAY ? 'team.serviceMorning' : 'team.serviceTurndown')}
+          </button>
+        ))}
+      </div>
       <div role="tablist" className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl">
         <button role="tab" aria-selected={tab === 'BOARD'} onClick={() => setTab('BOARD')} className={tabClass(tab === 'BOARD')}>
           <LayoutGrid className="w-3.5 h-3.5" />
@@ -71,8 +83,8 @@ export const TeamManagerModal = ({ onClose, initialTab = 'BOARD' }: { onClose: (
         </div>
       }
     >
-      {tab === 'BOARD' ? <TeamBoardTab onAdd={setAddBlock} onSwitchUser={switchUser} /> : <CollaboratorDirectoryTab />}
-      {addBlock && <AddMemberModal defaultBlock={addBlock} onClose={() => setAddBlock(null)} />}
+      {tab === 'BOARD' ? <TeamBoardTab kind={kind} onAdd={setAddBlock} onSwitchUser={switchUser} /> : <CollaboratorDirectoryTab kind={kind} />}
+      {addBlock && <AddMemberModal kind={kind} defaultBlock={addBlock} onClose={() => setAddBlock(null)} />}
     </Modal>
   );
 };

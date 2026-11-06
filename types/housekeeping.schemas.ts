@@ -195,6 +195,8 @@ export const roomAlertSchema = z.object({
 
 export const blockTeamSchema = z.object({
   id: z.string(),
+  // - manhã e turndown têm equipas de bloco separadas (nome, cor, responsável e pessoas)
+  kind: z.enum(PlanKind).default(PlanKind.DAY),
   block: z.string(),
   name: z.string(),
   description: z.string(),

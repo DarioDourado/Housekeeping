@@ -30,6 +30,9 @@ export const userSchema = z.object({
   jobTitles: z.array(z.enum(JobTitle)).optional(),   // funções: governanta (sheets) e/ou responsável de andares (blocos)
   assignedArea: z.string().optional(),   // bloco atualmente atribuído: "Bloco A", "Bloco B", etc.
   defaultBlock: z.string().optional(),   // bloco fixo por defeito (ver BLOCK em config/constants)
+  // - O turndown tem os seus próprios blocos e equipas: a mesma pessoa pode estar num bloco de manhã e noutro à noite
+  nightArea: z.string().optional(),          // bloco atual no turndown
+  nightDefaultBlock: z.string().optional(),  // bloco por defeito no turndown
   isOnDuty: z.boolean().optional(),      // de serviço hoje (true) ou folga/ausente (false)
   shift: z.string().optional(),          // "Manhã" | "Tarde 13h30" | "Turndown" | "Geral"
   notes: z.string().optional(),

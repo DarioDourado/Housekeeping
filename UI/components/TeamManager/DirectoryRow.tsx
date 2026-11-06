@@ -6,7 +6,7 @@ import { ArrowRightLeft, Edit2, LogIn, Trash2 } from 'lucide-react';
 import { SHIFT } from '@/config/constants';
 import { getDefaultBlock, getDisplayBlock } from '@/lib/staffBlock';
 import { UserRole, type User } from '@/types/auth.types';
-import type { BlockTeam } from '@/types/housekeeping.types';
+import type { BlockTeam, PlanKind } from '@/types/housekeeping.types';
 import { getTeamColorPalette } from './teamColorUtils';
 
 const SHIFT_KEYS: Record<string, string> = {
@@ -18,6 +18,7 @@ const SHIFT_KEYS: Record<string, string> = {
 
 interface DirectoryRowProps {
   user: User;
+  kind: PlanKind;
   blockTeams: BlockTeam[];
   sheetId?: string | undefined;
   sheets: { id: string; number: number }[];
@@ -40,10 +41,10 @@ const FAST = 'px-2 py-1 rounded-md text-[11px] font-semibold border border-slate
 const SHIFTS = Object.entries(SHIFT_KEYS);
 const ACTION = 'p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors';
 
-export const DirectoryRow = ({ user, blockTeams, sheetId, sheets, devices, canManage, onToggleDuty, onChangeDefaultBlock, onChangeCurrentBlock, onChangeShift, onChangeDevice, onChangeSheet, onRestoreDefault, onSwitchUser, onEdit, onDelete }: DirectoryRowProps) => {
+export const DirectoryRow = ({ user, kind, blockTeams, sheetId, sheets, devices, canManage, onToggleDuty, onChangeDefaultBlock, onChangeCurrentBlock, onChangeShift, onChangeDevice, onChangeSheet, onRestoreDefault, onSwitchUser, onEdit, onDelete }: DirectoryRowProps) => {
   const { t } = useTranslation();
-  const defaultBlock = getDefaultBlock(user);
-  const currentBlock = getDisplayBlock(user);
+  const defaultBlock = getDefaultBlock(user, kind);
+  const currentBlock = getDisplayBlock(user, kind);
   const defaultPalette = getTeamColorPalette(defaultBlock);
   const currentPalette = getTeamColorPalette(currentBlock);
   const onDuty = isOnDuty(user);

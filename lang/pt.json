@@ -584,7 +584,10 @@
     "register": "Registar na Equipa",
     "blockResponsible": "Resp. do bloco:",
     "blockResponsibleHint": "Responsável por este bloco (distinta da responsável de cada sheet)",
-    "noBlockResponsible": "Sem responsável"
+    "noBlockResponsible": "Sem responsável",
+    "serviceLabel": "Serviço",
+    "serviceMorning": "Morning",
+    "serviceTurndown": "Turndown"
   },
   "directory": {
     "metrics": {

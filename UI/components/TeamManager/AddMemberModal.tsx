@@ -4,19 +4,21 @@ import { UserPlus } from 'lucide-react';
 import { useBlockTeams } from '@/hooks/housekeeping';
 import { useAddStaff } from '@/hooks/staff';
 import { UserRole } from '@/types/auth.types';
+import type { PlanKind } from '@/types/housekeeping.types';
 import { Modal } from '@/UI/components/Modal';
 
 const INPUT = 'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100';
 const LABEL = 'block font-semibold text-slate-700 dark:text-slate-300 mb-1';
 
 interface AddMemberModalProps {
+  kind: PlanKind;
   defaultBlock: string;
   onClose: () => void;
 }
 
-export const AddMemberModal = ({ defaultBlock, onClose }: AddMemberModalProps) => {
+export const AddMemberModal = ({ kind, defaultBlock, onClose }: AddMemberModalProps) => {
   const { t } = useTranslation();
-  const { data: blockTeams = [] } = useBlockTeams();
+  const { data: blockTeams = [] } = useBlockTeams(kind);
   const addUser = useAddStaff();
   const [name, setName] = useState('');
   const [block, setBlock] = useState(defaultBlock);
@@ -32,8 +34,11 @@ export const AddMemberModal = ({ defaultBlock, onClose }: AddMemberModalProps) =
       name: name.trim(),
       email: `${name.toLowerCase().replace(/\s+/g, '.')}@vilavitaparc.com`,
       role,
+      // - a pessoa nova entra no mesmo bloco nos dois serviços (depois editam-se separadamente)
       assignedArea: block,
       defaultBlock: block,
+      nightArea: block,
+      nightDefaultBlock: block,
       isOnDuty,
       isExtra,
       phoneDeviceId: phoneDevice.trim() || undefined

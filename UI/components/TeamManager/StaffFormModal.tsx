@@ -3,7 +3,8 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Edit2, UserPlus } from 'lucide-react';
 import { BLOCK, SHIFT } from '@/config/constants';
-import { getDefaultBlock } from '@/lib/staffBlock';
+import { areaOf, getDefaultBlock } from '@/lib/staffBlock';
+import { PlanKind } from '@/types/housekeeping.types';
 import { JobTitle, UserRole, type User } from '@/types/auth.types';
 import type { BlockTeam } from '@/types/housekeeping.types';
 import { Modal } from '@/UI/components/Modal';
@@ -27,20 +28,27 @@ interface FormState {
 }
 
 interface StaffFormModalProps {
+  kind: PlanKind;
   user?: User | undefined;
   blockTeams: BlockTeam[];
   onSave: (user: Omit<User, 'id'> & { id?: string }) => Promise<void>;
   onClose: () => void;
 }
 
-const initialState = (user?: User): FormState => {
-  const defaultBlock = user ? getDefaultBlock(user) : BLOCK.A;
+// - novas pessoas começam com o mesmo bloco nos dois serviços; quem já existe só muda o do serviço aberto
+const blocksFor = (user: User | undefined, kind: PlanKind, defaultBlock: string, area: string): Pick<User, 'defaultBlock' | 'assignedArea' | 'nightDefaultBlock' | 'nightArea'> => {
+  const base = { defaultBlock: user?.defaultBlock ?? defaultBlock, assignedArea: user?.assignedArea ?? area, nightDefaultBlock: user?.nightDefaultBlock ?? defaultBlock, nightArea: user?.nightArea ?? area };
+  return kind === PlanKind.NIGHT ? { ...base, nightDefaultBlock: defaultBlock, nightArea: area } : { ...base, defaultBlock, assignedArea: area };
+};
+
+const initialState = (user: User | undefined, kind: PlanKind): FormState => {
+  const defaultBlock = user ? getDefaultBlock(user, kind) : BLOCK.A;
   return {
     name: user?.name ?? '',
     email: user?.email ?? '',
     role: user?.role ?? UserRole.HOUSEKEEPER,
     defaultBlock,
-    assignedArea: user?.assignedArea || defaultBlock,
+    assignedArea: (user && areaOf(user, kind)) || defaultBlock,
     isOnDuty: user ? isOnDuty(user) : true,
     shift: user?.shift || SHIFT.MORNING,
     phoneDeviceId: user?.phoneDeviceId ?? '',
@@ -51,9 +59,9 @@ const initialState = (user?: User): FormState => {
 };
 
 // - Criar ou editar um colaborador (a mesma ficha serve para os dois)
-export const StaffFormModal = ({ user, blockTeams, onSave, onClose }: StaffFormModalProps) => {
+export const StaffFormModal = ({ kind, user, blockTeams, onSave, onClose }: StaffFormModalProps) => {
   const { t } = useTranslation();
-  const [form, setForm] = useState<FormState>(() => initialState(user));
+  const [form, setForm] = useState<FormState>(() => initialState(user, kind));
   const set = (patch: Partial<FormState>) => setForm(current => ({ ...current, ...patch }));
 
   const submit = async (event: FormEvent) => {
@@ -64,8 +72,8 @@ export const StaffFormModal = ({ user, blockTeams, onSave, onClose }: StaffFormM
       name: form.name.trim(),
       email: form.email.trim() || user?.email || `${form.name.toLowerCase().replace(/\s+/g, '.')}@vilavitaparc.com`,
       role: form.role,
-      defaultBlock: form.defaultBlock,
-      assignedArea: user ? form.assignedArea || form.defaultBlock : form.defaultBlock,
+      // - o bloco por defeito e o atual guardam-se no serviço escolhido; o outro serviço mantém os seus
+      ...blocksFor(user, kind, form.defaultBlock, user ? form.assignedArea || form.defaultBlock : form.defaultBlock),
       isOnDuty: form.isOnDuty,
       shift: form.shift,
       phoneDeviceId: form.phoneDeviceId.trim(),

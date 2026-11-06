@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, GripVertical, Settings2, Users } from 'lucide-r
 import { useBlockTeams, useMoveStaffToBlock } from '@/hooks/housekeeping';
 import { useStaff } from '@/hooks/staff';
 import { teamMembers } from '@/lib/staffBlock';
+import { PlanKind } from '@/types/housekeeping.types';
 import { useOverlayStore } from '@/store/overlayStore';
 import { useUiStore } from '@/store/uiStore';
 import type { User } from '@/types/auth.types';
@@ -17,11 +18,11 @@ const shortName = (name: string) => {
 };
 
 // - Barra de equipas por bloco no topo do planeamento: arrastar pessoas entre blocos ou para uma task sheet
-export const BlockTeamRosterBar = () => {
+export const BlockTeamRosterBar = ({ kind = PlanKind.DAY }: { kind?: PlanKind }) => {
   const { t } = useTranslation();
   const { data: users = [] } = useStaff();
-  const { data: blockTeams = [] } = useBlockTeams();
-  const moveStaffToBlock = useMoveStaffToBlock();
+  const { data: blockTeams = [] } = useBlockTeams(kind);
+  const moveStaffToBlock = useMoveStaffToBlock(kind);
   const openPanel = useOverlayStore(state => state.openPanel);
   const draggingStaffId = useUiStore(state => state.draggingStaffId);
   const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
@@ -76,7 +77,7 @@ export const BlockTeamRosterBar = () => {
           {blockTeams.map(team => {
             const palette = getTeamColorPalette(team.color || team.block);
             // - só aparecem as pessoas de serviço; quem está fora entra pela lista da sheet (com confirmação)
-            const members = teamMembers(users, team.block).filter(isOnDuty);
+            const members = teamMembers(users, team.block, kind).filter(isOnDuty);
             const isOver = dragOverBlock === team.block;
 
             return (

@@ -4,7 +4,7 @@ import { JobTitleBadges } from './JobTitleBadges';
 import { useTranslation } from 'react-i18next';
 import { GripVertical, Smartphone } from 'lucide-react';
 import { useMoveStaffToBlock } from '@/hooks/housekeeping';
-import { getStaffBlock } from '@/lib/staffBlock';
+import { defaultOf, getStaffBlock } from '@/lib/staffBlock';
 import { useUiStore } from '@/store/uiStore';
 import type { User } from '@/types/auth.types';
 import type { BlockTeam } from '@/types/housekeeping.types';
@@ -24,7 +24,7 @@ const BADGE = 'text-[10px] font-semibold px-1.5 py-0.5 rounded';
 // - Cartão arrastável de uma pessoa dentro da coluna do seu bloco
 export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams, onSwitchUser }: TeamMemberCardProps) => {
   const { t } = useTranslation();
-  const moveStaffToBlock = useMoveStaffToBlock();
+  const moveStaffToBlock = useMoveStaffToBlock(team.kind);
   const draggingStaffId = useUiStore(state => state.draggingStaffId);
   const setDraggingStaffId = useUiStore(state => state.setDraggingStaffId);
   const isBeingDragged = draggingStaffId === member.id;
@@ -61,9 +61,9 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
               {!isOnDuty(member) && <span className={`${BADGE} bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300`}>{t('team.offBadge')}</span>}
               {member.isExtra && <span className={`${BADGE} bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300`}>{t('team.extraBadge')}</span>}
               <JobTitleBadges user={member} className={BADGE} />
-              {member.defaultBlock && member.defaultBlock !== team.block && (
-                <span className="text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: member.defaultBlock })}>
-                  {t('team.defaultBlockShort', { block: member.defaultBlock })}
+              {defaultOf(member, team.kind) && defaultOf(member, team.kind) !== team.block && (
+                <span className="text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: defaultOf(member, team.kind) })}>
+                  {t('team.defaultBlockShort', { block: defaultOf(member, team.kind) })}
                 </span>
               )}
             </div>
@@ -91,7 +91,7 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
         <label htmlFor={`move-${member.id}`} className="text-slate-400">{t('team.moveTo')}</label>
         <select
           id={`move-${member.id}`}
-          value={getStaffBlock(member)}
+          value={getStaffBlock(member, team.kind)}
           onChange={event => moveStaffToBlock(member.id, event.target.value)}
           className="px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 font-medium"
         >

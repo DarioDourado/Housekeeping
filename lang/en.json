@@ -584,7 +584,10 @@
     "register": "Register in Team",
     "blockResponsible": "Block lead:",
     "blockResponsibleHint": "Lead of this block (different from each sheet lead)",
-    "noBlockResponsible": "No lead"
+    "noBlockResponsible": "No lead",
+    "serviceLabel": "Service",
+    "serviceMorning": "Morning",
+    "serviceTurndown": "Turndown"
   },
   "directory": {
     "metrics": {

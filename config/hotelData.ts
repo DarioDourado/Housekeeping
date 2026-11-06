@@ -42,7 +42,7 @@ export const NIGHT_PLAN_ID = 'plan-night';
 // - secções 2, 5 e 10-24 (quartos, estadias, equipa, tarefas) geradas à parte: ver hotelDataVolume.ts
 const VOLUME = buildVolumeData(DAY_PLAN_ID, NIGHT_PLAN_ID);
 
-export const INITIAL_STAFF: User[] = [
+const BASE_STAFF: User[] = [
   {
     id: 'user-dario',
     name: 'Dario Dourado',
@@ -172,7 +172,14 @@ export const INITIAL_STAFF: User[] = [
   ...VOLUME.staff
 ];
 
-export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
+// - o turndown arranca com os mesmos blocos da manhã, mas guardados à parte (editam-se separadamente)
+export const INITIAL_STAFF: User[] = BASE_STAFF.map(user => ({
+  ...user,
+  ...(user.assignedArea && { nightArea: user.assignedArea }),
+  ...(user.defaultBlock && { nightDefaultBlock: user.defaultBlock })
+}));
+
+const BASE_BLOCK_TEAMS: Omit<BlockTeam, 'kind'>[] = [
   {
     id: 'team-bloco-a',
     block: BLOCK.A,
@@ -229,6 +236,12 @@ export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
     color: 'slate',
     supervisorId: 'user-dario', supervisorName: 'Dario Dourado'
   }
+];
+
+// - Equipas de bloco separadas por serviço: as da manhã e as do turndown (mesmo ponto de partida, edição independente)
+export const INITIAL_BLOCK_TEAMS: BlockTeam[] = [
+  ...BASE_BLOCK_TEAMS.map(team => ({ ...team, kind: PlanKind.DAY })),
+  ...BASE_BLOCK_TEAMS.map(team => ({ ...team, id: `${team.id}-noite`, kind: PlanKind.NIGHT }))
 ];
 
 // ---------- Quartos e estadias (Opera) ----------

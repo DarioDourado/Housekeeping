@@ -20,7 +20,7 @@
 ## 2. Autenticação e ator
 
 - Hoje: sessão = `userId` em `localStorage`; qualquer password serve; o **cliente envia o `Actor`** (`id`, `name`, `role`, `deviceId?`).
-- **[proposta]** A API autentica por token (access em memória + refresh em cookie `httpOnly`, `.agents/08-auth`). O ator é sempre o do token; o corpo do pedido nunca o leva. `deviceId` vem de um cabeçalho (`X-Device-Id`), alinhado com `User.phoneDeviceId`. Hoje o cliente nunca preenche `deviceId`, por isso o requisito "quem, quando e em que dispositivo" ainda não está cumprido.
+- **Implementado em `housekeeping-api`** (2026-11-06): `POST /auth/login` (access JWT de 15 min no corpo + refresh em cookie httpOnly `path=/api/v1/auth`, ou no corpo com `X-Refresh-Transport: body`), `POST /auth/refresh` (rotação; reutilizar o refresh antigo fora de 20 s revoga a sessão), `POST /auth/logout` (204; o access deixa de valer já), `GET /auth/me`. Sessões no SQL Server com teto de 30 dias; 5 falhas por (conta, IP) → `429 LOGIN_LOCKED` 15 min. Códigos: `INVALID_CREDENTIALS`, `REFRESH_TOKEN_INVALID`, `REFRESH_TOKEN_MISSING`, `SESSION_INVALID`, `NOT_AUTHENTICATED`, `PERMISSION_DENIED`, `ORIGIN_NOT_ALLOWED`, `LOGIN_LOCKED`, `RATE_LIMITED`. O ator é sempre o do token; o corpo nunca o leva. `deviceId` vem do cabeçalho `X-Device-Id`.
 - Perfis (`UserRole`): `superadmin` (programador), `admin` (governanta geral), `sub_admin` (chefe de andares), `user` (colaboradora), `reception`. Substituem o `JobTitle` do FE; detalhe na secção 8.
 
 ## 3. Leituras
@@ -227,7 +227,7 @@ Fechadas com o utilizador em 2026-11-06:
 
 | # | Decisão |
 |---|---|
-| 1 | **Tempo real: polling, 30 s por omissão** (D5). Os dados têm de chegar a todos os dispositivos; aceita-se até 30 s de atraso. O intervalo ajusta-se sem mexer no código: `POLL_INTERVAL_SECONDS` na API (5–300), devolvido em cada `GET /boards/{kind}` como `pollIntervalSeconds`, e `VITE_POLL_INTERVAL_SECONDS` no FE como valor até a primeira resposta chegar. SSE só se 30 s não chegar. |
+| 1 | **Tempo real por WebSocket** (decidido 2026-11-06, substitui o polling do D5). Ao gravar uma alteração, a API avisa todos os dispositivos ligados em `GET /api/v1/ws` (WebSocket) com `{ "type": "changed", "collections": ["tasks", ...], "planId"? }`; o cliente volta a pedir só o que mudou. Autenticação no WebSocket com o access token (primeira mensagem, nunca na URL) e verificação da sessão como no HTTP. **Rede de segurança:** o polling continua, com `POLL_INTERVAL_SECONDS`/`VITE_POLL_INTERVAL_SECONDS` (30 s, ajustável), para o caso de a ligação cair; aceita-se até 30 s de atraso nesse caso. shortcut: 1 processo, ligações em memória; com vários workers o aviso passa por Redis pub/sub (15-websockets). |
 | 2 | **Leitura agregada:** `GET /boards/{kind}` (secção 3). Com polling, 1 pedido por ciclo em vez de 7. |
 | 3 | **Resposta dos comandos:** `CommandResult` (secção 3.1). |
 | 4 | **Créditos em standby.** A API não calcula nem guarda créditos na Fase 1; o FE mantém a tabela ilustrativa só para visualização. Sem `estimatedCredits` no contrato. |

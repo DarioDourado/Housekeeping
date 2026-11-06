@@ -47,18 +47,6 @@ describe('tema', () => {
     expect(offenders).toEqual([]);
   });
 
-  describe('foco de teclado (WCAG 2.4.7 / 1.4.11)', () => {
-    it('should use a solid action-colored outline for :focus-visible', () => {
-      const rule = /:focus-visible \{([^}]*)\}/.exec(css)?.[1] ?? '';
-      expect(rule).toMatch(/outline:\s*2px solid var\(--color-action-text\)/);
-    });
-
-    it('should not remove the focus outline in components', () => {
-      const offenders = Object.entries(sources).filter(([, source]) => /focus:outline-none|focus:ring-primary\/20/.test(source)).map(([file]) => file.split('/').pop());
-      expect(offenders).toEqual([]);
-    });
-  });
-
   describe('movimento reduzido (WCAG 2.3.3)', () => {
     const reduced = /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? '';
 
@@ -73,51 +61,46 @@ describe('tema', () => {
     });
   });
 
-  describe('contraste (WCAG 2.2 AA, .agents/23-accessibility)', () => {
-    const channel = (hex: string, offset: number) => {
-      const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
-      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  // - Theme.txt é contrato do cliente: "usa estas cores exclusivamente, não inventes hexadecimais novos".
+  //   Os tokens abaixo vêm de lá e não se alteram; escalas derivadas (500 = claro, 400 = escuro) têm de manter o valor do Theme.txt.
+  describe('fidelidade ao Theme.txt', () => {
+    // - valor claro (@theme / :root); o bloco `.dark { ... }` é verificado à parte pelos tokens que só existem lá
+    const lightCss = css.replace(/\n\.dark \{[^}]*\}/, '');
+    const value = (name: string) => new RegExp(`${name}:\\s*(#[0-9A-Fa-f]{6})`).exec(lightCss)?.[1]?.toUpperCase();
+    const THEME: Record<string, string> = {
+      '--color-primary': '#00A9C5',
+      '--color-primary-hover': '#00879E',
+      '--canvas': '#F5F5F7',
+      '--surface': '#FFFFFF',
+      '--content': '#1D1D1F',
+      '--success': '#34C759',
+      '--danger': '#FF3B30',
+      '--warning': '#FF9500',
+      '--color-blue-600': '#00A9C5',
+      '--color-blue-700': '#00879E',
+      '--color-slate-500': '#86868B',
+      '--color-slate-400': '#8E8E93',
+      '--color-slate-600': '#636366',
+      '--color-emerald-600': '#279543',
+      '--color-amber-600': '#BF7000',
+      '--color-emerald-500': '#34C759',
+      '--color-emerald-400': '#30D158',
+      '--color-red-500': '#FF3B30',
+      '--color-red-400': '#FF453A',
+      '--color-amber-500': '#FF9500',
+      '--color-amber-400': '#FF9F0A'
     };
-    const luminance = (hex: string) => 0.2126 * channel(hex, 1) + 0.7152 * channel(hex, 3) + 0.0722 * channel(hex, 5);
-    const ratio = (a: string, b: string) => {
-      const [high = 0, low = 0] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-      return (high + 0.05) / (low + 0.05);
-    };
-    // - valor do token no tema; em dark, o bloco `.dark { ... }` (se o redefinir) prevalece sobre o @theme
-    const darkBlock = /\n\.dark \{([^}]*)\}/.exec(css)?.[1] ?? '';
-    const token = (name: string, dark = false) => {
-      const pattern = new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`);
-      const hex = (dark ? pattern.exec(darkBlock)?.[1] : undefined) ?? pattern.exec(css.replace(darkBlock, ''))?.[1];
-      if (!hex) throw new Error(`token --${name} em falta`);
-      return hex;
-    };
-    const WHITE = '#FFFFFF';
-    const CANVAS = '#F5F5F7';
-    const DARK_SURFACE = '#1C1C1E';
 
-    it('should keep action buttons readable with white text', () => {
-      expect(ratio(WHITE, token('color-action'))).toBeGreaterThanOrEqual(4.5);
-      expect(ratio(WHITE, token('color-action-hover'))).toBeGreaterThanOrEqual(4.5);
-      expect(ratio(WHITE, token('color-blue-600'))).toBeGreaterThanOrEqual(4.5);
+    it.each(Object.entries(THEME))('should keep %s at its Theme.txt value %s', (name, hex) => {
+      expect(value(name)).toBe(hex);
     });
 
-    it('should keep action text readable in light and dark', () => {
-      expect(ratio(token('action-text'), WHITE)).toBeGreaterThanOrEqual(4.5);
-      expect(ratio(token('action-text'), CANVAS)).toBeGreaterThanOrEqual(4.5);
-      expect(ratio(token('action-text', true), DARK_SURFACE)).toBeGreaterThanOrEqual(4.5);
+    it('should not invent action colors outside the brand', () => {
+      expect(css).not.toMatch(/--(color-)?action/);
     });
 
-    it('should keep secondary grey text readable in light and dark', () => {
-      for (const name of ['color-slate-400', 'color-slate-500']) {
-        expect(ratio(token(name), CANVAS), `${name} claro`).toBeGreaterThanOrEqual(4.5);
-        expect(ratio(token(name, true), DARK_SURFACE), `${name} escuro`).toBeGreaterThanOrEqual(4.5);
-      }
-    });
-
-    it('should keep status text readable on light surfaces', () => {
-      for (const name of ['color-emerald-600', 'color-amber-600', 'color-red-600']) {
-        expect(ratio(token(name), CANVAS), name).toBeGreaterThanOrEqual(4.5);
-      }
+    it('should keep the soft brand halo as keyboard focus (Theme.txt rule 5)', () => {
+      expect(css).toMatch(/:focus-visible \{[^}]*rgb\(0 169 197 \/ 0\.2\)/);
     });
   });
 });

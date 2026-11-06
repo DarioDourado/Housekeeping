@@ -60,7 +60,7 @@ export const ConfirmDialog = ({
             onClick={onConfirm}
             className={isDangerous
               ? 'rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 px-6 py-3 text-sm font-medium'
-              : 'rounded-lg bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium'}
+              : 'rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-medium'}
           >
             {confirmLabel}
           </button>

@@ -34,7 +34,7 @@ export const SettingsPage = () => {
             aria-selected={tab === id}
             aria-controls={`settings-panel-${id}`}
             onClick={() => setTab(id)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${tab === id ? 'border-action-text text-action-text' : 'border-transparent text-muted hover:text-content'}`}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${tab === id ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-content'}`}
           >
             {t(`settings.tabs.${id}`)}
           </button>

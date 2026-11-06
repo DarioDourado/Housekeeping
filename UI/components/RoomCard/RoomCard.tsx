@@ -57,7 +57,6 @@ export const RoomCard = ({ view, index, compact = false }: RoomCardProps) => {
       {...draggableProps}
       // - clicar em qualquer ponto do cartão abre a ficha completa; os botões (ações, nº do quarto) mantêm o seu comportamento
       onClick={event => { if (!(event.target as HTMLElement).closest('button, a, input, select, textarea')) openDetail(task.id); }}
-      title={t('room.openTitle')}
       className={`relative group bg-surface border rounded-xl transition-all duration-150 select-none ${canDistribute ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${
         isDragging
           ? 'opacity-35 scale-[0.98] ring-2 ring-blue-500 shadow-xl'

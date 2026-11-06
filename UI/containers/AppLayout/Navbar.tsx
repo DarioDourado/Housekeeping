@@ -11,8 +11,8 @@ import { NAV_LINKS, NavMenu } from './NavMenu';
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `whitespace-nowrap shrink-0 py-1 transition-colors hover:text-slate-900 dark:hover:text-white ${isActive ? 'text-blue-600 dark:text-blue-400 font-bold border-b-2 border-blue-600' : ''}`;
 
-const ghostButton = 'px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap';
-const iconButton = 'p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors';
+const ghostButton = 'min-h-9 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap';
+const iconButton = 'min-h-9 min-w-9 inline-flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors';
 
 export const Navbar = () => {
   const { t } = useTranslation();

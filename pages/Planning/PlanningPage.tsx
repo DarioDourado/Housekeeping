@@ -35,7 +35,7 @@ export const PlanningPage = () => {
         title={t('planning.noPlanTitle')}
         description={t('planning.noPlanHint')}
         action={canDistribute ? (
-          <button onClick={() => openPlan(PlanKind.DAY)} className="rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-medium">
+          <button onClick={() => openPlan(PlanKind.DAY)} className="rounded-lg bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium">
             {t('planning.openPlan')}
           </button>
         ) : undefined}

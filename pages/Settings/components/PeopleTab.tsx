@@ -19,7 +19,7 @@ export const PeopleTab = () => {
           onClick={() => openPanel(panel)}
           className="text-left rounded-[16px] border border-line bg-surface p-6 space-y-2 transition-all duration-300 hover:border-primary active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-primary/20"
         >
-          <Icon className="w-5 h-5 text-primary" />
+          <Icon className="w-5 h-5 text-action-text" />
           <span className="block text-base font-semibold text-content">{t(title)}</span>
           <span className="block text-sm text-muted">{t(hint)}</span>
         </button>

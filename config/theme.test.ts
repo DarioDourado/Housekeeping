@@ -41,4 +41,52 @@ describe('tema', () => {
       }
     }
   });
+
+  describe('contraste (WCAG 2.2 AA, .agents/23-accessibility)', () => {
+    const channel = (hex: string, offset: number) => {
+      const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (hex: string) => 0.2126 * channel(hex, 1) + 0.7152 * channel(hex, 3) + 0.0722 * channel(hex, 5);
+    const ratio = (a: string, b: string) => {
+      const [high = 0, low = 0] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (high + 0.05) / (low + 0.05);
+    };
+    // - valor do token no tema; em dark, o bloco `.dark { ... }` (se o redefinir) prevalece sobre o @theme
+    const darkBlock = /\n\.dark \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    const token = (name: string, dark = false) => {
+      const pattern = new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`);
+      const hex = (dark ? pattern.exec(darkBlock)?.[1] : undefined) ?? pattern.exec(css.replace(darkBlock, ''))?.[1];
+      if (!hex) throw new Error(`token --${name} em falta`);
+      return hex;
+    };
+    const WHITE = '#FFFFFF';
+    const CANVAS = '#F5F5F7';
+    const DARK_SURFACE = '#1C1C1E';
+
+    it('should keep action buttons readable with white text', () => {
+      expect(ratio(WHITE, token('color-action'))).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(WHITE, token('color-action-hover'))).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(WHITE, token('color-blue-600'))).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('should keep action text readable in light and dark', () => {
+      expect(ratio(token('action-text'), WHITE)).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(token('action-text'), CANVAS)).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(token('action-text', true), DARK_SURFACE)).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('should keep secondary grey text readable in light and dark', () => {
+      for (const name of ['color-slate-400', 'color-slate-500']) {
+        expect(ratio(token(name), CANVAS), `${name} claro`).toBeGreaterThanOrEqual(4.5);
+        expect(ratio(token(name, true), DARK_SURFACE), `${name} escuro`).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
+    it('should keep status text readable on light surfaces', () => {
+      for (const name of ['color-emerald-600', 'color-amber-600', 'color-red-600']) {
+        expect(ratio(token(name), CANVAS), name).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+  });
 });

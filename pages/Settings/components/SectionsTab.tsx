@@ -61,7 +61,7 @@ export const SectionsTab = ({ kind }: { kind: PlanKind }) => {
             {OPERATIONAL_BLOCKS.map(item => <option key={item} value={item}>{item}</option>)}
           </select>
         </label>
-        <button type="submit" disabled={!name.trim()} className="rounded-[12px] bg-primary hover:bg-primary-hover text-primary-foreground px-5 py-2.5 text-sm font-medium flex items-center gap-1.5 transition-all duration-300 active:scale-[0.98] disabled:opacity-50">
+        <button type="submit" disabled={!name.trim()} className="rounded-[12px] bg-action hover:bg-action-hover text-primary-foreground px-5 py-2.5 text-sm font-medium flex items-center gap-1.5 transition-all duration-300 active:scale-[0.98] disabled:opacity-50">
           <Plus className="w-4 h-4" />{t('settings.sections.add')}
         </button>
       </form>

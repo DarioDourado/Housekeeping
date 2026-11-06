@@ -13,7 +13,7 @@ export const ErrorFallback = ({ onReset }: ErrorFallbackProps) => {
       <p className="text-sm text-muted">{t('errors.generic')}</p>
       <button
         onClick={onReset}
-        className="rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-medium"
+        className="rounded-lg bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium"
       >
         {t('errors.retry')}
       </button>

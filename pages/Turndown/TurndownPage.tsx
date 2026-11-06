@@ -37,7 +37,7 @@ export const TurndownPage = () => {
         title={t('turndown.noPlanTitle')}
         description={t('turndown.noPlanHint')}
         action={canDistribute ? (
-          <button onClick={() => openPlan(PlanKind.NIGHT)} className="rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-medium">{t('turndown.openPlan')}</button>
+          <button onClick={() => openPlan(PlanKind.NIGHT)} className="rounded-lg bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium">{t('turndown.openPlan')}</button>
         ) : undefined}
       />
     );

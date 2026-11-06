@@ -25,7 +25,7 @@ export const PageError = ({ onRetry }: { onRetry: () => void }) => {
       </div>
       <h2 className="text-lg font-semibold text-content">{t('states.errorTitle')}</h2>
       <p className="text-sm text-muted max-w-sm">{t('states.errorHint')}</p>
-      <button onClick={onRetry} className="rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-medium">
+      <button onClick={onRetry} className="rounded-lg bg-action hover:bg-action-hover text-primary-foreground px-6 py-3 text-sm font-medium">
         {t('errors.retry')}
       </button>
     </div>

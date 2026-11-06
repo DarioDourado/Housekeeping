@@ -6,13 +6,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { usePermission } from '@/hooks/auth/usePermission';
 import { useTheme } from '@/hooks/theme/useTheme';
 import { useOverlayStore } from '@/store/overlayStore';
-
-const LINKS = [
-  { to: ROUTES.PLANNING, label: 'nav.morningDistribution', end: true },
-  { to: ROUTES.TURNDOWN, label: 'nav.turndownDistribution', end: false },
-  { to: ROUTES.LIVE, label: 'nav.realtimeOverview', end: false },
-  { to: ROUTES.AUDIT, label: 'nav.timeAudit', end: false }
-] as const;
+import { NAV_LINKS, NavMenu } from './NavMenu';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `whitespace-nowrap shrink-0 py-1 transition-colors hover:text-slate-900 dark:hover:text-white ${isActive ? 'text-blue-600 dark:text-blue-400 font-bold border-b-2 border-blue-600' : ''}`;
@@ -30,7 +24,8 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between gap-3 px-3 sm:px-4 lg:px-5 py-2.5 w-full">
-        <NavLink to={ROUTES.PLANNING} className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap shrink-0 flex items-center gap-2">
+        <NavMenu />
+        <NavLink to={ROUTES.PLANNING} className="max-lg:mr-auto text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap shrink-0 flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-blue-600" />
           <span>{t('app.hotelName')}</span>
           <span className="text-slate-400 font-normal">/</span>
@@ -38,7 +33,7 @@ export const Navbar = () => {
         </NavLink>
 
         <nav aria-label={t('nav.main')} className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
-          {LINKS.map(link => (
+          {NAV_LINKS.map(link => (
             <NavLink key={link.to} to={link.to} end={link.end} className={linkClass}>{t(link.label)}</NavLink>
           ))}
         </nav>

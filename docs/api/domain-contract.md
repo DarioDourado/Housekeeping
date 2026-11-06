@@ -15,7 +15,7 @@
 5. **Estado Opera ≠ estado da tarefa.** DND, recusa (NQ), já arrumado (AC), refresh e turndown nunca contam como limpeza concluída nem escrevem no Opera.
 6. **Dia operacional** fecha às 02h, nunca à meia-noite (`lib/operationalDate.ts`). O servidor calcula a data; o cliente não a envia, exceto em `openPlan`.
 
-**Transporte** (do plano de backend, aqui só para referência): base `/api/v1`; JSON `camelCase`; ids UUID em string; datas ISO-8601 UTC; erros `application/problem+json` com `code`; `version` + `If-Match` nas entidades mutáveis; `clientEventId` nas escritas de execução. As rotas abaixo omitem o prefixo `/api/v1`.
+**Transporte** (do plano de backend, aqui só para referência): base `/api/v1`; JSON `camelCase`; ids ULID em string (26 caracteres, ordenáveis no tempo; regra da API); datas ISO-8601 UTC; erros `application/problem+json` com `code`; `version` + `If-Match` nas entidades mutáveis; `clientEventId` nas escritas de execução. As rotas abaixo omitem o prefixo `/api/v1`.
 
 ## 2. Autenticação e ator
 
@@ -137,6 +137,18 @@ Execução (`resolveExecution`): quem **executou** ≠ quem **registou** (§14.5
 | `removeStaffFromSheet` | `DELETE /sheets/{id}/assignments/{staffId}` | — | pessoa não está na sheet | sai da sheet e **passa ao pool Apoio** nesse serviço | `STAFF_SHEET_CHANGED` (+ `STAFF_MOVED` se não estava já em Apoio) |
 | `assignStaffToSheet` | `PUT /sheets/{id}/assignments` | `assignments[]` | sheet inexistente | substitui a equipa; regista quem entrou e quem saiu | `STAFF_SHEET_CHANGED` por pessoa |
 
+**Pré-definição (default) — nunca se começa do zero** (decidido 2026-11-06). A configuração base de cada serviço (`DAY`/`NIGHT`) é o conjunto de secções (quartos por defeito), o bloco por defeito de cada pessoa (`defaultBlock`/`nightDefaultBlock`) e as equipas de bloco. Regras:
+
+0. **As pessoas vêm do perfil de cada colaborador** (decidido 2026-11-06). Quem tem `defaultBlock` = X (manhã) ou `nightDefaultBlock` = X (turndown) aparece no bloco X. A única diferença de dia para dia é `isOnDuty`: quem está de serviço aparece no seu bloco por defeito; quem não está não aparece. **Fase 1:** `isOnDuty` é manual e fica `true` por omissão. **Depois:** sincroniza com o **GesExtra** (picagem de ponto): picar a entrada põe `isOnDuty = true` (ver secção 9). As secções dão os **quartos** de cada sheet; o perfil dá o **bloco** de cada pessoa. Mexer no dia (`moveStaffToBlock`) muda só `assignedArea`/`nightArea`, nunca o bloco por defeito; `restoreDailyToDefaultBaseline` volta a pôr cada pessoa no bloco do perfil. **Quem fica em cada sheet** de um bloco fica para a definição do bloco (por definir); até lá as pessoas de serviço do bloco são as candidatas e a governanta distribui. A lista `defaultStaffIds` das secções do FE fica sem uso na API.
+1. **Existe sempre.** A instalação arranca com uma lista pré-feita (seed: quartos, secções e perfis com bloco por defeito); a API recusa apagar a última secção de um serviço (`422`, `code: DEFAULT_REQUIRED`) **[proposta]**.
+2. **Cada dia parte dela.** `openPlan` copia-a para as sheets do dia (CT-01) e nunca abre um plano vazio. Se o serviço não tiver secções, `openPlan` devolve `422 DEFAULT_REQUIRED` em vez de criar um dia sem sheets **[proposta]**.
+3. **Mudar a pré-definição não mexe no dia aberto**; mexer no dia não muda a pré-definição (§6.1).
+4. **Recarregar a pré-definição** (botão "Recarregar pré-definição" do FE): hoje o FE chama `housekeepingTransporter.reset()`, que **recarrega os dados de demonstração inteiros**. Não é um comando de domínio e não pode ir para produção. Passa a ser `resetPlanToDefault` (abaixo).
+
+| Comando (novo) | Rota **[proposta]** | Corpo | Efeito **[proposta, a confirmar]** | Eventos |
+|---|---|---|---|---|
+| `resetPlanToDefault` | `POST /plans/{id}/reset-to-default` | — | volta a aplicar as secções ao plano do dia: sheets, equipas e a sheet de cada tarefa **ainda `PENDING`**. Tarefas iniciadas, concluídas ou com impedimento ficam onde estão; nenhum estado nem evento é apagado. Sheets criadas à mão nesse dia ficam (vazias) | `PLAN_OPENED` com `metadata.action = "reset"` |
+
 Regra do LEAD (`withLead`): é sempre uma governanta. Se o atual sai, passa à primeira governanta da sheet; sem nenhuma, a sheet fica sem responsável e todos são `MEMBER`.
 
 ### 4.4b Equipas, pessoal e secções (`teamCommands.ts`)
@@ -185,7 +197,7 @@ Regra do LEAD (`withLead`): é sempre uma governanta. Se o atual sai, passa à p
 | Sem permissão | (só esconde botões) | `403` |
 | Escrita no Opera mais antiga que o estado atual | job `CONFLICT`, comando **tem sucesso** | `200`; o conflito vem no corpo e no evento `OPERA_CONFLICT_DETECTED`. **Não é um erro HTTP** |
 
-Formato (já implementado em `housekeeping-api`): `application/problem+json` (RFC 9457) com `code` estável em `MAIUSCULAS_COM_UNDERSCORE` (`VALIDATION_ERROR`, `HTTP_404`, `TASK_INVALID_TRANSITION`, `SCOPE_FORBIDDEN`, `VERSION_CONFLICT`) e `errors[]` por campo nos 422; o cliente traduz `errors.<CODE>` e nunca mostra texto do servidor. As mensagens geradas pelo sistema continuam a ser `LocalizedText` (`{key, params}`).
+Formato (já implementado em `housekeeping-api`): `application/problem+json` (RFC 9457) com `code` estável em `MAIUSCULAS_COM_UNDERSCORE` (`VALIDATION_ERROR`, `HTTP_404`, `TASK_INVALID_TRANSITION`, `SCOPE_FORBIDDEN`, `STALE_RESOURCE`) e `errors[]` por campo nos 422; o cliente traduz `errors.<CODE>` e nunca mostra texto do servidor. As mensagens geradas pelo sistema continuam a ser `LocalizedText` (`{key, params}`).
 
 ## 6. Regras transversais
 
@@ -201,10 +213,10 @@ Atenção: eventos que **não são sobre um quarto** reutilizam `roomId`/`roomNu
 - **`occurredAt`.** Hoje 5 comandos aceitam-no do cliente (`finishTask`, `reopenRoom`, `setRoomStatus`, `inspectTask`; `receiveOperaStatus` com `observedAt`). O plano usa sempre o relógio do servidor (Review Focus 2) e o v0.3.1 põe o offline fora da Fase 1. Na Fase 1 o parâmetro é ignorado; volta, validado (não no futuro, desvio limitado), quando houver fila offline. `observedAt` do Opera é diferente: vem do sistema de origem e mantém-se.
 
 ### 6.3 Concorrência e idempotência
-Hoje o estado é substituído por inteiro e as operações são síncronas, por isso não há conflitos possíveis. Do plano de backend (rascunho): `version` + `If-Match` nas entidades mutáveis (`ServiceTask`, `TaskSheet`) com `409` em conflito, e `clientEventId` em todas as escritas de execução (repetir o mesmo não duplica o evento).
+Hoje o estado é substituído por inteiro e as operações são síncronas, por isso não há conflitos possíveis. Do plano de backend (rascunho): `version` nas entidades mutáveis; versão velha com `If-Match` → `412 STALE_RESOURCE`, sem `If-Match` → `409 CONFLICT` (regra `DB-LOCK` da API, implementada com `version_id_col`); e `clientEventId` em todas as escritas de execução (repetir o mesmo não duplica o evento).
 
 ### 6.4 Identificadores
-Hoje o cliente gera ids (`prefix-Date.now()-random`). Do plano: o servidor gera UUIDs. Os campos `id` saem de `addStaff`, `addSection`, `addBlockTeam` e `addSheet`.
+Hoje o cliente gera ids (`prefix-Date.now()-random`). O servidor gera ULIDs (regra `DB-TYPES` da API; substitui o UUID do plano). Os campos `id` saem de `addStaff`, `addSection`, `addBlockTeam` e `addSheet`.
 
 ## 7. Decisões
 
@@ -225,6 +237,7 @@ Fechadas com o utilizador em 2026-11-06:
 | 9 | **Escopo:** governanta e responsável de andares veem e agem sobre **tudo**; só a empregada tem escopo (as suas tarefas). |
 | 10 | **Sem fusão de sheets;** uma sheet tem vários blocos (`blocks[]`). |
 | 11 | **5 perfis:** `superadmin` (programador), `admin` (governanta geral), `sub_admin` (chefe de andares), `user` (colaboradora), `reception`. Não há `supervisor`; o `JobTitle` deixa de ser preciso. |
+| 13 | **Pré-definição sempre presente:** nunca se começa do zero; `openPlan` parte dela e o "Recarregar" passa a ser `resetPlanToDefault` (secção 4.4). |
 | 12 | **Prioridades: cria a governanta geral**; hierarquia governanta geral → responsável de andar → colaboradoras. A receção pede por alerta (secção 8, nota 2). |
 
 Detalhes técnicos fechados aqui (**[proposta]**, mudam sem impacto no domínio):
@@ -265,7 +278,7 @@ Hierarquia: `admin` → `sub_admin` → `user`. Os perfis substituem o `JobTitle
 | `correction.request` | `requestCorrection` | ✔ | ✔ | ✔ | — | — |
 | `room.editDetails` | `updateRoomInstructions` | ✔ | ✔ | ✔ | — | — |
 | `priority.reorder` | `togglePriority` | ✔ | ✔ | — ² | — | — |
-| `sheets.distribute` | `openPlan`, `moveTask`, `addSheet`, `updateSheet` | ✔ | ✔ | ✔ ³ | — | — |
+| `sheets.distribute` | `openPlan`, `resetPlanToDefault`, `moveTask`, `addSheet`, `updateSheet` | ✔ | ✔ | ✔ ³ | — | — |
 | `staff.assign` | `moveStaffToSheet`, `setSheetLead`, `removeStaffFromSheet`, `assignStaffToSheet`, `moveStaffToBlock`, `removeStaffFromBlock`, `restoreDailyToDefaultBaseline` | ✔ | ✔ | ✔ ³ | — | — |
 | `staff.manage` (nova) | `addStaff`, `updateStaff`, `deactivateStaff` | ✔ | ✔ | — ³ | — | — |
 | `staff.delete` (nova) | `deleteStaff` | ✔ | — | — | — | — |
@@ -287,6 +300,7 @@ Permissões que saem: `rooms.viewAll`/`viewArea`/`viewAssigned` (substituídas p
 ## 9. Fora deste contrato (ainda por levantar)
 
 - Chat (`chatTransporter`, hoje `localStorage`).
+- **GesExtra** (picagem de ponto): fonte de `isOnDuty`. Falta saber a interface (API, BD partilhada, ficheiro), o identificador comum da pessoa e o que acontece à saída.
 - Estatísticas e relatórios (sem definição do cliente).
 - Importação de reservas/hóspedes (OHIP): `RoomStay` vem hoje de `config/hotelData.ts`. `openPlan` herda as estadias do dia anterior quando o dia não tem nenhuma (`ponytail` no código); a API devolve as do dia.
 
@@ -331,4 +345,5 @@ Quando este documento for aprovado, o v0.3.1 deixa de valer e o plano de backend
 | Remover `guest.view` e `rooms.view*` | `config/constants.ts`, `MobilePage.tsx` |
 | Alertas visíveis e reconhecíveis por todos os perfis | `TraceForm.tsx`, `MobileAlerts.tsx` |
 | Mostrar o job do Opera `PENDING` ("a sincronizar") | cartões e detalhe do quarto |
+| "Recarregar pré-definição" chama `resetPlanToDefault`, não `housekeepingTransporter.reset()` (que só serve à demonstração) | `useResetToDailyPreset.ts`, `SummaryStrip` |
 | Escopo nas leituras (empregada só vê as suas tarefas) | vem filtrado da API; o FE deixa de assumir a coleção inteira |

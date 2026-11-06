@@ -7,7 +7,7 @@
 Desvios decididos na execução:
 - **Correção posterior: `Theme.txt` prevalece.** Os valores das Tarefas 1 e 2 (cor de ação `#007A8F`, escalas escurecidas, outline sólido de foco) violavam o contrato do cliente ("não inventes hexadecimais novos", botão primário e auréola de foco definidos) e foram revertidos. Hoje `src/index.css` tem os mesmos hexadecimais que `main`, travados por testes de fidelidade em `config/theme.test.ts`. Ficam sem correção, por decisão do cliente: contraste do branco sobre `#00A9C5`, do texto secundário `#86868B` e da auréola de foco (ver `PRODUCT.md`, Accessibility).
 - T1 e T2: sem efeito (revertidas).
-- T7: o passo "rótulos `text-slate-400` → `text-muted`" ficou resolvido pelo contraste da T1.
+- T7: só o piso de 10px foi feito; o passo "rótulos `text-slate-400` → `text-muted`" fica de fora (o `#86868B` é do Theme.txt).
 - T8: versão enxuta: removidos os aliases de cor (rose, sky, cyan, green, orange, stone) e convertidos os 3 pares mais comuns para `bg-surface`/`text-content`/`border-line`. Não foram criados `info`/`surface-muted` (sem consumidores). O resto das ~1500 classes cruas continua por migrar.
 - T10: mantido o hero escuro do Turndown (separação visual dos ciclos, princípio 2 do PRODUCT.md); só removido o gradiente. Alinhamento com o `SummaryStrip` não feito.
 - T11: sem axe/Playwright e sem verificação visual no browser (não há Playwright instalado).

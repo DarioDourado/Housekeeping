@@ -4,6 +4,16 @@
 
 **Estado: RASCUNHO PARA ANÁLISE.** Nada deste plano foi implementado nem aprovado. Primeiro passo, depois de aprovado: reconciliar `last-verified` da skill 34 com o git (regra de manutenção) e resolver a secção *Decisões a tomar*.
 
+> **Correções de 2026-11-06 (prevalecem sobre o texto abaixo).** O contrato passou a ser `docs/api/domain-contract.md` (v0.4); o `.agents/34-backend-fastapi` foi apagado em `a7752c1`. A API vive em `Housekeeping-APP/housekeeping-api/`.
+> - **Perfis:** `superadmin` (programador), `admin` (governanta geral), `sub_admin` (chefe de andares, era o `supervisor`), `user` (colaboradora, era `housekeeper`), `reception`. Sem `JobTitle`.
+> - **Permissões:** matriz da secção 8 do contrato (substitui o mapa da T8 e a frase da T2 "admin sem `task.startFinish`/`room.markDirty`"). `user`: start, finish e DND/NQ/AC; `sub_admin` como `admin` exceto prioridades, pessoal e configuração (a confirmar). Receção: só leitura e alertas. Alertas: todos os perfis (não `messages.send`). Apagar pessoal: só `superadmin`; `admin` desativa (`deactivateStaff`).
+> - **Escopo:** só `user` (as suas tarefas). `admin` e `sub_admin` veem tudo. Substitui "governanta = a sua área".
+> - **T5 / CT-03:** sem `merge_sheets` nem `POST /sheets/{id}/merge`; `TaskSheet.blocks: string[]` cumpre o CT-03.
+> - **Prioridades:** cria a governanta geral (não a receção, que pede por alerta). Contrato secção 8, nota 2.
+> - **D5 fechado:** polling. **Créditos:** standby, fora da Fase 1.
+> - **Leituras:** `GET /boards/{kind}` agregado; resposta comum dos comandos `CommandResult` (contrato 3.0 e 3.1).
+> - **Comandos novos** face a T4/T5: `setRoomStatus`, `setSheetLead`, `moveStaffToSheet`, `removeStaffFromSheet`, `addSheet`, `updateSheet`, `updateRoomInstructions`, `deactivateStaff` (lista completa na secção 4 do contrato).
+
 **Goal:** Substituir o `services/local-api` do FE por uma API FastAPI real que cumpre o mesmo contrato, sem alterar páginas, hooks nem tipos do FE (só os transporters).
 
 **Architecture:** Router → Service → Repository (+ `integrations/opera`). As regras de negócio que hoje são funções puras em `services/local-api/*Commands.ts` passam a ser serviços Python com os **mesmos cenários de teste**. O estado Opera é escrito por uma outbox (`OperaSyncJob`) processada à parte, nunca dentro do pedido HTTP. O FE continua a ser a especificação executável até o BE passar os mesmos testes.

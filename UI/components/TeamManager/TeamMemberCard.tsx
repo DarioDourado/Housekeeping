@@ -62,7 +62,7 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
               {member.isExtra && <span className={`${BADGE} bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300`}>{t('team.extraBadge')}</span>}
               <JobTitleBadges user={member} className={BADGE} />
               {defaultOf(member, team.kind) && defaultOf(member, team.kind) !== team.block && (
-                <span className="text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: defaultOf(member, team.kind) })}>
+                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: defaultOf(member, team.kind) })}>
                   {t('team.defaultBlockShort', { block: defaultOf(member, team.kind) })}
                 </span>
               )}

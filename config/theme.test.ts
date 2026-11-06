@@ -42,6 +42,11 @@ describe('tema', () => {
     }
   });
 
+  it('should not use text smaller than 10px', () => {
+    const offenders = Object.entries(sources).filter(([, source]) => /text-\[[1-9]px\]/.test(source)).map(([file]) => file.split('/').pop());
+    expect(offenders).toEqual([]);
+  });
+
   describe('foco de teclado (WCAG 2.4.7 / 1.4.11)', () => {
     it('should use a solid action-colored outline for :focus-visible', () => {
       const rule = /:focus-visible \{([^}]*)\}/.exec(css)?.[1] ?? '';

@@ -123,7 +123,7 @@ export const TeamBoardTab = ({ kind, onAdd, onSwitchUser }: TeamBoardTabProps) =
                 <span className={`w-2 h-2 rounded-full ${palette.dot}`} />
                 <span>{team.block}</span>
                 <span className="opacity-75 font-normal text-[10px]">({t(`teamColors.${palette.id}.short`)})</span>
-                <span className="ml-0.5 px-1 rounded-full bg-white/60 dark:bg-slate-900/40 text-[9px]">{count}</span>
+                <span className="ml-0.5 px-1 rounded-full bg-white/60 dark:bg-slate-900/40 text-[10px]">{count}</span>
               </div>
             );
           })}

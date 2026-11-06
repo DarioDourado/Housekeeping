@@ -123,7 +123,7 @@ export const BlockTeamRosterBar = ({ kind = PlanKind.DAY }: { kind?: PlanKind })
                         >
                           <GripVertical className="w-2.5 h-2.5 text-slate-400 -ml-0.5 shrink-0" />
                           <span className="truncate max-w-[140px]" title={person.name}>{shortName(person.name)}</span>
-                          {offDuty ? <span className="text-[8px] font-bold text-slate-400">{t('roster.offDutyMark')}</span> : person.isExtra ? <span className="text-[8px] font-bold text-amber-600">★</span> : null}
+                          {offDuty ? <span className="text-[10px] font-bold text-slate-400">{t('roster.offDutyMark')}</span> : person.isExtra ? <span className="text-[10px] font-bold text-amber-600">★</span> : null}
                         </div>
                       );
                     })

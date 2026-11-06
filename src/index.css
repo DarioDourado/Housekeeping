@@ -303,3 +303,17 @@
 
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
+
+/* Movimento reduzido: sem pulsos, deslizes nem escalas; mudanças de estado continuam por cor/opacidade. O spinner de carregamento mantém-se (é feedback essencial). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-slide-up { animation: none; }
+  .animate-in {
+    --tw-enter-translate-x: 0 !important;
+    --tw-enter-translate-y: 0 !important;
+    --tw-enter-scale: 1 !important;
+  }
+  body { transition: none; }
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active { scale: none; }
+}

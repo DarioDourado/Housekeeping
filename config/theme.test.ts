@@ -54,6 +54,20 @@ describe('tema', () => {
     });
   });
 
+  describe('movimento reduzido (WCAG 2.3.3)', () => {
+    const reduced = /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? '';
+
+    it('should remove pulsing, sliding and scaling motion', () => {
+      expect(reduced).toMatch(/\.animate-pulse/);
+      expect(reduced).toMatch(/--tw-enter-translate-y:\s*0/);
+      expect(reduced).toMatch(/scale:\s*none/);
+    });
+
+    it('should not kill every animation with a global near-zero duration', () => {
+      expect(css).not.toMatch(/animation-duration:\s*0\.01ms/);
+    });
+  });
+
   describe('contraste (WCAG 2.2 AA, .agents/23-accessibility)', () => {
     const channel = (hex: string, offset: number) => {
       const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;

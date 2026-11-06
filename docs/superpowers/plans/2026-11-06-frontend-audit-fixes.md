@@ -2,7 +2,14 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Estado: RASCUNHO PARA APROVAÇÃO.** Nada deste plano foi implementado.
+**Estado: EXECUTADO na branch `fix/frontend-audit` (2026-11-06), com os desvios abaixo.**
+
+Desvios decididos na execução:
+- T1: em vez de tokens `success-text`/`warning-text`, escurecidos os degraus `emerald-600` e `amber-600`; `slate-400/500/600` escurecidos no claro e repostos no escuro por override em `.dark`; `blue-600/700/800` escurecidos. Novos tokens: `action`, `action-hover`, `action-text`.
+- T7: o passo "rótulos `text-slate-400` → `text-muted`" ficou resolvido pelo contraste da T1.
+- T8: versão enxuta: removidos os aliases de cor (rose, sky, cyan, green, orange, stone) e convertidos os 3 pares mais comuns para `bg-surface`/`text-content`/`border-line`. Não foram criados `info`/`surface-muted` (sem consumidores). O resto das ~1500 classes cruas continua por migrar.
+- T10: mantido o hero escuro do Turndown (separação visual dos ciclos, princípio 2 do PRODUCT.md); só removido o gradiente. Alinhamento com o `SummaryStrip` não feito.
+- T11: sem axe/Playwright e sem verificação visual no browser (não há Playwright instalado).
 
 **Goal:** Corrigir os problemas da auditoria de 2026-11-06 (12/20) para a versão real: contraste, foco, movimento, navegação responsiva, modais unificados e tokens semânticos. Alvo: ≥18/20 e WCAG 2.2 AA.
 

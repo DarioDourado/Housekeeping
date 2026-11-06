@@ -57,12 +57,12 @@ export const TurndownPage = () => {
   return (
     <SheetRemoveZone kind={PlanKind.NIGHT} className={BOARD_PAGE}>
       <div className="space-y-4 shrink-0">
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white border border-indigo-800/40 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-5 rounded-2xl bg-indigo-950 text-white border border-indigo-800/40 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <div className="p-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"><Moon className="w-6 h-6" /></div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold tracking-tight">{t('turndown.title')}</h2>
+                <h1 className="text-lg font-bold tracking-tight">{t('turndown.title')}</h1>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 font-medium">
                   {t('turndown.window', { start: TURNDOWN_SCHEDULE.start, end: TURNDOWN_SCHEDULE.end })}
                 </span>

@@ -18,7 +18,7 @@ export const TaskHistory = ({ view }: { view: TaskView }) => {
   return (
     <div className="space-y-1.5">
       <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('room.detail.history')}</span>
-      <ul className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg text-xs">
+      <ul className="divide-y divide-slate-100 dark:divide-slate-800 border border-line rounded-lg text-xs">
         {history.map(event => {
           const executors = event.executorIds.map(id => names.get(id) ?? id).join(', ');
           return (

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BLOCK } from '@/config/constants';
 import { UserRole, type User } from '@/types/auth.types';
 
-const INPUT = 'w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100';
+const INPUT = 'w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-content';
 const LABEL = 'block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1';
 
 interface StaffFormProps {

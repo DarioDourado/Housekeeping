@@ -28,7 +28,7 @@ export const TeamManagerModal = ({ onClose, initialTab = 'BOARD' }: { onClose: (
   const [addBlock, setAddBlock] = useState<string | null>(null);
 
   const tabClass = (active: boolean) =>
-    `px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 ${active ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`;
+    `px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 ${active ? 'bg-surface text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`;
 
   const header = (
     <div className="flex items-center gap-3">

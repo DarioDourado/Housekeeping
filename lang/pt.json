@@ -14,6 +14,7 @@
     "realtimeOverview": "Quartos em Direto",
     "timeAudit": "Auditoria de Tempos",
     "main": "Navegação principal",
+    "menu": "Menu",
     "settings": "Configuração"
   },
   "status": {
@@ -28,6 +29,9 @@
     "changeTitle": "Confirmar alteração de estado",
     "changeMessage": "O quarto {{number}} passa de {{from}} para {{to}} e o estado será enviado ao Opera Cloud. Confirmas?",
     "changeConfirm": "Alterar estado"
+  },
+  "common": {
+    "skipToContent": "Saltar para o conteúdo"
   },
   "actions": {
     "reproveInspection": "Reprovar c/ Nota",

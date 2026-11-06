@@ -22,8 +22,8 @@ interface TaskSheetColumnProps {
 
 const COUNTERS = [
   ['stayovers', 'stayoverCount', 'text-blue-600 dark:text-blue-400'],
-  ['departureArrival', 'departureArrivalCount', 'text-rose-600 dark:text-rose-400'],
-  ['departureOnly', 'departureOnlyCount', 'text-stone-500'],
+  ['departureArrival', 'departureArrivalCount', 'text-red-600 dark:text-red-400'],
+  ['departureOnly', 'departureOnlyCount', 'text-slate-500'],
   ['refreshes', 'refreshCount', 'text-purple-600 dark:text-purple-400']
 ] as const;
 
@@ -71,10 +71,10 @@ export const TaskSheetColumn = ({ column, layout, cards }: TaskSheetColumnProps)
             ? 'border-blue-300 dark:border-blue-700/80 bg-blue-50/30 dark:bg-blue-950/20'
             : sheet.isReserve
               ? 'border-dashed border-amber-300 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/10'
-              : 'border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 shadow-xs'
+              : 'border-line bg-slate-50/80 dark:bg-slate-900/60 shadow-xs'
       }`}
     >
-      <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 space-y-2">
+      <div className="p-3.5 border-b border-line space-y-2">
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -86,14 +86,14 @@ export const TaskSheetColumn = ({ column, layout, cards }: TaskSheetColumnProps)
                 <span>{sheet.block}</span>
               </span>
             </div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1 line-clamp-1">{sheet.title}</h4>
+            <h4 className="text-sm font-bold text-content mt-1 line-clamp-1">{sheet.title}</h4>
           </div>
           {canDistribute && <SheetEditor sheet={sheet} />}
         </div>
 
         <SheetAssignees sheetId={sheet.id} assignments={sheet.assignments} assignees={assignees} canEdit={canAssign} />
 
-        <div className="grid grid-cols-4 gap-1 p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-center">
+        <div className="grid grid-cols-4 gap-1 p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-line text-center">
           {COUNTERS.map(([key, field, tone]) => (
             <div key={key} className="space-y-0.5">
               <span className="text-[10px] text-slate-400 block font-medium">{t(`sheet.counters.${key}`)}</span>

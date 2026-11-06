@@ -24,7 +24,7 @@ export const ChatMessageList = ({ messages, currentUserId }: { messages: ChatMes
             <div className={`p-3 rounded-2xl max-w-[85%] text-xs shadow-xs space-y-1.5 ${
               isMe
                 ? 'bg-blue-600 text-white rounded-tr-none'
-                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-none'
+                : 'bg-white dark:bg-slate-800 text-content border border-slate-200 dark:border-slate-700 rounded-tl-none'
             }`}>
               {message.roomNumber && (
                 <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${isMe ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'}`}>

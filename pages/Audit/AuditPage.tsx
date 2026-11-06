@@ -26,10 +26,10 @@ export const AuditPage = () => {
   );
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-      <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="bg-surface border border-line rounded-2xl shadow-xs overflow-hidden">
+      <div className="p-5 border-b border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600" />{t('audit.title')}</h2>
+          <h1 className="text-base font-bold text-content flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600" />{t('audit.title')}</h1>
           <p className="text-xs text-slate-500 mt-0.5">{t('audit.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -41,10 +41,10 @@ export const AuditPage = () => {
               onChange={event => setRoom(event.target.value)}
               placeholder={t('audit.filterRoom')}
               aria-label={t('audit.filterRoom')}
-              className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-content"
             />
           </div>
-          <select value={type} onChange={event => setType(event.target.value)} aria-label={t('audit.filterType')} className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+          <select value={type} onChange={event => setType(event.target.value)} aria-label={t('audit.filterType')} className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-content">
             <option value="ALL">{t('audit.filters.all')}</option>
             {FILTERABLE.map(value => <option key={value} value={value}>{t(`audit.events.${EVENT_LABEL_KEY[value]}`)}</option>)}
           </select>

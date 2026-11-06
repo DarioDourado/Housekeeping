@@ -90,16 +90,16 @@ export const CollaboratorDirectoryTab = ({ kind }: { kind: PlanKind }) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50 dark:bg-slate-950/40">
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 space-y-3">
+      <div className="p-4 border-b border-line bg-white/80 dark:bg-slate-900/80 space-y-3">
         <DirectoryStats users={users} />
         <DirectoryFilters value={filters} blockTeams={blockTeams} canAdd={canManage} onChange={setFilters} onAdd={() => setEditor({})} />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-x-auto">
+        <div className="bg-surface border border-line rounded-xl shadow-xs overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/60 text-slate-500 font-semibold">
+              <tr className="border-b border-line bg-slate-50/80 dark:bg-slate-800/60 text-slate-500 font-semibold">
                 {(['name', 'status', 'defaultBlock', 'currentBlock', 'shift', 'device', 'sheet', 'actions'] as const).map(column => (
                   <th key={column} className={`py-3 ${column === 'name' ? 'px-4' : 'px-3'} ${column === 'actions' ? 'text-right' : ''}`}>{t(`directory.columns.${column}`)}</th>
                 ))}

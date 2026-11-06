@@ -63,7 +63,7 @@ export const DirectoryRow = ({ user, kind, blockTeams, sheetId, sheets, devices,
           <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 border ${avatar}`}>{user.name.substring(0, 2).toUpperCase()}</div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-900 dark:text-slate-100">{user.name}</span>
+              <span className="font-bold text-content">{user.name}</span>
               {user.isExtra && <span className="text-[10px] font-bold px-1.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">{t('team.extraBadge')}</span>}
               <JobTitleBadges user={user} className="text-[10px] font-bold px-1.5 rounded" />
               {user.role === UserRole.ADMIN && <span className="text-[10px] font-bold px-1.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">{t('directory.badgeAdmin')}</span>}
@@ -150,7 +150,7 @@ export const DirectoryRow = ({ user, kind, blockTeams, sheetId, sheets, devices,
           {canManage && (
             <>
               <button onClick={() => onEdit(user)} className={`${ACTION} hover:text-emerald-600`} title={t('directory.edit')} aria-label={t('directory.edit')}><Edit2 className="w-3.5 h-3.5" /></button>
-              <button onClick={() => onDelete(user)} className={`${ACTION} hover:text-rose-600`} title={t('directory.delete')} aria-label={t('directory.delete')}><Trash2 className="w-3.5 h-3.5" /></button>
+              <button onClick={() => onDelete(user)} className={`${ACTION} hover:text-red-600`} title={t('directory.delete')} aria-label={t('directory.delete')}><Trash2 className="w-3.5 h-3.5" /></button>
             </>
           )}
         </div>

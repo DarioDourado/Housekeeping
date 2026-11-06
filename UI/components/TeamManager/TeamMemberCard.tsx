@@ -57,12 +57,12 @@ export const TeamMemberCard = ({ member, team, palette, sheetNumber, blockTeams,
           </div>
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-xs text-slate-900 dark:text-slate-100">{member.name}</span>
+              <span className="font-bold text-xs text-content">{member.name}</span>
               {!isOnDuty(member) && <span className={`${BADGE} bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300`}>{t('team.offBadge')}</span>}
               {member.isExtra && <span className={`${BADGE} bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300`}>{t('team.extraBadge')}</span>}
               <JobTitleBadges user={member} className={BADGE} />
               {defaultOf(member, team.kind) && defaultOf(member, team.kind) !== team.block && (
-                <span className="text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: defaultOf(member, team.kind) })}>
+                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1 rounded" title={t('team.defaultBlockTitle', { block: defaultOf(member, team.kind) })}>
                   {t('team.defaultBlockShort', { block: defaultOf(member, team.kind) })}
                 </span>
               )}

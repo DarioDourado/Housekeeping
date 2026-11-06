@@ -12,8 +12,8 @@ import { TaskStatusChip } from '@/UI/components/StatusBadges';
 // - [sigla no cartão, motivo, chave i18n do título, cor ativa]: toggles extra; clicar outra vez desliga e volta a "por iniciar"
 const TOGGLES = [
   ['DND', NotPerformedReason.DND, 'toggleDND', 'bg-purple-600 border-purple-600 text-white'],
-  ['NQ', NotPerformedReason.REFUSE_SERVICE, 'toggleNQ', 'bg-stone-600 border-stone-600 text-white'],
-  ['AC', NotPerformedReason.ALREADY_DONE, 'toggleAC', 'bg-sky-600 border-sky-600 text-white']
+  ['NQ', NotPerformedReason.REFUSE_SERVICE, 'toggleNQ', 'bg-slate-600 border-slate-600 text-white'],
+  ['AC', NotPerformedReason.ALREADY_DONE, 'toggleAC', 'bg-blue-600 border-blue-600 text-white']
 ] as const;
 
 const CHIP = 'inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded border';
@@ -54,7 +54,7 @@ export const TurndownCard = ({ view, index }: { view: TaskView; index: number })
           {canDistribute && <GripVertical className="w-3.5 h-3.5 mt-1 text-slate-400" />}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">{room.number}</span>
+              <span className="text-base font-bold text-content tabular-nums">{room.number}</span>
               <span className="text-xs text-slate-500">{room.block}</span>
             </div>
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mt-0.5">{stay?.guestName ?? '—'}</p>

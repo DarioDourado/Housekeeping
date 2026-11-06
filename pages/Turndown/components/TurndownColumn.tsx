@@ -50,26 +50,26 @@ export const TurndownColumn = ({ column, cards }: TurndownColumnProps) => {
       onDragOver={event => { if (canDistribute || canAssign) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setIsOver(true); } }}
       onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setIsOver(false); }}
       onDrop={handleDrop}
-      className={`bg-white dark:bg-slate-900 border rounded-2xl shadow-xs flex flex-col transition-all duration-150 ${
+      className={`bg-surface border rounded-2xl shadow-xs flex flex-col transition-all duration-150 ${
         isOver
           ? 'border-indigo-500 ring-2 ring-indigo-500/50 bg-indigo-50/60 dark:bg-indigo-950/40 scale-[1.01]'
           : draggingTaskId && !isSource
             ? 'border-indigo-300 dark:border-indigo-700/80 bg-indigo-50/30 dark:bg-indigo-950/20'
-            : 'border-slate-200 dark:border-slate-800'
+            : 'border-line'
       }`}
     >
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-2">
+      <div className="p-4 border-b border-line bg-slate-50/70 dark:bg-slate-800/40 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300">{t('turndown.group', { number: sheet.number })}</span>
             <span className="text-xs font-medium text-slate-400 line-clamp-1">{sheet.block}</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-xs font-bold text-slate-900 dark:text-slate-100 tabular-nums">{t('turndown.done', { done: completed, total: views.length })}</span>
+            <span className="text-xs font-bold text-content tabular-nums">{t('turndown.done', { done: completed, total: views.length })}</span>
             {canDistribute && <SheetEditor sheet={sheet} />}
           </div>
         </div>
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{sheet.title}</h3>
+        <h3 className="text-sm font-bold text-content line-clamp-1">{sheet.title}</h3>
         <SheetAssignees sheetId={sheet.id} assignments={sheet.assignments} assignees={assignees} canEdit={canAssign} />
       </div>
 

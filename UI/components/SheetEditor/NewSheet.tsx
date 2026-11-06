@@ -7,7 +7,7 @@ import { useEnsureOnDuty, useStaff } from '@/hooks/staff';
 import { isGovernanta } from '@/lib/jobTitles';
 import { isOnDuty } from '@/lib/staffDuty';
 
-const FIELD = 'w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-800 dark:text-slate-200';
+const FIELD = 'w-full rounded-md border border-slate-200 dark:border-slate-700 bg-surface px-2 py-1.5 text-xs text-slate-800 dark:text-slate-200';
 const BLOCKS = [...OPERATIONAL_BLOCKS, BLOCK.PARKING];
 
 // - Botão "Nova sheet" do plano de hoje (manhã ou turndown): nome opcional (há um por defeito) e bloco

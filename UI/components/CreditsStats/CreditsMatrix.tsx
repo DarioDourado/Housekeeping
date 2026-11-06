@@ -19,11 +19,11 @@ export const CreditsMatrix = () => {
 
   return (
     <div className="space-y-2">
-      <h4 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+      <h4 className="font-bold text-content flex items-center gap-1.5">
         <BarChart3 className="w-4 h-4 text-purple-600" />
         {t('credits.matrixTitle')}
       </h4>
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+      <div className="border border-line rounded-xl overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-slate-100 dark:bg-slate-800 font-semibold text-slate-600 dark:text-slate-300">
             <tr>
@@ -38,7 +38,7 @@ export const CreditsMatrix = () => {
               <tr key={typology}>
                 <td className="p-2.5 font-medium">{t(`credits.typologies.${TYPOLOGY_I18N_KEY[typology]}`)}</td>
                 <td className="p-2.5 tabular-nums">{label(CREDIT_TABLE[typology].stayover)}</td>
-                <td className="p-2.5 tabular-nums font-semibold text-rose-600">{label(CREDIT_TABLE[typology].departure)}</td>
+                <td className="p-2.5 tabular-nums font-semibold text-red-600">{label(CREDIT_TABLE[typology].departure)}</td>
                 <td className="p-2.5 tabular-nums text-purple-600">{label(REFRESH_CREDITS)}</td>
               </tr>
             ))}

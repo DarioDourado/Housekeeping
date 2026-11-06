@@ -51,8 +51,8 @@ export const SheetRemoveZone = ({ kind, className, children }: { kind: PlanKind;
           onDrop={event => { event.preventDefault(); event.stopPropagation(); remove(event.dataTransfer); }}
           className={`absolute top-2 left-1/2 -translate-x-1/2 z-40 px-5 py-3 rounded-xl border-2 border-dashed text-xs font-semibold flex items-center gap-1.5 shadow-lg transition-colors ${
             isOver
-              ? 'border-rose-600 bg-rose-600 text-white'
-              : 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
+              ? 'border-red-600 bg-red-600 text-white'
+              : 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/80 text-red-700 dark:text-red-300'
           }`}
         >
           <Trash2 className="w-3.5 h-3.5" />

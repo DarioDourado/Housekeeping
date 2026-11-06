@@ -55,7 +55,7 @@ export const StaffManagerModal = ({ onClose }: { onClose: () => void }) => {
           </button>
         ))}
 
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="border border-line rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
           {users.map(person => (
             <div key={person.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40">
               <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ export const StaffManagerModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{person.name}</span>
+                    <span className="font-bold text-content text-sm">{person.name}</span>
                     {person.isExtra && <span className="text-[10px] font-semibold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-1.5 py-0.5 rounded">{t('staff.extraBadge')}</span>}
                     <span className="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{t(`roles.${person.role}`)}</span>
                   </div>
@@ -89,7 +89,7 @@ export const StaffManagerModal = ({ onClose }: { onClose: () => void }) => {
                   {t('staff.takeProfile')}
                 </button>
                 {canManage && (
-                  <button onClick={() => handleDelete(person)} className="p-1.5 text-slate-400 hover:text-rose-600 rounded" title={t('staff.remove')} aria-label={t('staff.remove')}>
+                  <button onClick={() => handleDelete(person)} className="p-1.5 text-slate-400 hover:text-red-600 rounded" title={t('staff.remove')} aria-label={t('staff.remove')}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}

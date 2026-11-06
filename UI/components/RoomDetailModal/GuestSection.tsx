@@ -21,11 +21,11 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
 
   return (
     <>
-      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
+      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-line space-y-2">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('room.detail.guestOpera')}</span>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h3 className="text-base font-bold text-content flex items-center gap-2">
               {stay?.guestName ?? '—'}
               {stay?.vipType && (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
@@ -39,13 +39,13 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
             {stay?.arrivalEta && (
               <div>
                 <span className="text-xs text-slate-400 block font-medium">{t('room.detail.etaLabel')}</span>
-                <span className="text-xs font-bold text-rose-600 dark:text-rose-400 tabular-nums">{stay.arrivalEta}</span>
+                <span className="text-xs font-bold text-red-600 dark:text-red-400 tabular-nums">{stay.arrivalEta}</span>
               </div>
             )}
             {stay?.departureEta && (
               <div>
                 <span className="text-xs text-slate-400 block font-medium">{t('room.detail.etdLabel')}</span>
-                <span className="text-xs font-bold text-stone-600 dark:text-stone-300 tabular-nums">{stay.departureEta}</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 tabular-nums">{stay.departureEta}</span>
               </div>
             )}
           </div>
@@ -70,7 +70,7 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
       {DETAIL_STAY_FIELDS.some(([field]) => stay?.[field]) && (
         <div className="grid grid-cols-2 gap-3 text-xs">
           {DETAIL_STAY_FIELDS.map(([field, labelKey, isDate]) => stay?.[field] && (
-            <div key={field} className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div key={field} className="p-3 rounded-lg border border-line bg-surface">
               <span className="text-slate-400 block mb-0.5">{t(`room.detail.${labelKey}`)}</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200 tabular-nums">{isDate ? formatDateTime(stay[field]!, true) : stay[field]}</span>
             </div>
@@ -79,18 +79,18 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
       )}
 
       <div className="grid grid-cols-2 gap-3 text-xs">
-        <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="p-3 rounded-lg border border-line bg-surface">
           <span className="text-slate-400 block mb-0.5">{t('room.detail.operaSync')}</span>
           <div className="flex items-center justify-between font-medium">
             <span>{t('room.detail.lastOperaStatus', { status: t(`status.${room.operaStatus.toLowerCase()}`) })}</span>
             <span className="text-slate-500 tabular-nums">{formatTime(room.operaStatusUpdatedAt)}</span>
           </div>
         </div>
-        <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="p-3 rounded-lg border border-line bg-surface">
           <span className="text-slate-400 block mb-0.5">{t('room.detail.linenTitle')}</span>
           <div className="flex items-center gap-1.5 font-semibold">
-            <RotateCw className={`w-3.5 h-3.5 ${stay?.isLinenChangeDue ? 'text-cyan-600' : 'text-slate-400'}`} />
-            <span className={stay?.isLinenChangeDue ? 'text-cyan-700 dark:text-cyan-300' : 'text-slate-500'}>
+            <RotateCw className={`w-3.5 h-3.5 ${stay?.isLinenChangeDue ? 'text-blue-600' : 'text-slate-400'}`} />
+            <span className={stay?.isLinenChangeDue ? 'text-blue-700 dark:text-blue-300' : 'text-slate-500'}>
               {stay?.isLinenChangeDue ? t('room.detail.linenDue') : t('room.detail.linenNotDue')}
             </span>
           </div>
@@ -118,7 +118,7 @@ export const GuestSection = ({ view }: { view: TaskView }) => {
           </div>
         )}
         {stay?.preferences && (
-          <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+          <div className="p-3 rounded-lg border border-line">
             <span className="font-semibold text-slate-500 block mb-0.5">{t('room.detail.preferences')}</span>
             <p className="text-slate-700 dark:text-slate-300">{stay.preferences}</p>
           </div>

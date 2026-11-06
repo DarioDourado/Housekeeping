@@ -15,12 +15,12 @@ export const MobileTaskList = ({ views, pendingAlerts, onOpenAlerts }: MobileTas
   return (
     <div className="space-y-3">
       {pendingAlerts > 0 && (
-        <button onClick={onOpenAlerts} className="w-full p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-left flex items-center justify-between gap-2 shadow-xs hover:bg-rose-100">
-          <div className="flex items-center gap-2 text-rose-800 dark:text-rose-200 text-xs font-semibold">
-            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+        <button onClick={onOpenAlerts} className="w-full p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-left flex items-center justify-between gap-2 shadow-xs hover:bg-red-100">
+          <div className="flex items-center gap-2 text-red-800 dark:text-red-200 text-xs font-semibold">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
             <span>{t('mobile.alertBanner', { count: pendingAlerts })}</span>
           </div>
-          <ChevronRight className="w-4 h-4 text-rose-600 shrink-0" />
+          <ChevronRight className="w-4 h-4 text-red-600 shrink-0" />
         </button>
       )}
 

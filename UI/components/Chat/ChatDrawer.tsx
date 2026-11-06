@@ -36,13 +36,13 @@ export const ChatDrawer = ({ onClose }: { onClose: () => void }) => {
       role="dialog"
       aria-label={t('chat.title')}
       onKeyDown={event => event.key === 'Escape' && onClose()}
-      className="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200"
+      className="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-surface border-l border-line shadow-2xl flex flex-col animate-in slide-in-from-right duration-200"
     >
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/40">
+      <div className="p-4 border-b border-line flex items-center justify-between bg-slate-50 dark:bg-slate-800/40">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"><MessageSquare className="w-4 h-4" /></div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{t('chat.title')}</h3>
+            <h3 className="text-sm font-bold text-content">{t('chat.title')}</h3>
             <p className="text-[11px] text-slate-500">{t('chat.subtitle')}</p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export const ChatDrawer = ({ onClose }: { onClose: () => void }) => {
         </button>
       </div>
 
-      <div role="tablist" className="p-2 border-b border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-800/20 flex gap-1 overflow-x-auto">
+      <div role="tablist" className="p-2 border-b border-line bg-slate-100/60 dark:bg-slate-800/20 flex gap-1 overflow-x-auto">
         {channels.map(channel => (
           <button
             key={channel.id}

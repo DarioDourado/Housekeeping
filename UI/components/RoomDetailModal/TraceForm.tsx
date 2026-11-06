@@ -39,7 +39,7 @@ export const TraceForm = ({ roomId, roomNumber }: { roomId: string; roomNumber: 
           value={text}
           onChange={event => setText(event.target.value)}
           placeholder={t('room.detail.tracePlaceholder')}
-          className="flex-1 px-3 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          className="flex-1 px-3 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-content"
         />
         <button type="submit" className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md">
           {t('room.detail.send')}

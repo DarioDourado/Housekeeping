@@ -9,7 +9,7 @@ const STATE_STYLE: Record<SyncState, string> = {
   [SyncState.CONFIRMED]: 'text-emerald-600 dark:text-emerald-400',
   [SyncState.PENDING]: 'text-amber-600 dark:text-amber-400',
   [SyncState.FAILED]: 'text-red-600 dark:text-red-400',
-  [SyncState.CONFLICT]: 'text-orange-600 dark:text-orange-400'
+  [SyncState.CONFLICT]: 'text-amber-600 dark:text-amber-400'
 };
 
 interface OperaJobRowProps {
@@ -26,14 +26,14 @@ export const OperaJobRow = ({ job, roomNumber, canRetry, onRetry }: OperaJobRowP
   const needsDecision = job.state === SyncState.CONFLICT || job.state === SyncState.FAILED;
 
   return (
-    <div className={`p-3 rounded-xl border bg-white dark:bg-slate-900 flex items-center justify-between gap-3 text-xs ${needsDecision ? 'border-orange-300 dark:border-orange-800' : 'border-slate-200 dark:border-slate-800'}`}>
+    <div className={`p-3 rounded-xl border bg-surface flex items-center justify-between gap-3 text-xs ${needsDecision ? 'border-amber-300 dark:border-amber-800' : 'border-line'}`}>
       <div className="flex items-center gap-3">
         <div className={`p-1.5 rounded-lg ${outbound ? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400' : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400'}`}>
           {outbound ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4" />}
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-900 dark:text-slate-100">
+            <span className="font-bold text-content">
               {job.roomId === null || roomNumber === ALL_ROOMS ? t('opera.allRooms') : t('opera.room', { number: roomNumber ?? job.roomId })}
             </span>
             <span className="text-slate-400">·</span>
@@ -42,7 +42,7 @@ export const OperaJobRow = ({ job, roomNumber, canRetry, onRetry }: OperaJobRowP
             </span>
           </div>
           <span className="text-[11px] text-slate-500">{localized(t, job.source)}</span>
-          {job.lastError && <span className="block text-[11px] text-orange-600 dark:text-orange-400">{localized(t, job.lastError)}</span>}
+          {job.lastError && <span className="block text-[11px] text-amber-600 dark:text-amber-400">{localized(t, job.lastError)}</span>}
         </div>
       </div>
 

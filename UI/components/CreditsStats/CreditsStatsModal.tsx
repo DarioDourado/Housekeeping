@@ -7,7 +7,7 @@ import { PlanKind } from '@/types/housekeeping.types';
 import { Modal } from '@/UI/components/Modal';
 import { CreditsMatrix } from './CreditsMatrix';
 
-const CARD = 'p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50';
+const CARD = 'p-4 rounded-xl border border-line bg-slate-50 dark:bg-slate-800/50';
 
 export const CreditsStatsModal = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation();
@@ -47,7 +47,7 @@ export const CreditsStatsModal = ({ onClose }: { onClose: () => void }) => {
           </div>
           <div className={CARD}>
             <span className="text-slate-400 block font-medium mb-1">{t('credits.targetPerHousekeeper')}</span>
-            <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">{t('credits.targetValue', { target: DAILY_CREDIT_TARGET })}</span>
+            <span className="text-2xl font-bold text-content tabular-nums">{t('credits.targetValue', { target: DAILY_CREDIT_TARGET })}</span>
             <span className="text-[11px] text-slate-500 block mt-1">{t('credits.targetExample')}</span>
           </div>
           <div className={CARD}>
@@ -60,14 +60,14 @@ export const CreditsStatsModal = ({ onClose }: { onClose: () => void }) => {
         <CreditsMatrix />
 
         <div className="space-y-2">
-          <h4 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+          <h4 className="font-bold text-content flex items-center gap-1.5">
             <Users className="w-4 h-4 text-emerald-600" />
             {t('credits.inspectionsBySupervisor')}
           </h4>
           <div className="grid grid-cols-2 gap-3">
             {Object.keys(bySupervisor).length > 0 ? (
               Object.entries(bySupervisor).map(([name, count]) => (
-                <div key={name} className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-between">
+                <div key={name} className="p-3 rounded-lg border border-line bg-white dark:bg-slate-800 flex items-center justify-between">
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{name}</span>
                   <span className="font-bold text-emerald-600 tabular-nums">{t('credits.roomsInspected', { count })}</span>
                 </div>

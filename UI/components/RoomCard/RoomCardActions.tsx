@@ -87,7 +87,7 @@ export const RoomCardActions = ({ view }: { view: TaskView }) => {
         {canRequestCorrection && awaitingInspection && (
           <button
             onClick={() => openCorrection(task.id)}
-            className={`${BUTTON} font-medium text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800`}
+            className={`${BUTTON} font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800`}
             title={t('room.reproveTitle')}
           >
             <span>{t('room.reprove')}</span>
@@ -113,7 +113,7 @@ export const RoomCardActions = ({ view }: { view: TaskView }) => {
         {canPrioritize && (
           <button
             onClick={() => togglePriority(task.id)}
-            className={`${ICON_BUTTON} ${task.isPriority ? '!text-rose-600 bg-rose-50 dark:bg-rose-950 dark:!text-rose-400' : ''}`}
+            className={`${ICON_BUTTON} ${task.isPriority ? '!text-red-600 bg-red-50 dark:bg-red-950 dark:!text-red-400' : ''}`}
             title={task.isPriority ? t('room.priorityRemoveTitle') : t('room.priorityAddTitle')}
             aria-label={t('room.priorityLabel')}
           >

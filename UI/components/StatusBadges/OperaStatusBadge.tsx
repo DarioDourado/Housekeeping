@@ -3,7 +3,7 @@ import { RoomStatus } from '@/types/housekeeping.types';
 
 const STYLES: Record<RoomStatus, string> = {
   [RoomStatus.DIRTY]: 'text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60',
-  [RoomStatus.CLEAN]: 'text-sky-700 bg-sky-50 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60',
+  [RoomStatus.CLEAN]: 'text-blue-700 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60',
   [RoomStatus.INSPECTED]: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60'
 };
 

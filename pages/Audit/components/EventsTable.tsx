@@ -20,7 +20,7 @@ export const EventsTable = ({ events, staffNames }: EventsTableProps) => {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-xs">
-        <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold">
+        <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-line text-slate-500 font-semibold">
           <tr>{COLUMNS.map(column => <th key={column} className="py-3 px-4">{t(`audit.columns.${column}`)}</th>)}</tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-normal">
@@ -33,7 +33,7 @@ export const EventsTable = ({ events, staffNames }: EventsTableProps) => {
               return (
                 <tr key={event.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                   <td className="py-3 px-4 font-mono text-slate-400 tabular-nums whitespace-nowrap">{formatTimeWithSeconds(event.occurredAt)}</td>
-                  <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100 tabular-nums">{event.roomNumber === ALL_ROOMS ? t('audit.allRooms') : event.roomNumber}</td>
+                  <td className="py-3 px-4 font-bold text-content tabular-nums">{event.roomNumber === ALL_ROOMS ? t('audit.allRooms') : event.roomNumber}</td>
                   <td className="py-3 px-4">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium ${color}`}>
                       <Icon className="w-3 h-3" />

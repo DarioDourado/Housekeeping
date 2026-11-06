@@ -17,7 +17,7 @@ import {
 } from '@/types/housekeeping.enums';
 
 // - Fonte única de verdade (14-types): o schema valida o que vem do transporter (hoje localStorage, amanhã a API FastAPI)
-//   e o tipo da entidade é inferido dele. Espelha o contrato em 34-backend-fastapi.
+//   e o tipo da entidade é inferido dele. Espelha o contrato em docs/api/domain-contract.md.
 
 export { userSchema };
 

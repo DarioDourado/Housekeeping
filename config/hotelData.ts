@@ -31,7 +31,7 @@ import {
 // =====================================================================================
 // MOCK DE DEMONSTRAÇÃO (Vila Vita Parc). Não é código de produção: no BE estes dados vêm
 // do Opera (quartos, estadias), da configuração (secções, equipas) e da base de dados
-// (planos, tarefas, histórico). Está na forma do contrato FE↔BE (ver 34-backend-fastapi).
+// (planos, tarefas, histórico). Está na forma do contrato FE↔BE (ver docs/api/domain-contract.md).
 // =====================================================================================
 
 const TODAY = operationalDate();

@@ -1,4 +1,4 @@
-// - Enums do contrato FE↔BE (ver .agents/34-backend-fastapi/references/domain-contract.md).
+// - Enums do contrato FE↔BE (ver docs/api/domain-contract.md).
 
 export enum RoomStatus {
   DIRTY = 'DIRTY',

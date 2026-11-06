@@ -1,4 +1,4 @@
-// - Modelo do contrato FE↔BE (ver .agents/34-backend-fastapi/references/domain-contract.md).
+// - Modelo do contrato FE↔BE (ver docs/api/domain-contract.md).
 //   Room (físico, vem do Opera) ≠ ServiceTask (intervenção) ≠ ServicePlan (distribuição de um dia e serviço).
 //   Enums em housekeeping.enums.ts; entidades inferidas dos schemas em housekeeping.schemas.ts; este ficheiro é a porta de entrada.
 

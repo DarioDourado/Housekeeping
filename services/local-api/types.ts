@@ -14,7 +14,7 @@ import type {
 import type { User } from '@/types/auth.types';
 
 // - "Servidor" de demonstração: as regras de negócio vivem aqui, não na UI. O BE FastAPI implementa os mesmos comandos
-//   (ver .agents/34-backend-fastapi/references/domain-contract.md).
+//   (ver docs/api/domain-contract.md).
 
 export interface HousekeepingState {
   rooms: Room[];

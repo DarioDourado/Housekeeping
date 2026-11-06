@@ -64,7 +64,8 @@ Listas sem paginação (o hotel tem ~74 quartos e ~60 pessoas), exceto eventos, 
     }],
     "counters": TaskSheetCounters       // sem estimatedCredits (créditos em standby)
   }],
-  "serverTime": string                  // ISO; o cliente usa-o para durações e "há x min"
+  "serverTime": string,                 // ISO; o cliente usa-o para durações e "há x min"
+  "pollIntervalSeconds": number         // POLL_INTERVAL_SECONDS da API: o cliente pede o quadro outra vez ao fim deste tempo
 }
 ```
 
@@ -226,7 +227,7 @@ Fechadas com o utilizador em 2026-11-06:
 
 | # | Decisão |
 |---|---|
-| 1 | **Tempo real: polling** (D5). O FE já o faz por `staleTime`; SSE só se a latência incomodar. |
+| 1 | **Tempo real: polling, 30 s por omissão** (D5). Os dados têm de chegar a todos os dispositivos; aceita-se até 30 s de atraso. O intervalo ajusta-se sem mexer no código: `POLL_INTERVAL_SECONDS` na API (5–300), devolvido em cada `GET /boards/{kind}` como `pollIntervalSeconds`, e `VITE_POLL_INTERVAL_SECONDS` no FE como valor até a primeira resposta chegar. SSE só se 30 s não chegar. |
 | 2 | **Leitura agregada:** `GET /boards/{kind}` (secção 3). Com polling, 1 pedido por ciclo em vez de 7. |
 | 3 | **Resposta dos comandos:** `CommandResult` (secção 3.1). |
 | 4 | **Créditos em standby.** A API não calcula nem guarda créditos na Fase 1; o FE mantém a tabela ilustrativa só para visualização. Sem `estimatedCredits` no contrato. |

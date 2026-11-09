@@ -20,7 +20,7 @@
 ## 2. Autenticação e ator
 
 - Hoje: sessão = `userId` em `localStorage`; qualquer password serve; o **cliente envia o `Actor`** (`id`, `name`, `role`, `deviceId?`).
-- **Implementado em `housekeeping-api`** (2026-11-06): `POST /auth/login` (access JWT de 15 min no corpo + refresh em cookie httpOnly `path=/api/v1/auth`, ou no corpo com `X-Refresh-Transport: body`), `POST /auth/refresh` (rotação; reutilizar o refresh antigo fora de 20 s revoga a sessão), `POST /auth/logout` (204; o access deixa de valer já), `GET /auth/me`. Sessões no SQL Server com teto de 30 dias; 5 falhas por (conta, IP) → `429 LOGIN_LOCKED` 15 min. Códigos: `INVALID_CREDENTIALS`, `REFRESH_TOKEN_INVALID`, `REFRESH_TOKEN_MISSING`, `SESSION_INVALID`, `NOT_AUTHENTICATED`, `PERMISSION_DENIED`, `ORIGIN_NOT_ALLOWED`, `LOGIN_LOCKED`, `RATE_LIMITED`. O ator é sempre o do token; o corpo nunca o leva. `deviceId` vem do cabeçalho `X-Device-Id`.
+- **Implementado em `housekeeping-api`** (2026-11-06): `POST /auth/login` (access JWT de 15 min no corpo + refresh em cookie httpOnly `path=/api/v1/auth`, ou no corpo com `X-Refresh-Transport: body`), `POST /auth/refresh` (rotação; reutilizar o refresh antigo fora de 20 s revoga a sessão), `POST /auth/logout` (204; o access deixa de valer já), `GET /auth/me`. Sessões no SQL Server com teto de 30 dias; 5 falhas por (conta, IP) → `429 LOGIN_LOCKED` 15 min. Códigos: `INVALID_CREDENTIALS`, `REFRESH_TOKEN_INVALID`, `REFRESH_TOKEN_MISSING`, `SESSION_INVALID`, `NOT_AUTHENTICATED`, `PERMISSION_DENIED`, `ORIGIN_NOT_ALLOWED`, `LOGIN_LOCKED`, `RATE_LIMITED`. O ator é sempre o do token; o corpo nunca o leva. `deviceId` vem do cabeçalho `X-Device-Id` (opcional, até 100 caracteres; nas rotas de execução, secção 4.1, grava-se no evento).
 - Perfis (`UserRole`): `superadmin` (programador), `admin` (governanta geral), `sub_admin` (chefe de andares), `user` (colaboradora), `reception`. Substituem o `JobTitle` do FE; detalhe na secção 8.
 
 ## 3. Leituras
@@ -96,16 +96,40 @@ Colunas: **Guarda** = condição que hoje faz o comando não fazer nada (devolve
 
 ### 4.1 Execução (`executionCommands.ts`)
 
-| Comando | Rota **[proposta]** | Corpo | Guarda (hoje: sem efeito) | Efeito | Eventos | Opera |
+**Implementado em `housekeeping-api`** (2026-11-09): as seis rotas abaixo, com o comportamento descrito a seguir à tabela. A coluna "Guarda" é o que o FE faz hoje; o que a API devolve em cada guarda está em "Resposta da API".
+
+| Comando | Rota | Corpo | Guarda (hoje: sem efeito) | Efeito | Eventos | Opera |
 |---|---|---|---|---|---|---|
-| `startTask` | `POST /tasks/{id}/start` | `executorIds?` | estado ∉ {`PENDING`, `NOT_PERFORMED`} | → `IN_PROGRESS`; guarda `startedAt`, `startedById`, executores; limpa fim e motivo | `ROOM_STARTED` | não |
-| `finishTask` | `POST /tasks/{id}/finish` | `executorIds?`, `occurredAt?` | estado ∉ {`PENDING`, `IN_PROGRESS`} | → `COMPLETED`; `durationSeconds` real, sem mínimo (anomalia é para mostrar); limpeza passa a `inspectionStatus=PENDING` | `ROOM_FINISHED` (limpeza/refresh) ou `TURNDOWN_UPDATED` | **só `CLEANING`**: → `CLEAN` |
-| `recordNotPerformed` | `POST /tasks/{id}/not-performed` | `reason` (`DND`/`REFUSE_SERVICE`/`ALREADY_DONE`) | tarefa `COMPLETED`; ou já `NOT_PERFORMED` com o mesmo motivo | → `NOT_PERFORMED`, `inspectionStatus=NOT_REQUIRED` | `DND_RECORDED` / `SERVICE_REFUSED` / `TURNDOWN_UPDATED` | não |
-| `reopenTask` | `POST /tasks/{id}/reopen` | — | tipo `CLEANING`, ou já `PENDING` | repõe a tarefa a `PENDING` (`resetTask`) | `TURNDOWN_UPDATED` ou `REFRESH_RECORDED` | não |
-| `reopenRoom` | `POST /rooms/{id}/reopen` | `reason?`, `occurredAt?` | quarto inexistente | repõe a limpeza **do plano DAY ativo** a `PENDING` | `ROOM_REOPENED` | → `DIRTY` |
-| `setRoomStatus` | `PUT /rooms/{id}/status` | `status`, `occurredAt?` | estado igual ao atual | `DIRTY` delega em `reopenRoom`. `CLEAN`/`INSPECTED` alinham a limpeza do dia (`COMPLETED`; `INSPECTED` → `APPROVED`, `CLEAN` → `PENDING`) | `ROOM_STATUS_CHANGED` | → estado pedido |
+| `startTask` | `POST /tasks/{id}/start` | `executorIds?`, `clientEventId?`, `occurredAt?` (ignorado) | estado ∉ {`PENDING`, `NOT_PERFORMED`} | → `IN_PROGRESS`; guarda `startedAt`, `startedById`, executores; limpa fim e motivo | `ROOM_STARTED` | não |
+| `finishTask` | `POST /tasks/{id}/finish` | `executorIds?`, `clientEventId?`, `occurredAt?` (ignorado) | estado ∉ {`PENDING`, `IN_PROGRESS`} | → `COMPLETED`; `durationSeconds` real, sem mínimo (anomalia é para mostrar); limpeza passa a `inspectionStatus=PENDING` | `ROOM_FINISHED` (limpeza/refresh) ou `TURNDOWN_UPDATED` | **só `CLEANING`**: → `CLEAN` |
+| `recordNotPerformed` | `POST /tasks/{id}/not-performed` | `reason` (`DND`/`REFUSE_SERVICE`/`ALREADY_DONE`), `clientEventId?` | tarefa `COMPLETED`; ou já `NOT_PERFORMED` com o mesmo motivo | → `NOT_PERFORMED`, `inspectionStatus=NOT_REQUIRED` | `DND_RECORDED` / `SERVICE_REFUSED` / `TURNDOWN_UPDATED` | não |
+| `reopenTask` | `POST /tasks/{id}/reopen` | — (sem corpo) | tipo `CLEANING`, ou já `PENDING` | repõe a tarefa a `PENDING` (`resetTask`) | `TURNDOWN_UPDATED` ou `REFRESH_RECORDED` | não |
+| `reopenRoom` | `POST /rooms/{id}/reopen` | `reason?` (até 500 caracteres), `occurredAt?` (ignorado); o corpo é obrigatório (`{}` serve) | quarto inexistente | repõe a limpeza **do plano DAY ativo** a `PENDING` | `ROOM_REOPENED` | → `DIRTY` |
+| `setRoomStatus` | `PUT /rooms/{id}/status` | `status` (`DIRTY`/`CLEAN`/`INSPECTED`), `occurredAt?` (ignorado) | estado igual ao atual | `DIRTY` delega em `reopenRoom`. `CLEAN`/`INSPECTED` alinham a limpeza do dia (`COMPLETED`; `INSPECTED` → `APPROVED`, `CLEAN` → `PENDING`) | `ROOM_STATUS_CHANGED` | → estado pedido |
 
 Execução (`resolveExecution`): quem **executou** ≠ quem **registou** (§14.5). Com `executorIds` explícito, `onBehalfOfTeam = !executorIds.includes(ator)`. Sem eles: se a sheet (sem a responsável) tem exatamente 1 pessoa e é o ator, executor = ator; caso contrário `executorIds = []` e `onBehalfOfTeam = true` (telemóvel partilhado). `finishTask` mantém os executores do início se já existiam.
+
+**Resposta da API** (seis rotas, `200` com `CommandResult`, secção 3.1):
+
+- **Permissões e escopo.** `start`, `finish` e `not-performed` exigem `task.startFinish`; `reopen` (tarefa), `reopenRoom` e `setRoomStatus` exigem `room.markDirty` (secção 8). Falta de permissão: `403 PERMISSION_DENIED`. A colaboradora só mexe nas tarefas das sheets onde está atribuída: `403 SCOPE_FORBIDDEN`, verificado antes de qualquer escrita.
+- **Pedido.** Campos desconhecidos no corpo dão `422 VALIDATION_ERROR` (por exemplo `occurredAt` em `not-performed`, que não o aceita). Limites: `clientEventId` até 36 caracteres; `executorIds` até 20 ids de até 36. O cabeçalho `X-Device-Id` é opcional e vai para `deviceId` do evento.
+- **`clientEventId`** só em `start`, `finish` e `not-performed`. Idempotente por **(ator, `clientEventId`)**: se esse ator já registou um evento com esse id, devolve `200` com `changed: {}` e `events: []`, sem alterar nada (há índice único em `task_events`). É avaliado depois de carregar a tarefa e verificar o escopo (um `404`/`403` ganha) e antes da guarda de estado. `reopen`, `reopenRoom` e `setRoomStatus` não o têm.
+- **`occurredAt`** aceite em `start`, `finish`, `reopenRoom` e `setRoomStatus` e **ignorado**: o instante é sempre o relógio do servidor (secção 6.2).
+- **`changed`** traz `tasks`, `rooms` e `syncJobs` (só as chaves com alterações); `toast` não é preenchido. Depois do commit, e só se o comando escreveu eventos, a API avisa o WebSocket com `["tasks", "rooms", "syncJobs"]`.
+
+| Comando | Guarda | Resposta |
+|---|---|---|
+| qualquer tarefa | tarefa inexistente | `404 TASK_NOT_FOUND` |
+| `startTask` | estado ∉ {`PENDING`, `NOT_PERFORMED`} | `409 TASK_INVALID_TRANSITION` |
+| `finishTask` | estado ∉ {`PENDING`, `IN_PROGRESS`} | `409 TASK_INVALID_TRANSITION` |
+| `recordNotPerformed` | tarefa `COMPLETED` | `409 TASK_INVALID_TRANSITION` |
+| `recordNotPerformed` | já `NOT_PERFORMED` com o mesmo motivo | **`200` sem efeito** (`changed: {}`, `events: []`); outro motivo troca-o |
+| `reopenTask` | tipo `CLEANING` (a limpeza reabre-se por `reopenRoom`) | `422 TASK_KIND_NOT_ALLOWED` |
+| `reopenTask` | já `PENDING` | **`200` sem efeito** |
+| `reopenRoom`, `setRoomStatus` | quarto inexistente | `404 ROOM_NOT_FOUND` |
+| `setRoomStatus` | estado igual ao atual do quarto | **`200` sem efeito** |
+
+`reopenRoom` não é idempotente: repetido, volta a escrever o evento e um novo job `DIRTY` (mesmo com o quarto já `DIRTY`). Sem tarefa de limpeza no plano `DAY` ativo, só escreve o evento e o job. `finishTask` numa limpeza escreve ainda o job do Opera e o quarto (`CLEAN`); em refresh e turndown não toca no Opera. As escritas no Opera seguem a secção 6.2.
 
 ### 4.2 Inspeção (`inspectionCommands.ts`)
 
@@ -198,6 +222,8 @@ Regra do LEAD (`withLead`): é sempre uma governanta. Se o atual sai, passa à p
 | Sem permissão | (só esconde botões) | `403` |
 | Escrita no Opera mais antiga que o estado atual | job `CONFLICT`, comando **tem sucesso** | `200`; o conflito vem no corpo e no evento `OPERA_CONFLICT_DETECTED`. **Não é um erro HTTP** |
 
+**Implementado nas rotas de execução** (secção 4.1): `404 TASK_NOT_FOUND`, `404 ROOM_NOT_FOUND`, `409 TASK_INVALID_TRANSITION`, `422 TASK_KIND_NOT_ALLOWED`, `403 SCOPE_FORBIDDEN`, e ainda `403 PERMISSION_DENIED` e `422 VALIDATION_ERROR` (campo desconhecido ou fora dos limites). São `200` sem efeito (`changed: {}`, `events: []`): repetir um `clientEventId` já aplicado, `recordNotPerformed` com o mesmo motivo, `reopenTask` numa tarefa já `PENDING` e `setRoomStatus` para o estado em que o quarto já está. Um conflito de escrita no Opera continua a ser `200` (secção 6.2).
+
 Formato (já implementado em `housekeeping-api`): `application/problem+json` (RFC 9457) com `code` estável em `MAIUSCULAS_COM_UNDERSCORE` (`VALIDATION_ERROR`, `HTTP_404`, `TASK_INVALID_TRANSITION`, `SCOPE_FORBIDDEN`, `STALE_RESOURCE`) e `errors[]` por campo nos 422; o cliente traduz `errors.<CODE>` e nunca mostra texto do servidor. As mensagens geradas pelo sistema continuam a ser `LocalizedText` (`{key, params}`).
 
 ## 6. Regras transversais
@@ -211,10 +237,13 @@ Atenção: eventos que **não são sobre um quarto** reutilizam `roomId`/`roomNu
 - `idempotencyKey = roomId:alvo:occurredAt`. A mesma chave repetida **não duplica nada**.
 - Se `room.operaStatusUpdatedAt > occurredAt`: job `CONFLICT`, **não altera o quarto**, regista `OPERA_CONFLICT_DETECTED`. Só `retryOperaJob` (decisão humana) o resolve.
 - **Diferença FE → API.** No FE a escrita é imediata (job nasce `CONFIRMED`). Na API (plano T7) é uma *outbox*: o job é criado `PENDING` na mesma transação do evento, um worker escreve no Opera depois, e o pedido HTTP nunca espera pelo Opera. Consequências: (1) a resposta do comando devolve o job `PENDING` e a UI tem de mostrar "a sincronizar" em vez de assumir o novo estado; (2) a verificação de conflito acontece no worker, por isso faz sentido mesmo com `occurredAt` do servidor (o Opera pode mudar entre o evento e a escrita).
+- **Implementado hoje (2026-11-09), até haver integração com o Opera e worker.** Os comandos de execução (secção 4.1) **não** usam a outbox: o job nasce `CONFIRMED` (com `operaObservedAt` = agora) e o estado do quarto (`operaStatus`, `operaStatusUpdatedAt`) muda **na mesma transação** que o evento. A resposta traz o quarto já alterado em `changed.rooms` e o job em `changed.syncJobs`, por isso a UI pode assumir o novo estado e não mostra "a sincronizar". A `idempotencyKey` (`roomId:alvo:instante`, instante = relógio do servidor) repetida não cria outro job. O conflito (`room.operaStatusUpdatedAt > occurredAt`) mantém-se: job `CONFLICT` e `OPERA_CONFLICT_DETECTED`, o quarto não muda (vai na mesma em `changed.rooms`, inalterado, junto com o job); com o relógio do servidor só aconteceria com um estado do Opera no futuro. **A outbox com job `PENDING` e worker continua a ser o alvo** e passa a valer quando houver cliente Opera (plano T7); nessa altura as consequências (1) e (2) acima voltam a aplicar-se e o FE terá de tratar o job `PENDING`.
 - **`occurredAt`.** Hoje 5 comandos aceitam-no do cliente (`finishTask`, `reopenRoom`, `setRoomStatus`, `inspectTask`; `receiveOperaStatus` com `observedAt`). O plano usa sempre o relógio do servidor (Review Focus 2) e o v0.3.1 põe o offline fora da Fase 1. Na Fase 1 o parâmetro é ignorado; volta, validado (não no futuro, desvio limitado), quando houver fila offline. `observedAt` do Opera é diferente: vem do sistema de origem e mantém-se.
 
 ### 6.3 Concorrência e idempotência
 Hoje o estado é substituído por inteiro e as operações são síncronas, por isso não há conflitos possíveis. Do plano de backend (rascunho): `version` nas entidades mutáveis; versão velha com `If-Match` → `412 STALE_RESOURCE`, sem `If-Match` → `409 CONFLICT` (regra `DB-LOCK` da API, implementada com `version_id_col`); e `clientEventId` em todas as escritas de execução (repetir o mesmo não duplica o evento).
+
+**Estado nos comandos de execução (secção 4.1), 2026-11-09:** `clientEventId` está implementado em `start`, `finish` e `not-performed` (secção 4.1). **`If-Match` / `412 STALE_RESOURCE` ainda NÃO está implementado** nestes comandos: não leem `If-Match` e não comparam `version`; a única proteção contra dois pedidos sobre a mesma tarefa é a guarda de estado (`409 TASK_INVALID_TRANSITION`).
 
 ### 6.4 Identificadores
 Hoje o cliente gera ids (`prefix-Date.now()-random`). O servidor gera **UUID v7** (RFC 9562), guardado como texto de 36 caracteres: o `UNIQUEIDENTIFIER` do SQL Server ordena pelos últimos bytes e perderia a ordem temporal. Os campos `id` saem de `addStaff`, `addSection`, `addBlockTeam` e `addSheet`.

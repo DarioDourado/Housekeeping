@@ -88,7 +88,7 @@ Todos os comandos devolvem `200` com:
 }
 ```
 
-Um comando idempotente repetido (secção 5) devolve `changed: {}` e `events: []`. Os jobs do Opera vêm em `changed.syncJobs` com `state: PENDING` (secção 6.2). Na Fase 1 o cliente pode simplesmente invalidar o quadro ao receber a resposta; `changed` permite depois atualizar a cache sem refetch.
+Um comando idempotente repetido (secção 5) devolve `changed: {}` e `events: []`. Os jobs do Opera vêm em `changed.syncJobs` com `state: PENDING` (secção 6.2); nas rotas de execução, até haver worker Opera, o job vem `CONFIRMED` (ver 6.2). Na Fase 1 o cliente pode simplesmente invalidar o quadro ao receber a resposta; `changed` permite depois atualizar a cache sem refetch.
 
 ## 4. Comandos
 
@@ -104,7 +104,7 @@ Colunas: **Guarda** = condição que hoje faz o comando não fazer nada (devolve
 | `finishTask` | `POST /tasks/{id}/finish` | `executorIds?`, `clientEventId?`, `occurredAt?` (ignorado) | estado ∉ {`PENDING`, `IN_PROGRESS`} | → `COMPLETED`; `durationSeconds` real, sem mínimo (anomalia é para mostrar); limpeza passa a `inspectionStatus=PENDING` | `ROOM_FINISHED` (limpeza/refresh) ou `TURNDOWN_UPDATED` | **só `CLEANING`**: → `CLEAN` |
 | `recordNotPerformed` | `POST /tasks/{id}/not-performed` | `reason` (`DND`/`REFUSE_SERVICE`/`ALREADY_DONE`), `clientEventId?` | tarefa `COMPLETED`; ou já `NOT_PERFORMED` com o mesmo motivo | → `NOT_PERFORMED`, `inspectionStatus=NOT_REQUIRED` | `DND_RECORDED` / `SERVICE_REFUSED` / `TURNDOWN_UPDATED` | não |
 | `reopenTask` | `POST /tasks/{id}/reopen` | — (sem corpo) | tipo `CLEANING`, ou já `PENDING` | repõe a tarefa a `PENDING` (`resetTask`) | `TURNDOWN_UPDATED` ou `REFRESH_RECORDED` | não |
-| `reopenRoom` | `POST /rooms/{id}/reopen` | `reason?` (até 500 caracteres), `occurredAt?` (ignorado); o corpo é obrigatório (`{}` serve) | quarto inexistente | repõe a limpeza **do plano DAY ativo** a `PENDING` | `ROOM_REOPENED` | → `DIRTY` |
+| `reopenRoom` | `POST /rooms/{id}/reopen` | `reason?` (até 500 caracteres), `occurredAt?` (ignorado) | quarto inexistente | repõe a limpeza **do plano DAY ativo** a `PENDING` | `ROOM_REOPENED` | → `DIRTY` |
 | `setRoomStatus` | `PUT /rooms/{id}/status` | `status` (`DIRTY`/`CLEAN`/`INSPECTED`), `occurredAt?` (ignorado) | estado igual ao atual | `DIRTY` delega em `reopenRoom`. `CLEAN`/`INSPECTED` alinham a limpeza do dia (`COMPLETED`; `INSPECTED` → `APPROVED`, `CLEAN` → `PENDING`) | `ROOM_STATUS_CHANGED` | → estado pedido |
 
 Execução (`resolveExecution`): quem **executou** ≠ quem **registou** (§14.5). Com `executorIds` explícito, `onBehalfOfTeam = !executorIds.includes(ator)`. Sem eles: se a sheet (sem a responsável) tem exatamente 1 pessoa e é o ator, executor = ator; caso contrário `executorIds = []` e `onBehalfOfTeam = true` (telemóvel partilhado). `finishTask` mantém os executores do início se já existiam.
@@ -112,7 +112,7 @@ Execução (`resolveExecution`): quem **executou** ≠ quem **registou** (§14.5
 **Resposta da API** (seis rotas, `200` com `CommandResult`, secção 3.1):
 
 - **Permissões e escopo.** `start`, `finish` e `not-performed` exigem `task.startFinish`; `reopen` (tarefa), `reopenRoom` e `setRoomStatus` exigem `room.markDirty` (secção 8). Falta de permissão: `403 PERMISSION_DENIED`. A colaboradora só mexe nas tarefas das sheets onde está atribuída: `403 SCOPE_FORBIDDEN`, verificado antes de qualquer escrita.
-- **Pedido.** Campos desconhecidos no corpo dão `422 VALIDATION_ERROR` (por exemplo `occurredAt` em `not-performed`, que não o aceita). Limites: `clientEventId` até 36 caracteres; `executorIds` até 20 ids de até 36. O cabeçalho `X-Device-Id` é opcional e vai para `deviceId` do evento.
+- **Pedido.** `start`, `finish`, `not-performed`, `POST /rooms/{id}/reopen` e `PUT /rooms/{id}/status` exigem corpo JSON (sem corpo: `422`; `{}` serve em `start`, `finish` e `reopenRoom`, onde todos os campos são opcionais); só `POST /tasks/{id}/reopen` não tem corpo. Campos desconhecidos no corpo dão `422 VALIDATION_ERROR` (por exemplo `occurredAt` em `not-performed`, que não o aceita). Limites: `clientEventId` até 36 caracteres; `executorIds` até 20 ids de até 36. O cabeçalho `X-Device-Id` é opcional e vai para `deviceId` do evento.
 - **`clientEventId`** só em `start`, `finish` e `not-performed`. Idempotente por **(ator, `clientEventId`)**: se esse ator já registou um evento com esse id, devolve `200` com `changed: {}` e `events: []`, sem alterar nada (há índice único em `task_events`). É avaliado depois de carregar a tarefa e verificar o escopo (um `404`/`403` ganha) e antes da guarda de estado. `reopen`, `reopenRoom` e `setRoomStatus` não o têm.
 - **`occurredAt`** aceite em `start`, `finish`, `reopenRoom` e `setRoomStatus` e **ignorado**: o instante é sempre o relógio do servidor (secção 6.2).
 - **`changed`** traz `tasks`, `rooms` e `syncJobs` (só as chaves com alterações); `toast` não é preenchido. Depois do commit, e só se o comando escreveu eventos, a API avisa o WebSocket com `["tasks", "rooms", "syncJobs"]`.

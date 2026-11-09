@@ -243,7 +243,7 @@ Atenção: eventos que **não são sobre um quarto** reutilizam `roomId`/`roomNu
 ### 6.3 Concorrência e idempotência
 Hoje o estado é substituído por inteiro e as operações são síncronas, por isso não há conflitos possíveis. Do plano de backend (rascunho): `version` nas entidades mutáveis; versão velha com `If-Match` → `412 STALE_RESOURCE`, sem `If-Match` → `409 CONFLICT` (regra `DB-LOCK` da API, implementada com `version_id_col`); e `clientEventId` em todas as escritas de execução (repetir o mesmo não duplica o evento).
 
-**Estado nos comandos de execução (secção 4.1), 2026-11-09:** `clientEventId` está implementado em `start`, `finish` e `not-performed` (secção 4.1). **`If-Match` / `412 STALE_RESOURCE` ainda NÃO está implementado** nestes comandos: não leem `If-Match` e não comparam `version`; a única proteção contra dois pedidos sobre a mesma tarefa é a guarda de estado (`409 TASK_INVALID_TRANSITION`).
+**Estado nos comandos de execução (secção 4.1), 2026-11-09:** `clientEventId` está implementado em `start`, `finish` e `not-performed` (secção 4.1). **`If-Match` / `412 STALE_RESOURCE` ainda NÃO está implementado** nestes comandos: não leem `If-Match`; a proteção contra dois pedidos sobre a mesma tarefa é a guarda de estado (`409 TASK_INVALID_TRANSITION`) mais a coluna `version` (`version_id_col`): numa corrida entre dois pedidos, o que perde recebe `409 CONFLICT` (não 412).
 
 ### 6.4 Identificadores
 Hoje o cliente gera ids (`prefix-Date.now()-random`). O servidor gera **UUID v7** (RFC 9562), guardado como texto de 36 caracteres: o `UNIQUEIDENTIFIER` do SQL Server ordena pelos últimos bytes e perderia a ordem temporal. Os campos `id` saem de `addStaff`, `addSection`, `addBlockTeam` e `addSheet`.
